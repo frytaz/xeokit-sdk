@@ -357,7 +357,7 @@ export class AngleMeasurementsPlugin extends Plugin {
      * @param {Boolean} [params.visible=true] Whether to initially show the {@link AngleMeasurement}.
      * @returns {AngleMeasurement} The new {@link AngleMeasurement}.
      */
-    createMeasurement(params = {}) {
+    createMeasurement(params) {
         if (this.viewer.scene.components[params.id]) {
             this.error("Viewer scene component with this ID already exists: " + params.id);
             delete params.id;

@@ -431,7 +431,7 @@ class LASLoaderPlugin extends Plugin {
     /**
      * Loads an ````LAS```` model into this LASLoaderPlugin's {@link Viewer}.
      *
-     * @param {*} params Loading parameters.
+     * @param {Object} params Loading parameters.
      * @param {String} [params.id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
      * @param {String} [params.src] Path to a LAS file, as an alternative to the ````las```` parameter.
      * @param {ArrayBuffer} [params.las] The LAS file data, as an alternative to the ````src```` parameter.

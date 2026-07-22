@@ -55,7 +55,7 @@
  @private
  @extends Component
  @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
- @param {*} [cfg] The Shadow configuration
+ @param {Object} [cfg] The Shadow configuration
  @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  @param {String:Object} [cfg.meta] Optional map of user-defined metadata to attach to this Shadow.
  @param [cfg.resolution=[1000,1000]] {Uint16Array} Resolution of the texture map for this Shadow.

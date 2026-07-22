@@ -301,7 +301,7 @@ class GLTFLoaderPlugin extends Plugin {
     /**
      * Loads a glTF model from a file into this GLTFLoaderPlugin's {@link Viewer}.
      *
-     * @param {*} params Loading parameters.
+     * @param {Object} params Loading parameters.
      * @param {String} [params.id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
      * @param {String} [params.src] Path to a glTF file, as an alternative to the ````gltf```` parameter.
      * @param {*} [params.gltf] glTF JSON, as an alternative to the ````src```` parameter.

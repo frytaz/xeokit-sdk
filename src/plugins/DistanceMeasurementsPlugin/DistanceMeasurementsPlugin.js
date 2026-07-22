@@ -469,7 +469,7 @@ class DistanceMeasurementsPlugin extends Plugin {
    * @param {Boolean} [params.labelsOnWires=true] Determines if labels will be set on wires or one below the other.
    * @returns {DistanceMeasurement} The new {@link DistanceMeasurement}.
    */
-  createMeasurement(params = {}) {
+  createMeasurement(params) {
     if (this.viewer.scene.components[params.id]) {
       this.error(
         "Viewer scene component with this ID already exists: " + params.id

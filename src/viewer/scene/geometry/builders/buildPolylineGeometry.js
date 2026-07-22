@@ -57,7 +57,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildPolylineGeometry
- * @param {*} [cfg] Configs
+ * @param {Object} [cfg] Configs
  * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @param {Number[]} [cfg.points]  3D points indicating vertices position.
  * @returns {Object} Configuration for a {@link Geometry} subtype.
@@ -188,7 +188,7 @@ function buildPolylineGeometry(cfg = {}) {
  * ````
  *
  * @function buildPolylineGeometryFromCurve
- * @param {*} [cfg] Configs
+ * @param {Object} [cfg] Configs
  * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @param {Object} [cfg.curve]  Curve for which polyline will be created.
  * @param {Number} [cfg.divisions]  The number of divisions.

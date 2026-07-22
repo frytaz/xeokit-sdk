@@ -487,7 +487,7 @@ class Component {
      * When component not given, attaches the scene's default instance for the given name (if any).
      * Publishes the new child component on this component, keyed to the given name.
      *
-     * @param {*} params
+     * @param {Object} params
      * @param {String} params.name component name
      * @param {Component} [params.component] The component
      * @param {String} [params.type] Optional expected type of base type of the child; when supplied, will

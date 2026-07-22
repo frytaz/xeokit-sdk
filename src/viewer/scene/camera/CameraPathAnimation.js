@@ -89,7 +89,7 @@ class CameraPathAnimation extends Component {
     /**
      * @constructor
      * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this CameraPathAnimation as well.
-     * @param {*} [cfg] Configuration
+     * @param {Object} [cfg] Configuration
      * @param {String} [cfg.id]  Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
      * @param {CameraPath} [cfg.eyeCurve] A {@link CameraPath} that defines the path of a {@link Camera}.
      */

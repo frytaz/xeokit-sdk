@@ -9,7 +9,7 @@ import {
 
 /**
  * @param {Component} scene 
- * @param {*} [cfg]  Texture configuration
+ * @param {Object} [cfg]  Texture configuration
  * @param {String[]} [cfg.src=null] Path to 6 images
  * @param {Number} [cfg.encoding=LinearEncoding] Texture encoding format.  See the {@link Texture#encoding} property for more info.
  */

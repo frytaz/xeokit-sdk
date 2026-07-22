@@ -948,7 +948,7 @@ export class ZonesPlugin extends Plugin {
      * @param {string} [params.color] The color of the length dot, wire and label.
      * @returns {Zone} The new {@link Zone}.
      */
-    createZone(params = {}) {
+    createZone(params) {
         if (this.viewer.scene.components[params.id]) {
             this.error("Viewer scene component with this ID already exists: " + params.id);
             delete params.id;

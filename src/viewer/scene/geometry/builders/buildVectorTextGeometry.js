@@ -1609,7 +1609,7 @@ const letters = {
  * ````
  *
  * @function buildVectorTextGeometry
- * @param {*} [cfg] Configs
+ * @param {Object} [cfg] Configs
  * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @param {Number[]} [cfg.center]  3D point indicating the center position.
  * @param {Number[]} [cfg.origin] 3D point indicating the top left corner.

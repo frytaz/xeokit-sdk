@@ -410,7 +410,7 @@ class Viewer {
      *
      * });
      * ````
-     * @param {*} [params] Capture options.
+     * @param {Object} [params] Capture options.
      * @param {Number} [params.width] Desired width of result in pixels - defaults to width of canvas.
      * @param {Number} [params.height] Desired height of result in pixels - defaults to height of canvas.
      * @param {String} [params.format="jpeg"] Desired format; "jpeg", "png" or "bmp".

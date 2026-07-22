@@ -48,7 +48,7 @@ export class AngleMeasurementsMouseControl extends AngleMeasurementsControl {
      * Creates a AngleMeasurementsMouseControl bound to the given AngleMeasurementsPlugin.
      *
      * @param {AngleMeasurementsPlugin} angleMeasurementsPlugin The AngleMeasurementsPlugin to control.
-     * @param {*} [cfg] Configuration
+     * @param {Object} [cfg] Configuration
      * @param {function} [cfg.canvasToPagePos] Optional function to map canvas-space coordinates to page coordinates.
      * @param {PointerLens} [cfg.pointerLens] A PointerLens to use to provide a magnified view of the cursor when snapping is enabled.
      * @param {boolean} [cfg.snapping=true] Whether to initially enable snap-to-vertex and snap-to-edge for this AngleMeasurementsMouseControl.
