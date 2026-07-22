@@ -1,4 +1,5 @@
 import {Material} from './Material.js';
+import {Component} from '../Component.js';
 import {RenderState} from '../webgl/RenderState.js';
 
 const PRESETS = {
@@ -194,6 +195,21 @@ const PRESETS = {
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} EmphasisMaterialConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Boolean} [fill=true] Indicates if xray surfaces are filled with color.
+ * @property {Number[]} [fillColor=[0.4,0.4,0.4]] EmphasisMaterial fill color.
+ * @property {Number} [fillAlpha=0.2] Transparency of filled xray faces. A value of ````0.0```` indicates fully transparent, ````1.0```` is fully opaque.
+ * @property {Boolean} [edges=true] Indicates if xray edges are visible.
+ * @property {Number[]} [edgeColor=[0.2,0.2,0.2]] RGB color of xray edges.
+ * @property {Number} [edgeAlpha=0.5] Transparency of xray edges. A value of ````0.0```` indicates fully transparent, ````1.0```` is fully opaque.
+ * @property {Number} [edgeWidth=1] Width of xray edges, in pixels.
+ * @property {String} [preset] Deprecated - will be removed in future releases - Selects a preset EmphasisMaterial configuration - see {@link EmphasisMaterial#presets}.
+ * @property {Boolean} [backfaces=false] Whether to render geometry backfaces when emphasising.
+ * @property {Boolean} [glowThrough=true] Whether to make the emphasized object appear to float on top of other objects, as if it were "glowing through" them.
+ */
 class EmphasisMaterial extends Material {
 
     /**
@@ -215,18 +231,7 @@ class EmphasisMaterial extends Material {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] The EmphasisMaterial configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Boolean} [cfg.fill=true] Indicates if xray surfaces are filled with color.
-     * @param {Number[]} [cfg.fillColor=[0.4,0.4,0.4]] EmphasisMaterial fill color.
-     * @param  {Number} [cfg.fillAlpha=0.2] Transparency of filled xray faces. A value of ````0.0```` indicates fully transparent, ````1.0```` is fully opaque.
-     * @param {Boolean} [cfg.edges=true] Indicates if xray edges are visible.
-     * @param {Number[]} [cfg.edgeColor=[0.2,0.2,0.2]]  RGB color of xray edges.
-     * @param {Number} [cfg.edgeAlpha=0.5] Transparency of xray edges. A value of ````0.0```` indicates fully transparent, ````1.0```` is fully opaque.
-     * @param {Number} [cfg.edgeWidth=1] Width of xray edges, in pixels.
-     * @param {String} [cfg.preset] Deprecated - will be removed in future releases - Selects a preset EmphasisMaterial configuration - see {@link EmphasisMaterial#presets}.
-     * @param {Boolean} [cfg.backfaces=false] Whether to render geometry backfaces when emphasising.
-     * @param {Boolean} [cfg.glowThrough=true] Whether to make the emphasized object appear to float on top of other objects, as if it were "glowing through" them.
+     * @param {EmphasisMaterialConfiguration} [cfg] The EmphasisMaterial configuration
      */
     constructor(owner, cfg = {}) {
 

@@ -1,4 +1,4 @@
-import {math, Plugin, SceneModel, utils} from "../../viewer/index.js";
+import {math, Plugin, SceneModel, utils, Viewer} from "../../viewer/index.js";
 import {CityJSONDefaultDataSource} from "./CityJSONDefaultDataSource.js";
 
 import earcut from '../../viewer/scene/libs/earcut.js';
@@ -111,16 +111,34 @@ const tempVec3c = math.vec3();
  * @class CityJSONLoaderPlugin
  * @since 2.0.13
  */
+
+/**
+ * @typedef {Object} CityJSONLoaderPluginConfiguration
+ * @property {String} [id="cityJSONLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Object} [dataSource] A custom data source through which the CityJSONLoaderPlugin can load model and
+ * metadata files. Defaults to an instance of {@link CityJSONDefaultDataSource}, which loads over HTTP.
+ */
+
+/**
+ * @typedef {Object} LoadCityJSONModel
+ * @property {String} [id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
+ * @property {String} [src] Path to a CityJSON file, as an alternative to the ````cityJSON```` parameter.
+ * @property {ArrayBuffer} [cityJSON] The CityJSON file data, as an alternative to the ````src```` parameter.
+ * @property {Boolean} [loadMetadata=true] Whether to load metadata on CityJSON objects.
+ * @property {Number[]} [origin=[0,0,0]] The model's World-space double-precision 3D origin. Use this to position the model within xeokit's World coordinate system, using double-precision coordinates.
+ * @property {Number[]} [position=[0,0,0]] The model single-precision 3D position, relative to the ````origin```` parameter.
+ * @property {Number[]} [scale=[1,1,1]] The model's scale.
+ * @property {Number[]} [rotation=[0,0,0]] The model's orientation, given as Euler angles in degrees, for each of the X, Y and Z axis.
+ * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
+ * @property {Object} [stats] Collects model statistics.
+ */
 class CityJSONLoaderPlugin extends Plugin {
 
     /**
      * @constructor
      *
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="cityJSONLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {Object} [cfg.dataSource] A custom data source through which the CityJSONLoaderPlugin can load model and
-     * metadata files. Defaults to an instance of {@link CityJSONDefaultDataSource}, which loads over HTTP.
+     * @param {CityJSONLoaderPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 
@@ -154,21 +172,7 @@ class CityJSONLoaderPlugin extends Plugin {
     /**
      * Loads an ````CityJSON```` model into this CityJSONLoaderPlugin's {@link Viewer}.
      *
-     * @param {*} params Loading parameters.
-     * @param {String} [params.id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
-     * @param {String} [params.src] Path to a CityJSON file, as an alternative to the ````cityJSON```` parameter.
-     * @param {ArrayBuffer} [params.cityJSON] The CityJSON file data, as an alternative to the ````src```` parameter.
-     * @param {Boolean} [params.loadMetadata=true] Whether to load metadata on CityJSON objects.
-     * @param {Number[]} [params.origin=[0,0,0]] The model's World-space double-precision 3D origin. Use this to position the model within xeokit's World coordinate system, using double-precision coordinates.
-     * @param {Number[]} [params.position=[0,0,0]] The model single-precision 3D position, relative to the ````origin```` parameter.
-     * @param {Number[]} [params.scale=[1,1,1]] The model's scale.
-     * @param {Number[]} [params.rotation=[0,0,0]] The model's orientation, given as Euler angles in degrees, for each of the X, Y and Z axis.
-     * @param {Number[]} [params.matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
-     * @param {Object} [params.stats] Collects model statistics.
-     * @param {Boolean} [params.dtxEnabled=true] When ````true```` (default) use data textures (DTX), where appropriate, to
-     * represent the returned model. Set false to always use vertex buffer objects (VBOs). Note that DTX is only applicable
-     * to non-textured triangle meshes, and that VBOs are always used for meshes that have textures, line segments, or point
-     * primitives. Only works while {@link DTX#enabled} is also ````true````.
+     * @param {LoadCityJSONModel} params Loading parameters.
      * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}.
      */
     load(params = {}) {

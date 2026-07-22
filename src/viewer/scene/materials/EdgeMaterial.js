@@ -1,4 +1,5 @@
 import {Material} from './Material.js';
+import {Component} from '../Component.js';
 import {RenderState} from '../webgl/RenderState.js';
 
 const PRESETS = {
@@ -129,6 +130,15 @@ const PRESETS = {
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} EdgeMaterialConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [edgeColor=[0.2,0.2,0.2]] RGB edge color.
+ * @property {Number} [edgeAlpha=1.0] Edge transparency. A value of ````0.0```` indicates fully transparent, ````1.0```` is fully opaque.
+ * @property {Number} [edgeWidth=1] Edge width in pixels.
+ * @property {String} [preset] Selects a preset EdgeMaterial configuration - see {@link EdgeMaterial#presets}.
+ */
 class EdgeMaterial extends Material {
 
     /**
@@ -150,12 +160,7 @@ class EdgeMaterial extends Material {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] The EdgeMaterial configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number[]} [cfg.edgeColor=[0.2,0.2,0.2]] RGB edge color.
-     * @param {Number} [cfg.edgeAlpha=1.0] Edge transparency. A value of ````0.0```` indicates fully transparent, ````1.0```` is fully opaque.
-     * @param {Number} [cfg.edgeWidth=1] Edge width in pixels.
-     * @param {String} [cfg.preset] Selects a preset EdgeMaterial configuration - see {@link EdgeMaterial#presets}.
+     * @param {EdgeMaterialConfiguration} [cfg] The EdgeMaterial configuration
      */
     constructor(owner, cfg = {}) {
 

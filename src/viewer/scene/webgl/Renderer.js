@@ -91,6 +91,7 @@ const makeRayAABBIntersectionTest = (O, D) => aabb => {
 
 /**
  * @private
+ * @constructor
  */
 const Renderer = function (scene, options) {
 

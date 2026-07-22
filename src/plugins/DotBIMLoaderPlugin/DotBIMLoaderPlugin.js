@@ -1,4 +1,4 @@
-import {Plugin, SceneModel, utils} from "../../viewer/index.js"
+import {Plugin, SceneModel, utils, Viewer} from "../../viewer/index.js"
 import {math} from "../../viewer/scene/math/math.js";
 import {DotBIMDefaultDataSource} from "./DotBIMDefaultDataSource.js";
 import {IFCObjectDefaults} from "../../viewer/metadata/IFCObjectDefaults.js";
@@ -215,16 +215,39 @@ import {IFCObjectDefaults} from "../../viewer/metadata/IFCObjectDefaults.js";
  * ````
  * @class DotBIMLoaderPlugin
  */
+
+/**
+ * @typedef {Object} DotBIMLoaderPluginConfiguration
+ * @property {String} [id="DotBIMLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
+ * @property {Object} [dataSource] A custom data source through which the DotBIMLoaderPlugin can load metadata, glTF and binary attachments. Defaults to an instance of {@link DotBIMDefaultDataSource}, which loads over HTTP.
+ */
+
+/**
+ * @typedef {Object} LoadDotBIMModel
+ * @property {String} [id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
+ * @property {String} [src] Path to a .BIM file, as an alternative to the ````bim```` parameter.
+ * @property {*} [bim] .BIM JSON, as an alternative to the ````src```` parameter.
+ * @property {Object.<string, Object>} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
+ * @property {String[]} [includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
+ * @property {String[]} [excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
+ * @property {Number[]} [origin=[0,0,0]] The double-precision World-space origin of the model's coordinates.
+ * @property {Number[]} [position=[0,0,0]] The single-precision position, relative to ````origin````.
+ * @property {Number[]} [scale=[1,1,1]] The model's scale.
+ * @property {Number[]} [rotation=[0,0,0]] The model's orientation, as Euler angles given in degrees, for each of the X, Y and Z axis.
+ * @property {Boolean} [backfaces=true] When true, always show backfaces, even on objects for which the .BIM material is single-sided. When false, only show backfaces on geometries whenever the .BIM material is double-sided.
+ * @property {Boolean} [dtxEnabled=true] When ````true```` (default) use data textures (DTX), where appropriate, to
+ * represent the returned model. Set false to always use vertex buffer objects (VBOs). Note that DTX is only applicable
+ * to non-textured triangle meshes, and that VBOs are always used for meshes that have textures, line segments, or point
+ * primitives. Only works while {@link DTX#enabled} is also ````true````.
+ */
 export class DotBIMLoaderPlugin extends Plugin {
 
     /**
      * @constructor
      *
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="DotBIMLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {Object} [cfg.objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
-     * @param {Object} [cfg.dataSource] A custom data source through which the DotBIMLoaderPlugin can load metadata, glTF and binary attachments. Defaults to an instance of {@link DotBIMDefaultDataSource}, which loads over HTTP.
+     * @param {DotBIMLoaderPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 
@@ -281,22 +304,7 @@ export class DotBIMLoaderPlugin extends Plugin {
     /**
      * Loads a .BIM model from a file into this DotBIMLoaderPlugin's {@link Viewer}.
      *
-     * @param {*} params Loading parameters.
-     * @param {String} [params.id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
-     * @param {String} [params.src] Path to a .BIM file, as an alternative to the ````bim```` parameter.
-     * @param {*} [params.bim] .BIM JSON, as an alternative to the ````src```` parameter.
-     * @param {{String:Object}} [params.objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
-     * @param {String[]} [params.includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
-     * @param {String[]} [params.excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
-     * @param {Number[]} [params.origin=[0,0,0]] The double-precision World-space origin of the model's coordinates.
-     * @param {Number[]} [params.position=[0,0,0]] The single-precision position, relative to ````origin````.
-     * @param {Number[]} [params.scale=[1,1,1]] The model's scale.
-     * @param {Number[]} [params.rotation=[0,0,0]] The model's orientation, as Euler angles given in degrees, for each of the X, Y and Z axis.
-     * @param {Boolean} [params.backfaces=true] When true, always show backfaces, even on objects for which the .BIM material is single-sided. When false, only show backfaces on geometries whenever the .BIM material is double-sided.
-     * @param {Boolean} [params.dtxEnabled=true] When ````true```` (default) use data textures (DTX), where appropriate, to
-     * represent the returned model. Set false to always use vertex buffer objects (VBOs). Note that DTX is only applicable
-     * to non-textured triangle meshes, and that VBOs are always used for meshes that have textures, line segments, or point
-     * primitives. Only works while {@link DTX#enabled} is also ````true````.
+     * @param {LoadDotBIMModel} params Loading parameters.
      * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
      */
     load(params = {}) {

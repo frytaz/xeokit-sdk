@@ -2,8 +2,10 @@ import {utils} from "../../viewer/scene/utils.js"
 import {SceneModel} from "../../viewer/scene/model/index.js";
 import {MetaModel} from "../../viewer/metadata/MetaModel.js";
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {XKTDefaultDataSource} from "./XKTDefaultDataSource.js";
 import {IFCObjectDefaults} from "../../viewer/metadata/IFCObjectDefaults.js";
+import {KTX2TextureTranscoder} from "../../viewer/scene/utils/textureTranscoders/KTX2TextureTranscoder/KTX2TextureTranscoder.js";
 
 import {ParserV1} from "./parsers/ParserV1.js";
 import {ParserV2} from "./parsers/ParserV2.js";
@@ -597,30 +599,57 @@ parsers[ParserV12.version] = ParserV12;
  *
  * @class XKTLoaderPlugin
  */
+
+/**
+ * @typedef {Object} XKTLoaderPluginConfiguration
+ * @property {String} [id="XKTLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
+ * @property {Object} [dataSource] A custom data source through which the XKTLoaderPlugin can load model and metadata files. Defaults to an instance of {@link XKTDefaultDataSource}, which loads uover HTTP.
+ * @property {String[]} [includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
+ * @property {String[]} [excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
+ * @property {Boolean} [excludeUnclassifiedObjects=false] When loading metadata and this is ````true````, will only load {@link Entity}s that have {@link MetaObject}s (that are not excluded). This is useful when we don't want Entitys in the Scene that are not represented within IFC navigation components, such as {@link TreeViewPlugin}.
+ * @property {Boolean|Function} [reuseGeometries=true] Indicates whether to enable geometry reuse (````true```` by default) or whether to internally expand, a function will be called with a `{ instanceCount: <number> }` argument.
+ * @property {Number} [maxGeometryBatchSize=50000000] Maximum geometry batch size, as number of vertices. This is optionally supplied
+ * @property {KTX2TextureTranscoder} [textureTranscoder] Transcoder used internally to transcode KTX2
+ */
+
+/**
+ * @typedef {Object} LoadXKTModel
+ * @property {String} [id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
+ * @property {String} [src] Path or URL to an *````.xkt````* file, as an alternative to the ````xkt```` parameter.
+ * @property {ArrayBuffer} [xkt] The *````.xkt````* file data, as an alternative to the ````src```` parameter.
+ * @property {String} [metaModelSrc] Path or URL to an optional metadata file, as an alternative to the ````metaModelData```` parameter.
+ * @property {*} [metaModelData] JSON model metadata, as an alternative to the ````metaModelSrc```` parameter.
+ * @property {Boolean} [loadIntoMetaScene=true] Whether to load metadata into MetaScene, otherwise expose as SceneModel::metadata.
+ * @property {String} [manifestSrc] Path or URL to a JSON manifest file that provides paths to ````.xkt```` files to load as parts of the model. Use this option to load models that have been split into
+ * @property {Object} [manifest] A JSON manifest object (as an alternative to a path or URL) that provides paths to ````.xkt```` files to load as parts of the model. Use this option to load models that have been split into
+ * @property {Object.<string, Object>} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
+ * @property {String[]} [includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
+ * @property {String[]} [excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
+ * @property {String[]} [includeIds] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#id} values in this list.
+ * @property {Boolean} [edges=false] Indicates if the model's edges are initially emphasized.
+ * @property {Number[]} [origin=[0,0,0]] The model's World-space double-precision 3D origin. Use this to position the model within xeokit's World coordinate system, using double-precision coordinates.
+ * @property {Number[]} [position=[0,0,0]] The model single-precision 3D position, relative to the ````origin```` parameter.
+ * @property {Number[]} [scale=[1,1,1]] The model's scale.
+ * @property {Number[]} [rotation=[0,0,0]] The model's orientation, given as Euler angles in degrees, for each of the X, Y and Z axis.
+ * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
+ * @property {Boolean} [saoEnabled=true] Indicates if Scalable Ambient Obscurance (SAO) is enabled for the model. SAO is configured by the Scene's {@link SAO} component. Only works when {@link SAO#enabled} is also ````true````
+ * @property {Boolean} [pbrEnabled=true] Indicates if physically-based rendering (PBR) is enabled for the model. Overrides ````colorTextureEnabled````. Only works when {@link Scene#pbrEnabled} is also ````true````.
+ * @property {Boolean} [colorTextureEnabled=true] Indicates if base color texture rendering is enabled for the model. Overridden by ````pbrEnabled````.  Only works when {@link Scene#colorTextureEnabled} is also ````true````.
+ * @property {Number} [backfaces=false] When we set this ````true````, then we force rendering of backfaces for the model.
+ * @property {Boolean} [excludeUnclassifiedObjects=false] When loading metadata and this is ````true````, will only load {@link Entity}s that have {@link MetaObject}s (that are not excluded). This is useful when we don't want Entitys in the Scene that are not represented within IFC navigation components, such as {@link TreeViewPlugin}.
+ * @property {Boolean} [globalizeObjectIds=false] Indicates whether to globalize each {@link Entity#id} and {@link MetaObject#id}, in case you need to prevent ID clashes with other models. See {@link XKTLoaderPlugin#globalizeObjectIds} for more info.
+ * @property {Boolean|Function} [reuseGeometries=true] Indicates whether to enable geometry reuse (````true```` by default) or whether to expand
+ * @property {Boolean} [dtxEnabled=true] When ````true```` (default) use data textures (DTX), where appropriate, to
+ * @property {Number} [renderOrder=0] Specifies the rendering order for the model. This is used to control the order in which
+ */
 class XKTLoaderPlugin extends Plugin {
 
     /**
      * @constructor
      *
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="XKTLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {Object} [cfg.objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
-     * @param {Object} [cfg.dataSource] A custom data source through which the XKTLoaderPlugin can load model and metadata files. Defaults to an instance of {@link XKTDefaultDataSource}, which loads uover HTTP.
-     * @param {String[]} [cfg.includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
-     * @param {String[]} [cfg.excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
-     * @param {Boolean} [cfg.excludeUnclassifiedObjects=false] When loading metadata and this is ````true````, will only load {@link Entity}s that have {@link MetaObject}s (that are not excluded). This is useful when we don't want Entitys in the Scene that are not represented within IFC navigation components, such as {@link TreeViewPlugin}.
-     * @param {Boolean|Function} [cfg.reuseGeometries=true] Indicates whether to enable geometry reuse (````true```` by default) or whether to internally expand, a function will be called with a `{ instanceCount: <number> }` argument.
-     * all geometry instances into batches (````false````), and not use instancing to render them. Setting this ````false```` can significantly
-     * improve Viewer performance for models that have a lot of geometry reuse, but may also increase the amount of
-     * browser and GPU memory they require. See [#769](https://github.com/xeokit/xeokit-sdk/issues/769) for more info.
-     * @param {Number} [cfg.maxGeometryBatchSize=50000000] Maximum geometry batch size, as number of vertices. This is optionally supplied
-     * to limit the size of the batched geometry arrays that {@link SceneModel} internally creates for batched geometries.
-     * A low value means less heap allocation/de-allocation while loading batched geometries, but more draw calls and
-     * slower rendering speed. A high value means larger heap allocation/de-allocation while loading, but less draw calls
-     * and faster rendering speed. It's recommended to keep this somewhere roughly between ````50000```` and ````50000000```.
-     * @param {KTX2TextureTranscoder} [cfg.textureTranscoder] Transcoder used internally to transcode KTX2
-     * textures within the XKT. Only required when the XKT is version 10 or later, and contains KTX2 textures.
+     * @param {XKTLoaderPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 
@@ -890,47 +919,7 @@ class XKTLoaderPlugin extends Plugin {
      * However, if we do choose to specify a separate metamodel JSON file to load (e.g. for backward compatibility
      * in data pipelines), then that metamodel will be loaded and the metamodel in the XKT 8 file will be ignored.
      *
-     * @param {*} params Loading parameters.
-     * @param {String} [params.id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
-     * @param {String} [params.src] Path or URL to an *````.xkt````* file, as an alternative to the ````xkt```` parameter.
-     * @param {ArrayBuffer} [params.xkt] The *````.xkt````* file data, as an alternative to the ````src```` parameter.
-     * @param {String} [params.metaModelSrc] Path or URL to an optional metadata file, as an alternative to the ````metaModelData```` parameter.
-     * @param {*} [params.metaModelData] JSON model metadata, as an alternative to the ````metaModelSrc```` parameter.
-     * @param {Boolean} [params.loadIntoMetaScene=true] Whether to load metadata into MetaScene, otherwise expose as SceneModel::metadata.
-     * @param {String} [params.manifestSrc] Path or URL to a JSON manifest file that provides paths to ````.xkt```` files to load as parts of the model. Use this option to load models that have been split into
-     * multiple XKT files. See [tutorial](https://xeokit.io/blog/automatically-splitting-large-models-for-better-performance) for more info.
-     * @param {Object} [params.manifest] A JSON manifest object (as an alternative to a path or URL) that provides paths to ````.xkt```` files to load as parts of the model. Use this option to load models that have been split into
-     * multiple XKT files. See [tutorial](https://xeokit.io/blog/automatically-splitting-large-models-for-better-performance) for more info.
-     * @param {{String:Object}} [params.objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
-     * @param {String[]} [params.includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
-     * @param {String[]} [params.excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
-     * @param {String[]} [params.includeIds] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#id} values in this list.
-     * @param {Boolean} [params.edges=false] Whether or not xeokit renders the model with edges emphasized.
-     * @param {Number[]} [params.origin=[0,0,0]] The model's World-space double-precision 3D origin. Use this to position the model within xeokit's World coordinate system, using double-precision coordinates.
-     * @param {Number[]} [params.position=[0,0,0]] The model single-precision 3D position, relative to the ````origin```` parameter.
-     * @param {Number[]} [params.scale=[1,1,1]] The model's scale.
-     * @param {Number[]} [params.rotation=[0,0,0]] The model's orientation, given as Euler angles in degrees, for each of the X, Y and Z axis.
-     * @param {Number[]} [params.matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
-     * @param {Boolean} [params.edges=false] Indicates if the model's edges are initially emphasized.
-     * @param {Boolean} [params.saoEnabled=true] Indicates if Scalable Ambient Obscurance (SAO) is enabled for the model. SAO is configured by the Scene's {@link SAO} component. Only works when {@link SAO#enabled} is also ````true````
-     * @param {Boolean} [params.pbrEnabled=true] Indicates if physically-based rendering (PBR) is enabled for the model. Overrides ````colorTextureEnabled````. Only works when {@link Scene#pbrEnabled} is also ````true````.
-     * @param {Boolean} [params.colorTextureEnabled=true] Indicates if base color texture rendering is enabled for the model. Overridden by ````pbrEnabled````.  Only works when {@link Scene#colorTextureEnabled} is also ````true````.
-     * @param {Number} [params.backfaces=false] When we set this ````true````, then we force rendering of backfaces for the model. When
-     * we leave this ````false````, then we allow the Viewer to decide when to render backfaces. In that case, the
-     * Viewer will hide backfaces on watertight meshes, show backfaces on open meshes, and always show backfaces on meshes when we slice them open with {@link SectionPlane}s.
-     * @param {Boolean} [params.excludeUnclassifiedObjects=false] When loading metadata and this is ````true````, will only load {@link Entity}s that have {@link MetaObject}s (that are not excluded). This is useful when we don't want Entitys in the Scene that are not represented within IFC navigation components, such as {@link TreeViewPlugin}.
-     * @param {Boolean} [params.globalizeObjectIds=false] Indicates whether to globalize each {@link Entity#id} and {@link MetaObject#id}, in case you need to prevent ID clashes with other models. See {@link XKTLoaderPlugin#globalizeObjectIds} for more info.
-     * @param {Boolean|Function} [params.reuseGeometries=true] Indicates whether to enable geometry reuse (````true```` by default) or whether to expand
-     * all geometry instances into batches (````false````), and not use instancing to render them. A function will be called with a `{ instanceCount: <number> }` argument. Setting this ````false```` can significantly
-     * improve Viewer performance for models that have excessive geometry reuse, but may also increase the amount of
-     * browser and GPU memory used by the model. See [#769](https://github.com/xeokit/xeokit-sdk/issues/769) for more info.
-     * @param {Boolean} [params.dtxEnabled=true] When ````true```` (default) use data textures (DTX), where appropriate, to
-     * represent the returned model. Set false to always use vertex buffer objects (VBOs). Note that DTX is only applicable
-     * to non-textured triangle meshes, and that VBOs are always used for meshes that have textures, line segments, or point
-     * primitives. Only works while {@link DTX#enabled} is also ````true````.
-     * @param {Number} [params.renderOrder=0] Specifies the rendering order for the model. This is used to control the order in which
-     * SceneModels are drawn when they have transparent objects, to give control over the order in which those objects are blended within the transparent
-     * render pass.
+     * @param {LoadXKTModel} params Loading parameters.
      * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}.
      */
     load(params = {}) {

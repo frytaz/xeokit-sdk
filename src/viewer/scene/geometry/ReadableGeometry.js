@@ -1,4 +1,5 @@
 import {Geometry} from './Geometry.js';
+import {Component} from '../Component.js';
 import {RenderState} from '../webgl/RenderState.js';
 import {ArrayBuf} from '../webgl/ArrayBuf.js';
 import {math} from '../math/math.js';
@@ -52,6 +53,24 @@ const tempAABB = math.AABB3();
  *
  * ````
  */
+
+/**
+ * @typedef {Object} ReadableGeometryConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Object.<string, Object>} [meta] Optional map of user-defined metadata to attach to this Geometry.
+ * @property {String} [primitive="triangles"] The primitive type. Accepted values are 'points', 'lines', 'line-loop', 'line-strip', 'triangles', 'triangle-strip' and 'triangle-fan'.
+ * @property {Number[]} [positions] Positions array.
+ * @property {Number[]} [normals] Vertex normal vectors array.
+ * @property {Number[]} [uv] UVs array.
+ * @property {Number[]} [colors] Vertex colors.
+ * @property {Number[]} [indices] Indices array.
+ * @property {Boolean} [autoVertexNormals=false] Set true to automatically generate normal vectors from the positions and
+ * indices, if those are supplied.
+ * @property {Boolean} [compressGeometry=false] Stores positions, colors, normals and UVs in compressGeometry and oct-encoded formats
+ * for reduced memory footprint and GPU bus usage.
+ * @property {Number} [edgeThreshold=10] When a {@link Mesh} renders this Geometry as wireframe,
+ * this indicates the threshold angle (in degrees) between the face normals of adjacent triangles below which the edge is discarded.
+ */
 class ReadableGeometry extends Geometry {
 
     /**
@@ -70,31 +89,11 @@ class ReadableGeometry extends Geometry {
     }
 
     /**
-     *
-     @class ReadableGeometry
-     @module xeokit
-     @submodule geometry
-     @constructor
-     @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     @param {*} [cfg] Configs
-     @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene},
-     generated automatically when omitted.
-     @param {String:Object} [cfg.meta] Optional map of user-defined metadata to attach to this Geometry.
-     @param [cfg.primitive="triangles"] {String} The primitive type. Accepted values are 'points', 'lines', 'line-loop', 'line-strip', 'triangles', 'triangle-strip' and 'triangle-fan'.
-     @param [cfg.positions] {Number[]} Positions array.
-     @param [cfg.normals] {Number[]} Vertex normal vectors array.
-     @param [cfg.uv] {Number[]} UVs array.
-     @param [cfg.colors] {Number[]} Vertex colors.
-     @param [cfg.indices] {Number[]} Indices array.
-     @param [cfg.autoVertexNormals=false] {Boolean} Set true to automatically generate normal vectors from the positions and
-     indices, if those are supplied.
-     @param [cfg.compressGeometry=false] {Boolean} Stores positions, colors, normals and UVs in compressGeometry and oct-encoded formats
-     for reduced memory footprint and GPU bus usage.
-     @param [cfg.edgeThreshold=10] {Number} When a {@link Mesh} renders this Geometry as wireframe,
-     this indicates the threshold angle (in degrees) between the face normals of adjacent triangles below which the edge is discarded.
-     @extends Component
-     * @param owner
-     * @param cfg
+     * @class ReadableGeometry
+     * @constructor
+     * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
+     * @param {ReadableGeometryConfiguration} [cfg] Configs
+     * @extends Component
      */
     constructor(owner, cfg = {}) {
 

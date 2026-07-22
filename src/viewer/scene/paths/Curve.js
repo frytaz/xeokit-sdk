@@ -4,15 +4,18 @@ import {math} from "../math/math.js";
 /**
  * @desc Abstract base class for curve classes.
  */
+
+/**
+ * @typedef {Object} CurveConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Curve}, generated automatically when omitted.
+ * @property {Number} [t=0] Current position on this Curve, in range between ````0..1````.
+ */
 class Curve extends Component {
 
     /**
      * @constructor
-     * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this Curve as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Curve}, generated automatically when omitted.
-     * @param {Object} [cfg] Configs for this Curve.
-     * @param {Number} [cfg.t=0] Current position on this Curve, in range between ````0..1````.
+     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this Curve as well.
+     * @param {CurveConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
         super(owner, cfg);

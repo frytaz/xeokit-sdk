@@ -1,4 +1,7 @@
 import {Material} from './Material.js';
+import {Component} from '../Component.js';
+import {Texture} from './Texture.js';
+import {Fresnel} from './Fresnel.js';
 import {RenderState} from '../webgl/RenderState.js';
 import {math} from '../math/math.js';
 
@@ -86,6 +89,37 @@ const alphaModeNames = ["opaque", "mask", "blend"];
  * | {@link PhongMaterial#backfaces} | Boolean |  | false |  | Whether to render geometry backfaces. |
  * | {@link PhongMaterial#frontface} | String | "ccw", "cw" | "ccw" |  | The winding order for geometry frontfaces - "cw" for clockwise, or "ccw" for counter-clockwise. |
  */
+
+/**
+ * @typedef {Object} PhongMaterialConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [ambient=[1.0, 1.0, 1.0 ]] PhongMaterial ambient color.
+ * @property {Number[]} [diffuse=[ 1.0, 1.0, 1.0 ]] PhongMaterial diffuse color.
+ * @property {Number[]} [specular=[ 1.0, 1.0, 1.0 ]] PhongMaterial specular color.
+ * @property {Number[]} [emissive=[ 0.0, 0.0, 0.0 ]] PhongMaterial emissive color.
+ * @property {Number} [alpha=1] Scalar in range 0-1 that controls alpha, where 0 is completely transparent and 1 is completely opaque.
+ * @property {Number} [shininess=80] Scalar in range 0-128 that determines the size and sharpness of specular highlights.
+ * @property {Number} [reflectivity=1] Scalar in range 0-1 that controls how much {@link ReflectionMap} is reflected.
+ * @property {Number} [lineWidth=1] Scalar that controls the width of lines.
+ * @property {Number} [pointSize=1] Scalar that controls the size of points.
+ * @property {Texture} [ambientMap=null] A ambient map {@link Texture}, which will multiply by the diffuse property. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Texture} [diffuseMap=null] A diffuse map {@link Texture}, which will override the effect of the diffuse property. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Texture} [specularMap=null] A specular map {@link Texture}, which will override the effect of the specular property. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Texture} [emissiveMap=undefined] An emissive map {@link Texture}, which will override the effect of the emissive property. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Texture} [normalMap=undefined] A normal map {@link Texture}. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Texture} [alphaMap=undefined] An alpha map {@link Texture}, which will override the effect of the alpha property. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Texture} [reflectivityMap=undefined] A reflectivity control map {@link Texture}, which will override the effect of the reflectivity property. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Texture} [occlusionMap=null] An occlusion map {@link Texture}. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Fresnel} [diffuseFresnel=undefined] A diffuse {@link Fresnel}. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Fresnel} [specularFresnel=undefined] A specular {@link Fresnel}. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Fresnel} [emissiveFresnel=undefined] An emissive {@link Fresnel}. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Fresnel} [alphaFresnel=undefined] An alpha {@link Fresnel}. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {Fresnel} [reflectivityFresnel=undefined] A reflectivity {@link Fresnel}. Must be within the same {@link Scene} as this PhongMaterial.
+ * @property {String} [alphaMode="opaque"] The alpha blend mode - accepted values are "opaque", "blend" and "mask". See the {@link PhongMaterial#alphaMode} property for more info.
+ * @property {Number} [alphaCutoff=0.5] The alpha cutoff value. See the {@link PhongMaterial#alphaCutoff} property for more info.
+ * @property {Boolean} [backfaces=false] Whether to render geometry backfaces.
+ * @property {Boolean} [frontface="ccw"] The winding order for geometry front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
+ */
 class PhongMaterial extends Material {
 
     /**
@@ -97,34 +131,7 @@ class PhongMaterial extends Material {
 
     /**
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] The PhongMaterial configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number[]} [cfg.ambient=[1.0, 1.0, 1.0 ]]  PhongMaterial ambient color.
-     * @param {Number[]} [cfg.diffuse=[ 1.0, 1.0, 1.0 ]] PhongMaterial diffuse color.
-     * @param {Number[]} [cfg.specular=[ 1.0, 1.0, 1.0 ]]  PhongMaterial specular color.
-     * @param {Number[]} [cfg.emissive=[ 0.0, 0.0, 0.0 ]] PhongMaterial emissive color.
-     * @param {Number} [cfg.alpha=1] Scalar in range 0-1 that controls alpha, where 0 is completely transparent and 1 is completely opaque.
-     * @param {Number} [cfg.shininess=80] Scalar in range 0-128 that determines the size and sharpness of specular highlights.
-     * @param {Number} [cfg.reflectivity=1] Scalar in range 0-1 that controls how much {@link ReflectionMap} is reflected.
-     * @param {Number} [cfg.lineWidth=1] Scalar that controls the width of lines.
-     * @param {Number} [cfg.pointSize=1] Scalar that controls the size of points.
-     * @param {Texture} [cfg.ambientMap=null] A ambient map {@link Texture}, which will multiply by the diffuse property. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Texture} [cfg.diffuseMap=null] A diffuse map {@link Texture}, which will override the effect of the diffuse property. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Texture} [cfg.specularMap=null] A specular map {@link Texture}, which will override the effect of the specular property. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Texture} [cfg.emissiveMap=undefined] An emissive map {@link Texture}, which will override the effect of the emissive property. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Texture} [cfg.normalMap=undefined] A normal map {@link Texture}. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Texture} [cfg.alphaMap=undefined] An alpha map {@link Texture}, which will override the effect of the alpha property. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Texture} [cfg.reflectivityMap=undefined] A reflectivity control map {@link Texture}, which will override the effect of the reflectivity property. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Texture} [cfg.occlusionMap=null] An occlusion map {@link Texture}. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Fresnel} [cfg.diffuseFresnel=undefined] A diffuse {@link Fresnel"}}Fresnel{{/crossLink}}. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Fresnel} [cfg.specularFresnel=undefined] A specular {@link Fresnel"}}Fresnel{{/crossLink}}. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Fresnel} [cfg.emissiveFresnel=undefined] An emissive {@link Fresnel"}}Fresnel{{/crossLink}}. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Fresnel} [cfg.alphaFresnel=undefined] An alpha {@link Fresnel"}}Fresnel{{/crossLink}}. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {Fresnel} [cfg.reflectivityFresnel=undefined] A reflectivity {@link Fresnel"}}Fresnel{{/crossLink}}. Must be within the same {@link Scene} as this PhongMaterial.
-     * @param {String} [cfg.alphaMode="opaque"] The alpha blend mode - accepted values are "opaque", "blend" and "mask". See the {@link PhongMaterial#alphaMode} property for more info.
-     * @param {Number} [cfg.alphaCutoff=0.5] The alpha cutoff value. See the {@link PhongMaterial#alphaCutoff} property for more info.
-     * @param {Boolean} [cfg.backfaces=false] Whether to render geometry backfaces.
-     * @param {Boolean} [cfg.frontface="ccw"] The winding order for geometry front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
+     * @param {PhongMaterialConfiguration} [cfg] The PhongMaterial configuration
      */
     constructor(owner, cfg = {}) {
 

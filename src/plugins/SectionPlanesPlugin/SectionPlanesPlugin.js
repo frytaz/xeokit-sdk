@@ -1,5 +1,6 @@
 import {math} from "../../viewer/scene/math/math.js";
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {SectionPlane} from "../../viewer/scene/sectionPlane/SectionPlane.js";
 import {TransformControl} from "../TransformControl/TransformControl.js";
 import {Overview} from "./Overview.js";
@@ -102,15 +103,19 @@ const tempVec3 = math.vec3();
  * mySectionPlane2.dir = [0.4, 0.0, 0.5];
  * ````
  */
+
+/**
+ * @typedef {Object} SectionPlanesPluginConfiguration
+ * @property {String} [id="SectionPlanes"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {String} [overviewCanvasId] ID of a canvas element to display the overview.
+ * @property {String} [overviewVisible=true] Initial visibility of the overview canvas.
+ */
 class SectionPlanesPlugin extends Plugin {
 
     /**
      * @constructor
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg Plugin configuration.
-     * @param {String} [cfg.id="SectionPlanes"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {String} [cfg.overviewCanvasId] ID of a canvas element to display the overview.
-     * @param {String} [cfg.overviewVisible=true] Initial visibility of the overview canvas.
+     * @param {SectionPlanesPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 

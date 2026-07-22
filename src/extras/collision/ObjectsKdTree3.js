@@ -20,7 +20,7 @@ export class ObjectsKdTree3 {
     /**
      * Creates an ObjectsKdTree3.
      *
-     * @param {*} cfg Configuration
+     * @param {Object} cfg Configuration
      * @param {Viewer} cfg.viewer The Viewer that provides the {@link Entity}s in this ObjectsKdTree3.
      * @param {number} [cfg.maxTreeDepth=15] Optional maximum depth for the k-d tree.
      */

@@ -1,6 +1,7 @@
 import {utils} from "../../viewer/scene/utils.js";
 import {SceneModel} from "../../viewer/scene/model/index.js";
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {LASDefaultDataSource} from "./LASDefaultDataSource.js";
 import {math} from "../../viewer/index.js";
 import {parse} from "../../external.js";
@@ -200,22 +201,26 @@ const MAX_VERTICES = 500000; // TODO: Rough estimate
  * @class LASLoaderPlugin
  * @since 2.0.17
  */
+
+/**
+ * @typedef {Object} LASLoaderPluginConfiguration
+ * @property {String} [id="lasLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Object} [dataSource] A custom data source through which the LASLoaderPlugin can load model and metadata files. Defaults to an instance of {@link LASDefaultDataSource}, which loads over HTTP.
+ * @property {Number} [skip=1] Configures LASLoaderPlugin to load every **n** points.
+ * @property {Number} [fp64=false] Configures if LASLoaderPlugin assumes that LAS positions are stored in 64-bit floats instead of 32-bit.
+ * @property {Number} [colorDepth=8] Configures whether LASLoaderPlugin assumes that LAS colors are encoded using 8 or 16 bits. Accepted values are 8, 16 an "auto".
+ * @property {Boolean} [center=false] Whether to center the LAS points.  Applied before "rotateX", "rotate" and "transform".
+ * @property {Boolean} [rotateX=false] Whether to rotate the LAS point positions 90 degrees. Applied after "center".
+ * @property {Number[]} [rotate=[0,0,0]] Rotations to immediately apply to the LAS points, given as Euler angles in degrees, for each of the X, Y and Z axis. Rotation is applied after "center" and "rotateX".
+ * @property {Number[]} [transform] 4x4 transform matrix to immediately apply to the LAS points. This is applied after "center", "rotateX" and "rotate". Typically used instead of "rotateX" and "rotate".
+ */
 class LASLoaderPlugin extends Plugin {
 
     /**
      * @constructor
      *
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="lasLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {Object} [cfg.dataSource] A custom data source through which the LASLoaderPlugin can load model and metadata files. Defaults to an instance of {@link LASDefaultDataSource}, which loads over HTTP.
-     * @param {Number} [cfg.skip=1] Configures LASLoaderPlugin to load every **n** points.
-     * @param {Number} [cfg.fp64=false] Configures if LASLoaderPlugin assumes that LAS positions are stored in 64-bit floats instead of 32-bit.
-     * @param {Number} [cfg.colorDepth=8] Configures whether LASLoaderPlugin assumes that LAS colors are encoded using 8 or 16 bits. Accepted values are 8, 16 an "auto".
-     * @param {Boolean} [cfg.center=false] Whether to center the LAS points.  Applied before "rotateX", "rotate" and "transform".
-     * @param {Boolean} [cfg.rotateX=false] Whether to rotate the LAS point positions 90 degrees. Applied after "center".
-     * @param {Number[]} [cfg.rotate=[0,0,0]] Rotations to immediately apply to the LAS points, given as Euler angles in degrees, for each of the X, Y and Z axis. Rotation is applied after "center" and "rotateX".
-     * @param {Number[]} [cfg.transform] 4x4 transform matrix to immediately apply to the LAS points. This is applied after "center", "rotateX" and "rotate". Typically used instead of "rotateX" and "rotate".
+     * @param {LASLoaderPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 

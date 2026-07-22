@@ -1,4 +1,5 @@
 import {Curve} from "./Curve.js"
+import {Component} from "../Component.js";
 import {math} from "../math/math.js";
 
 /**
@@ -13,17 +14,21 @@ import {math} from "../math/math.js";
  * <br>
  * *[Quadratic Bezier Curve from WikiPedia](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)*
  */
+
+/**
+ * @typedef {Object} QuadraticBezierCurveConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [v0=[0,0,0]] The starting point.
+ * @property {Number[]} [v1=[0,0,0]] The middle control point.
+ * @property {Number[]} [v2=[0,0,0]] The end point.
+ * @property {Number[]} [t=0] Current position on this QuadraticBezierCurve, in range between ````0..1````.
+ */
 class QuadraticBezierCurve extends Curve {
 
     /**
      * @constructor
-     * @param {Component} owner Owner component. When destroyed, the owner will destroy this MetallicMaterial as well.
-     * @param {*} [cfg] Configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {{#crossLink "Scene"}}Scene{{/crossLink}}, generated automatically when omitted.
-     * @param {Number[]} [cfg.v0=[0,0,0]] The starting point.
-     * @param {Number[]} [cfg.v1=[0,0,0]] The middle control point.
-     * @param {Number[]} [cfg.v2=[0,0,0]] The end point.
-     * @param {Number[]} [cfg.t=0] Current position on this QuadraticBezierCurve, in range between ````0..1````.
+     * @param {Component} owner Owner component. When destroyed, the owner will destroy this QuadraticBezierCurve as well.
+     * @param {QuadraticBezierCurveConfiguration} [cfg] Configuration
      */
     constructor(owner, cfg = {}) {
         super(owner, cfg);

@@ -19,52 +19,56 @@ import {transformToNode} from "../plugins/lib/ui/index.js";
  *
  * @public
  */
+
+/**
+ * @typedef {Object} ViewerConfiguration
+ * @property {String} [id] Optional ID for this Viewer, defaults to the ID of {@link Viewer#scene}, which xeokit automatically generates.
+ * @property {String} [canvasId] ID of an existing HTML canvas for the {@link Viewer#scene} - either this or canvasElement is mandatory. When both values are given, the element reference is always preferred to the ID.
+ * @property {HTMLCanvasElement} [canvasElement] Reference of an existing HTML canvas for the {@link Viewer#scene} - either this or canvasId is mandatory. When both values are given, the element reference is always preferred to the ID.
+ * @property {HTMLElement} [keyboardEventsElement] Optional reference to HTML element on which key events should be handled. Defaults to the HTML Document.
+ * @property {String} [spinnerElementId] ID of existing HTML element to show the {@link Spinner} - internally creates a default element automatically if this is omitted.
+ * @property {Number} [passes=1] The number of times the {@link Viewer#scene} renders per frame.
+ * @property {Boolean} [clearEachPass=false] When doing multiple passes per frame, specifies if to clear the canvas before each pass (true) or just before the first pass (false).
+ * @property {Boolean} [preserveDrawingBuffer=true] Whether or not to preserve the WebGL drawing buffer. This needs to be ````true```` for {@link Viewer#getSnapshot} to work.
+ * @property {Boolean} [transparent=true] Whether or not the canvas is transparent.
+ * @property {Boolean} [premultipliedAlpha=false] Whether or not you want alpha composition with premultiplied alpha. Highlighting and selection works best when this is ````false````.
+ * @property {Boolean} [gammaInput=true] When true, expects that all textures and colors are premultiplied gamma.
+ * @property {Boolean} [gammaOutput=false] Whether or not to render with pre-multiplied gama.
+ * @property {Number} [gammaFactor=2.2] The gamma factor to use when rendering with pre-multiplied gamma.
+ * @property {Number[]} [backgroundColor=[1,1,1]] Sets the canvas background color to use when ````transparent```` is false.
+ * @property {Boolean} [backgroundColorFromAmbientLight=true] When ````transparent```` is false, set this ````true````
+ * to derive the canvas background color from {@link AmbientLight#color}, or ````false```` to set the canvas background to ````backgroundColor````.
+ * @property {String} [units="meters"] The measurement unit type. Accepted values are ````"meters"````, ````"metres"````, , ````"centimeters"````, ````"centimetres"````, ````"millimeters"````,  ````"millimetres"````, ````"yards"````, ````"feet"```` and ````"inches"````.
+ * @property {Number} [scale=1] The number of Real-space units in each World-space coordinate system unit.
+ * @property {Number[]} [origin=[0,0,0]] The Real-space 3D origin, in current measurement units, at which the World-space coordinate origin ````[0,0,0]```` sits.
+ * @property {Boolean} [saoEnabled=false] Whether to enable Scalable Ambient Obscurance (SAO) effect. See {@link SAO} for more info.
+ * @property {Boolean} [antialias=true] Whether to enable anti-aliasing.
+ * @property {Boolean} [alphaDepthMask=true] Whether writing into the depth buffer is enabled or disabled when rendering transparent objects.
+ * @property {Boolean} [entityOffsetsEnabled=false] Whether to enable {@link Entity#offset}. For best performance, only set this ````true```` when you need to use {@link Entity#offset}.
+ * @property {Boolean} [readableGeometryEnabled=false] Whether to enable full-precision accuracy when surface picking with {@link Scene#pick}. Note that when ````true````, this configuration will increase the amount of browser memory used by the Viewer. The ````pickSurfacePrecision```` option for ````Scene#pick```` only works if this is set ````true````.
+ * @property {Boolean} [logarithmicDepthBufferEnabled=false] Whether to enable logarithmic depth buffer. When this is true,
+ * you can set huge values for {@link Perspective#far} and {@link Ortho#far}, to push the far clipping plane back so
+ * that it does not clip huge models.
+ * @property {Boolean} [colorTextureEnabled=true] Whether to enable base color texture rendering.
+ * @property {Boolean} [pbrEnabled=false] Whether to enable physically-based rendering.
+ * @property {LocaleService} [localeService=null] Optional locale-based translation service.
+ * @property {Boolean} [dtxEnabled=false] Whether to enable data texture-based (DTX) scene representation within the Viewer. When this is true, the Viewer will use data textures to
+ * store geometry on the GPU for triangle meshes that don't have textures. This gives a much lower memory footprint for these types of model element. This mode may not perform well on low-end GPUs that are optimized
+ * to use textures to hold geometry data. Works great on most medium/high-end GPUs found in desktop computers, including the nVIDIA and Intel HD chipsets. Set this false to use the default vertex buffer object (VBO)
+ * mode for storing geometry, which is the standard technique used in most graphics engines, and will work adequately on most low-end GPUs.
+ * @property {Number} [markerZOffset=-0.001] The Z value of offset for Marker's OcclusionTester. The closest the value is to 0.000 the more precise OcclusionTester will be, but at the same time the less precise it will behave for Markers that are located exactly on the Surface.
+ * @property {number} [numCachedSectionPlanes=0] Enhances the efficiency of SectionPlane creation by proactively allocating Viewer resources for a specified quantity
+ * of SectionPlanes. Introducing this parameter streamlines the initial creation speed of SectionPlanes, particularly up to the designated quantity. This parameter internally
+ * configures renderer logic for the specified number of SectionPlanes, eliminating the need for setting up logic with each SectionPlane creation and thereby enhancing
+ * responsiveness. It is important to consider that each SectionPlane impacts rendering performance, so it is recommended to set this value to a quantity that aligns with
+ * your expected usage.
+ */
 class Viewer {
 
     /**
      * @constructor
-     * @param {Object} cfg Viewer configuration.
-     * @param {String} [cfg.id] Optional ID for this Viewer, defaults to the ID of {@link Viewer#scene}, which xeokit automatically generates.
-     * @param {String} [cfg.canvasId]  ID of an existing HTML canvas for the {@link Viewer#scene} - either this or canvasElement is mandatory. When both values are given, the element reference is always preferred to the ID.
-     * @param {HTMLCanvasElement} [cfg.canvasElement] Reference of an existing HTML canvas for the {@link Viewer#scene} - either this or canvasId is mandatory. When both values are given, the element reference is always preferred to the ID.
-     * @param {HTMLElement} [cfg.keyboardEventsElement] Optional reference to HTML element on which key events should be handled. Defaults to the HTML Document.
-     * @param {String} [cfg.spinnerElementId]  ID of existing HTML element to show the {@link Spinner} - internally creates a default element automatically if this is omitted.
-     * @param {Number} [cfg.passes=1] The number of times the {@link Viewer#scene} renders per frame.
-     * @param {Boolean} [cfg.clearEachPass=false] When doing multiple passes per frame, specifies if to clear the canvas before each pass (true) or just before the first pass (false).
-     * @param {Boolean} [cfg.preserveDrawingBuffer=true]  Whether or not to preserve the WebGL drawing buffer. This needs to be ````true```` for {@link Viewer#getSnapshot} to work.
-     * @param {Boolean} [cfg.transparent=true]  Whether or not the canvas is transparent.
-     * @param {Boolean} [cfg.premultipliedAlpha=false]  Whether or not you want alpha composition with premultiplied alpha. Highlighting and selection works best when this is ````false````.
-     * @param {Boolean} [cfg.gammaInput=true]  When true, expects that all textures and colors are premultiplied gamma.
-     * @param {Boolean} [cfg.gammaOutput=false]  Whether or not to render with pre-multiplied gama.
-     * @param {Number} [cfg.gammaFactor=2.2] The gamma factor to use when rendering with pre-multiplied gamma.
-     * @param {Number[]} [cfg.backgroundColor=[1,1,1]] Sets the canvas background color to use when ````transparent```` is false.
-     * @param {Boolean} [cfg.backgroundColorFromAmbientLight=true] When ````transparent```` is false, set this ````true````
-     * to derive the canvas background color from {@link AmbientLight#color}, or ````false```` to set the canvas background to ````backgroundColor````.
-     * @param {String} [cfg.units="meters"] The measurement unit type. Accepted values are ````"meters"````, ````"metres"````, , ````"centimeters"````, ````"centimetres"````, ````"millimeters"````,  ````"millimetres"````, ````"yards"````, ````"feet"```` and ````"inches"````.
-     * @param {Number} [cfg.scale=1] The number of Real-space units in each World-space coordinate system unit.
-     * @param {Number[]} [cfg.origin=[0,0,0]] The Real-space 3D origin, in current measurement units, at which the World-space coordinate origin ````[0,0,0]```` sits.
-     * @param {Boolean} [cfg.saoEnabled=false] Whether to enable Scalable Ambient Obscurance (SAO) effect. See {@link SAO} for more info.
-     * @param {Boolean} [cfg.antialias=true] Whether to enable anti-aliasing.
+     * @param {ViewerConfiguration} cfg Viewer configuration.
      * @throws {String} Throws an exception when both canvasId or canvasElement are missing or they aren't pointing to a valid HTMLCanvasElement.
-     * @param {Boolean} [cfg.alphaDepthMask=true] Whether writing into the depth buffer is enabled or disabled when rendering transparent objects.
-     * @param {Boolean} [cfg.entityOffsetsEnabled=false] Whether to enable {@link Entity#offset}. For best performance, only set this ````true```` when you need to use {@link Entity#offset}.
-     * @param {Boolean} [cfg.readableGeometryEnabled=false] Whether to enable full-precision accuracy when surface picking with {@link Scene#pick}. Note that when ````true````, this configuration will increase the amount of browser memory used by the Viewer. The ````pickSurfacePrecision```` option for ````Scene#pick```` only works if this is set ````true````.
-     * @param {Boolean} [cfg.logarithmicDepthBufferEnabled=false] Whether to enable logarithmic depth buffer. When this is true,
-     * you can set huge values for {@link Perspective#far} and {@link Ortho#far}, to push the far clipping plane back so
-     * that it does not clip huge models.
-     * @param {Boolean} [cfg.colorTextureEnabled=true] Whether to enable base color texture rendering.
-     * @param {Boolean} [cfg.pbrEnabled=false] Whether to enable physically-based rendering.
-     * @param {LocaleService} [cfg.localeService=null] Optional locale-based translation service.
-     * @param {Boolean} [cfg.dtxEnabled=false] Whether to enable data texture-based (DTX) scene representation within the Viewer. When this is true, the Viewer will use data textures to
-     * store geometry on the GPU for triangle meshes that don't have textures. This gives a much lower memory footprint for these types of model element. This mode may not perform well on low-end GPUs that are optimized
-     * to use textures to hold geometry data. Works great on most medium/high-end GPUs found in desktop computers, including the nVIDIA and Intel HD chipsets. Set this false to use the default vertex buffer object (VBO)
-     * mode for storing geometry, which is the standard technique used in most graphics engines, and will work adequately on most low-end GPUs.
-     * @param {Number} [cfg.markerZOffset=-0.001] The Z value of offset for Marker's OcclusionTester. The closest the value is to 0.000 the more precise OcclusionTester will be, but at the same time the less precise it will behave for Markers that are located exactly on the Surface.
-     * @param {number} [cfg.numCachedSectionPlanes=0] Enhances the efficiency of SectionPlane creation by proactively allocating Viewer resources for a specified quantity
-     * of SectionPlanes. Introducing this parameter streamlines the initial creation speed of SectionPlanes, particularly up to the designated quantity. This parameter internally
-     * configures renderer logic for the specified number of SectionPlanes, eliminating the need for setting up logic with each SectionPlane creation and thereby enhancing
-     * responsiveness. It is important to consider that each SectionPlane impacts rendering performance, so it is recommended to set this value to a quantity that aligns with
-     * your expected usage.
      */
     constructor(cfg) {
 
@@ -374,7 +378,7 @@ class Viewer {
      *    format: "png"
      * });
      * ````
-     * @param {*} [params] Capture options.
+     * @param {Object} [params] Capture options.
      * @param {Number} [params.width] Desired width of result in pixels - defaults to width of canvas.
      * @param {Number} [params.height] Desired height of result in pixels - defaults to height of canvas.
      * @param {String} [params.format="jpeg"] Desired format; "jpeg", "png" or "bmp".

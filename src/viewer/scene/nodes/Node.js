@@ -143,38 +143,41 @@ const identityMat = math.identityMat4();
  *
  * @implements {Entity}
  */
+
+/**
+ * @typedef {Object} NodeConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent scene, generated automatically when omitted.
+ * @property {Boolean} [isModel] Specify ````true```` if this Mesh represents a model, in which case the Mesh will be registered by {@link Mesh#id} in {@link Scene#models} and may also have a corresponding {@link MetaModel} with matching {@link MetaModel#id}, registered by that ID in {@link MetaScene#metaModels}.
+ * @property {Boolean} [isObject] Specify ````true```` if this Mesh represents an object, in which case the Mesh will be registered by {@link Mesh#id} in {@link Scene#objects} and may also have a corresponding {@link MetaObject} with matching {@link MetaObject#id}, registered by that ID in {@link MetaScene#metaObjects}.
+ * @property {Node} [parent] The parent Node.
+ * @property {Number[]} [origin] World-space origin for this Node.
+ * @property {Number[]} [position=[0,0,0]] Local 3D position.
+ * @property {Number[]} [scale=[1,1,1]] Local scale.
+ * @property {Number[]} [rotation=[0,0,0]] Local rotation, as Euler angles given in degrees, for each of the X, Y and Z axis.
+ * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] Local modelling transform matrix. Overrides the position, scale and rotation parameters.
+ * @property {Number[]} [offset=[0,0,0]] World-space 3D translation offset. Translates the Node in World space, after modelling transforms.
+ * @property {Boolean} [visible=true] Indicates if the Node is initially visible.
+ * @property {Boolean} [culled=false] Indicates if the Node is initially culled from view.
+ * @property {Boolean} [pickable=true] Indicates if the Node is initially pickable.
+ * @property {Boolean} [clippable=true] Indicates if the Node is initially clippable.
+ * @property {Boolean} [collidable=true] Indicates if the Node is initially included in boundary calculations.
+ * @property {Boolean} [castsShadow=true] Indicates if the Node initially casts shadows.
+ * @property {Boolean} [receivesShadow=true] Indicates if the Node initially receives shadows.
+ * @property {Boolean} [xrayed=false] Indicates if the Node is initially xrayed.
+ * @property {Boolean} [highlighted=false] Indicates if the Node is initially highlighted.
+ * @property {Boolean} [selected=false] Indicates if the Mesh is initially selected.
+ * @property {Boolean} [edges=false] Indicates if the Node's edges are initially emphasized.
+ * @property {Number[]} [colorize=[1.0,1.0,1.0]] Node's initial RGB colorize color, multiplies by the rendered fragment colors.
+ * @property {Number} [opacity=1.0] Node's initial opacity factor, multiplies by the rendered fragment alpha.
+ * @property {Array} [children] Child Nodes or {@link Mesh}es to add initially. Children must be in the same {@link Scene} and will be removed first from whatever parents they may already have.
+ * @property {Boolean} [inheritStates=true] Indicates if children given to this constructor should inherit rendering state from this parent as they are added. Rendering state includes {@link Node#visible}, {@link Node#culled}, {@link Node#pickable}, {@link Node#clippable}, {@link Node#castsShadow}, {@link Node#receivesShadow}, {@link Node#selected}, {@link Node#highlighted}, {@link Node#colorize} and {@link Node#opacity}.
+ */
 class Node extends Component {
 
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent scene, generated automatically when omitted.
-     * @param {Boolean} [cfg.isModel] Specify ````true```` if this Mesh represents a model, in which case the Mesh will be registered by {@link Mesh#id} in {@link Scene#models} and may also have a corresponding {@link MetaModel} with matching {@link MetaModel#id}, registered by that ID in {@link MetaScene#metaModels}.
-     * @param {Boolean} [cfg.isObject] Specify ````true```` if this Mesh represents an object, in which case the Mesh will be registered by {@link Mesh#id} in {@link Scene#objects} and may also have a corresponding {@link MetaObject} with matching {@link MetaObject#id}, registered by that ID in {@link MetaScene#metaObjects}.
-     * @param {Node} [cfg.parent] The parent Node.
-     * @param {Number[]} [cfg.origin] World-space origin for this Node.
-     * @param {Number[]} [cfg.rtcCenter] Deprecated - renamed to ````origin````.
-     * @param {Number[]} [cfg.position=[0,0,0]] Local 3D position.
-     * @param {Number[]} [cfg.scale=[1,1,1]] Local scale.
-     * @param {Number[]} [cfg.rotation=[0,0,0]] Local rotation, as Euler angles given in degrees, for each of the X, Y and Z axis.
-     * @param {Number[]} [cfg.matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1] Local modelling transform matrix. Overrides the position, scale and rotation parameters.
-     * @param {Number[]} [cfg.offset=[0,0,0]] World-space 3D translation offset. Translates the Node in World space, after modelling transforms.
-     * @param {Boolean} [cfg.visible=true] Indicates if the Node is initially visible.
-     * @param {Boolean} [cfg.culled=false] Indicates if the Node is initially culled from view.
-     * @param {Boolean} [cfg.pickable=true] Indicates if the Node is initially pickable.
-     * @param {Boolean} [cfg.clippable=true] Indicates if the Node is initially clippable.
-     * @param {Boolean} [cfg.collidable=true] Indicates if the Node is initially included in boundary calculations.
-     * @param {Boolean} [cfg.castsShadow=true] Indicates if the Node initially casts shadows.
-     * @param {Boolean} [cfg.receivesShadow=true]  Indicates if the Node initially receives shadows.
-     * @param {Boolean} [cfg.xrayed=false] Indicates if the Node is initially xrayed.
-     * @param {Boolean} [cfg.highlighted=false] Indicates if the Node is initially highlighted.
-     * @param {Boolean} [cfg.selected=false] Indicates if the Mesh is initially selected.
-     * @param {Boolean} [cfg.edges=false] Indicates if the Node's edges are initially emphasized.
-     * @param {Number[]} [cfg.colorize=[1.0,1.0,1.0]] Node's initial RGB colorize color, multiplies by the rendered fragment colors.
-     * @param {Number} [cfg.opacity=1.0] Node's initial opacity factor, multiplies by the rendered fragment alpha.
-     * @param {Array} [cfg.children] Child Nodes or {@link Mesh}es to add initially. Children must be in the same {@link Scene} and will be removed first from whatever parents they may already have.
-     * @param {Boolean} [cfg.inheritStates=true] Indicates if children given to this constructor should inherit rendering state from this parent as they are added. Rendering state includes {@link Node#visible}, {@link Node#culled}, {@link Node#pickable}, {@link Node#clippable}, {@link Node#castsShadow}, {@link Node#receivesShadow}, {@link Node#selected}, {@link Node#highlighted}, {@link Node#colorize} and {@link Node#opacity}.
+     * @param {NodeConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
 

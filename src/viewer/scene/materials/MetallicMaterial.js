@@ -1,4 +1,6 @@
 import {Material} from './Material.js';
+import {Component} from '../Component.js';
+import {Texture} from './Texture.js';
 import {RenderState} from '../webgl/RenderState.js';
 import {math} from '../math/math.js';
 
@@ -212,6 +214,31 @@ const modeNames = ["opaque", "mask", "blend"];
  *  })
  * ````
  */
+
+/**
+ * @typedef {Object} MetallicMaterialConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [baseColor=[1,1,1]] RGB diffuse color of this MetallicMaterial. Multiplies by the RGB components of {@link MetallicMaterial#baseColorMap}.
+ * @property {Number} [metallic=1.0] Factor in the range ````[0..1]```` indicating how metallic this MetallicMaterial is.  ````1```` is metal, ````0```` is non-metal. Multiplies by the *R* component of {@link MetallicMaterial#metallicMap} and the *A* component of {@link MetallicMaterial#metallicRoughnessMap}.
+ * @property {Number} [roughness=1.0] Factor in the range ````[0..1]```` indicating the roughness of this MetallicMaterial.  ````0```` is fully smooth, ````1```` is fully rough. Multiplies by the *R* component of {@link MetallicMaterial#roughnessMap}.
+ * @property {Number} [specularF0=0.0] Factor in the range ````[0..1]```` indicating specular Fresnel.
+ * @property {Number[]} [emissive=[0,0,0]] RGB emissive color of this MetallicMaterial. Multiplies by the RGB components of {@link MetallicMaterial#emissiveMap}.
+ * @property {Number} [alpha=1.0] Factor in the range ````[0..1]```` indicating the alpha of this MetallicMaterial.  Multiplies by the *R* component of {@link MetallicMaterial#alphaMap} and the *A* component,  if present, of {@link MetallicMaterial#baseColorMap}. The value of  {@link MetallicMaterial#alphaMode} indicates how alpha is interpreted when rendering.
+ * @property {Texture} [baseColorMap=undefined] RGBA {@link Texture} containing the diffuse color of this MetallicMaterial, with optional *A* component for alpha. The RGB components multiply by the {@link MetallicMaterial#baseColor} property, while the *A* component, if present, multiplies by the {@link MetallicMaterial#alpha} property.
+ * @property {Texture} [alphaMap=undefined] RGB {@link Texture} containing this MetallicMaterial's alpha in its *R* component. The *R* component multiplies by the {@link MetallicMaterial#alpha} property. Must be within the same {@link Scene} as this MetallicMaterial.
+ * @property {Texture} [metallicMap=undefined] RGB {@link Texture} containing this MetallicMaterial's metallic factor in its *R* component. The *R* component multiplies by the {@link MetallicMaterial#metallic} property. Must be within the same {@link Scene} as this MetallicMaterial.
+ * @property {Texture} [roughnessMap=undefined] RGB {@link Texture} containing this MetallicMaterial's roughness factor in its *R* component. The *R* component multiplies by the  {@link MetallicMaterial#roughness} property. Must be within the same {@link Scene} as this MetallicMaterial.
+ * @property {Texture} [metallicRoughnessMap=undefined] RGB {@link Texture} containing this MetallicMaterial's metalness in its *R* component and roughness in its *G* component. Its *R* component multiplies by the {@link MetallicMaterial#metallic} property, while its *G* component multiplies by the {@link MetallicMaterial#roughness} property. Must be within the same {@link Scene} as this MetallicMaterial.
+ * @property {Texture} [emissiveMap=undefined] RGB {@link Texture} containing the emissive color of this MetallicMaterial. Multiplies by the {@link MetallicMaterial#emissive} property. Must be within the same {@link Scene} as this MetallicMaterial.
+ * @property {Texture} [occlusionMap=undefined] RGB ambient occlusion {@link Texture}. Within shaders, multiplies by the specular and diffuse light reflected by surfaces. Must be within the same {@link Scene} as this MetallicMaterial.
+ * @property {Texture} [normalMap=undefined] RGB tangent-space normal {@link Texture}. Must be within the same {@link Scene} as this MetallicMaterial.
+ * @property {String} [alphaMode="opaque"] The alpha blend mode, which specifies how alpha is to be interpreted. Accepted values are "opaque", "blend" and "mask". See the {@link MetallicMaterial#alphaMode} property for more info.
+ * @property {Number} [alphaCutoff=0.5] The alpha cutoff value. See the {@link MetallicMaterial#alphaCutoff} property for more info.
+ * @property {Boolean} [backfaces=false] Whether to render {@link ReadableGeometry} backfaces.
+ * @property {Boolean} [frontface="ccw"] The winding order for {@link ReadableGeometry} front faces - ````"cw"```` for clockwise, or ````"ccw"```` for counter-clockwise.
+ * @property {Number} [lineWidth=1] Scalar that controls the width of lines for {@link ReadableGeometry} with {@link ReadableGeometry#primitive} set to "lines".
+ * @property {Number} [pointSize=1] Scalar that controls the size of points for {@link ReadableGeometry} with {@link ReadableGeometry#primitive} set to "points".
+ */
 class MetallicMaterial extends Material {
 
     /**
@@ -224,28 +251,7 @@ class MetallicMaterial extends Material {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this MetallicMaterial as well.
-     * @param {*} [cfg] The MetallicMaterial configuration.
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number[]} [cfg.baseColor=[1,1,1]] RGB diffuse color of this MetallicMaterial. Multiplies by the RGB components of {@link MetallicMaterial#baseColorMap}.
-     * @param {Number} [cfg.metallic=1.0] Factor in the range ````[0..1]```` indicating how metallic this MetallicMaterial is.  ````1```` is metal, ````0```` is non-metal. Multiplies by the *R* component of {@link MetallicMaterial#metallicMap} and the *A* component of {@link MetallicMaterial#metallicRoughnessMap}.
-     * @param {Number} [cfg.roughness=1.0] Factor in the range ````[0..1]```` indicating the roughness of this MetallicMaterial.  ````0```` is fully smooth, ````1```` is fully rough. Multiplies by the *R* component of {@link MetallicMaterial#roughnessMap}.
-     * @param {Number} [cfg.specularF0=0.0] Factor in the range ````[0..1]```` indicating specular Fresnel.
-     * @param {Number[]} [cfg.emissive=[0,0,0]]  RGB emissive color of this MetallicMaterial. Multiplies by the RGB components of {@link MetallicMaterial#emissiveMap}.
-     * @param {Number} [cfg.alpha=1.0] Factor in the range ````[0..1]```` indicating the alpha of this MetallicMaterial.  Multiplies by the *R* component of {@link MetallicMaterial#alphaMap} and the *A* component,  if present, of {@link MetallicMaterial#baseColorMap}. The value of  {@link MetallicMaterial#alphaMode} indicates how alpha is interpreted when rendering.
-     * @param {Texture} [cfg.baseColorMap=undefined] RGBA {@link Texture} containing the diffuse color of this MetallicMaterial, with optional *A* component for alpha. The RGB components multiply by the {@link MetallicMaterial#baseColor} property, while the *A* component, if present, multiplies by the {@link MetallicMaterial#alpha} property.
-     * @param {Texture} [cfg.alphaMap=undefined] RGB {@link Texture} containing this MetallicMaterial's alpha in its *R* component. The *R* component multiplies by the {@link MetallicMaterial#alpha} property. Must be within the same {@link Scene} as this MetallicMaterial.
-     * @param {Texture} [cfg.metallicMap=undefined] RGB {@link Texture} containing this MetallicMaterial's metallic factor in its *R* component. The *R* component multiplies by the {@link MetallicMaterial#metallic} property. Must be within the same {@link Scene} as this MetallicMaterial.
-     * @param {Texture} [cfg.roughnessMap=undefined] RGB {@link Texture} containing this MetallicMaterial's roughness factor in its *R* component. The *R* component multiplies by the  {@link MetallicMaterial#roughness} property. Must be within the same {@link Scene} as this MetallicMaterial.
-     * @param {Texture} [cfg.metallicRoughnessMap=undefined] RGB {@link Texture} containing this MetallicMaterial's metalness in its *R* component and roughness in its *G* component. Its *R* component multiplies by the {@link MetallicMaterial#metallic} property, while its *G* component multiplies by the {@link MetallicMaterial#roughness} property. Must be within the same {@link Scene} as this MetallicMaterial.
-     * @param {Texture} [cfg.emissiveMap=undefined] RGB {@link Texture} containing the emissive color of this MetallicMaterial. Multiplies by the {@link MetallicMaterial#emissive} property. Must be within the same {@link Scene} as this MetallicMaterial.
-     * @param {Texture} [cfg.occlusionMap=undefined] RGB ambient occlusion {@link Texture}. Within shaders, multiplies by the specular and diffuse light reflected by surfaces. Must be within the same {@link Scene} as this MetallicMaterial.
-     * @param {Texture} [cfg.normalMap=undefined] RGB tangent-space normal {@link Texture}. Must be within the same {@link Scene} as this MetallicMaterial.
-     * @param {String} [cfg.alphaMode="opaque"] The alpha blend mode, which specifies how alpha is to be interpreted. Accepted values are "opaque", "blend" and "mask". See the {@link MetallicMaterial#alphaMode} property for more info.
-     * @param {Number} [cfg.alphaCutoff=0.5] The alpha cutoff value. See the {@link MetallicMaterial#alphaCutoff} property for more info.
-     * @param {Boolean} [cfg.backfaces=false] Whether to render {@link ReadableGeometry} backfaces.
-     * @param {Boolean} [cfg.frontface="ccw"] The winding order for {@link ReadableGeometry} front faces - ````"cw"```` for clockwise, or ````"ccw"```` for counter-clockwise.
-     * @param {Number} [cfg.lineWidth=1] Scalar that controls the width of lines for {@link ReadableGeometry} with {@link ReadableGeometry#primitive} set to "lines".
-     * @param {Number} [cfg.pointSize=1] Scalar that controls the size of points for {@link ReadableGeometry} with {@link ReadableGeometry#primitive} set to "points".
+     * @param {MetallicMaterialConfiguration} [cfg] The MetallicMaterial configuration.
      */
     constructor(owner, cfg = {}) {
 

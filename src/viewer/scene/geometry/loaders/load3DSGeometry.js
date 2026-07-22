@@ -48,7 +48,7 @@ import {K3D} from '../../libs/k3d.js';
  *
  * @function load3DSGeometry
  * @param {Scene} scene Scene we're loading the geometry for.
- * @param {*} cfg Configs, also added to the result object.
+ * @param {Object} cfg Configs, also added to the result object.
  * @param {String} [cfg.src]  Path to 3DS file.
  * @returns {Object} Configuration to pass into a {@link Geometry} constructor, containing geometry arrays loaded from the OBJ file.
  */

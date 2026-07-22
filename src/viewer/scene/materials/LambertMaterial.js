@@ -1,4 +1,5 @@
 import {Material} from './Material.js';
+import {Component} from '../Component.js';
 import {RenderState} from '../webgl/RenderState.js';
 import {math} from '../math/math.js';
 
@@ -65,6 +66,21 @@ import {math} from '../math/math.js';
  *  | {@link LambertMaterial#frontface} | String | "ccw", "cw" | "ccw" |  | The winding order for {@link Geometry} frontfaces - "cw" for clockwise, or "ccw" for counter-clockwise. |
  *
  */
+
+/**
+ * @typedef {Object} LambertMaterialConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Object.<string, Object>} [meta=null] Metadata to attach to this LambertMaterial.
+ * @property {Number[]} [ambient=[1.0, 1.0, 1.0 ]] LambertMaterial ambient color.
+ * @property {Number[]} [color=[ 1.0, 1.0, 1.0 ]] LambertMaterial diffuse color.
+ * @property {Number[]} [emissive=[ 0.0, 0.0, 0.0 ]] LambertMaterial emissive color.
+ * @property {Number} [alpha=1] Scalar in range 0-1 that controls alpha, where 0 is completely transparent and 1 is completely opaque.
+ * @property {Number} [reflectivity=1] Scalar in range 0-1 that controls how much {@link ReflectionMap} is reflected.
+ * @property {Number} [lineWidth=1] Scalar that controls the width of {@link Geometry} lines.
+ * @property {Number} [pointSize=1] Scalar that controls the size of points for {@link Geometry} with {@link Geometry#primitive} set to "points".
+ * @property {Boolean} [backfaces=false] Whether to render {@link Geometry} backfaces.
+ * @property {Boolean} [frontface="ccw"] The winding order for {@link Geometry} front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
+ */
 class LambertMaterial extends Material {
 
     /**
@@ -77,18 +93,7 @@ class LambertMaterial extends Material {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] The LambertMaterial configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {String:Object} [cfg.meta=null]  Metadata to attach to this LambertMaterial.
-     * @param {Number[]} [cfg.ambient=[1.0, 1.0, 1.0 ]] LambertMaterial ambient color.
-     * @param {Number[]} [cfg.color=[ 1.0, 1.0, 1.0 ]] LambertMaterial diffuse color.
-     * @param {Number[]} [cfg.emissive=[ 0.0, 0.0, 0.0 ]] LambertMaterial emissive color.
-     * @param {Number} [cfg.alpha=1]Scalar in range 0-1 that controls alpha, where 0 is completely transparent and 1 is completely opaque.
-     * @param {Number} [cfg.reflectivity=1]Scalar in range 0-1 that controls how much {@link ReflectionMap} is reflected.
-     * @param {Number} [cfg.lineWidth=1] Scalar that controls the width of {@link Geometry} lines.
-     * @param {Number} [cfg.pointSize=1] Scalar that controls the size of points for {@link Geometry} with {@link Geometry#primitive} set to "points".
-     * @param {Boolean} [cfg.backfaces=false] Whether to render {@link Geometry} backfaces.
-     * @param {Boolean} [cfg.frontface="ccw"] The winding order for {@link Geometry} front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
+     * @param {LambertMaterialConfiguration} [cfg] The LambertMaterial configuration
      */
     constructor(owner, cfg = {}) {
 

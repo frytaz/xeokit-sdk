@@ -85,6 +85,24 @@ function nextHighestPowerOfTwo(x) {
  * });
  *````
  */
+
+/**
+ * @typedef {Object} TextureConfiguration
+ * @property {String} [id] Optional ID for this Texture, unique among all components in the parent scene, generated automatically when omitted.
+ * @property {String} [src=null] Path to image file to load into this Texture. See the {@link Texture#src} property for more info.
+ * @property {HTMLImageElement} [image=null] HTML Image object to load into this Texture. See the {@link Texture#image} property for more info.
+ * @property {Number} [minFilter=LinearMipmapLinearFilter] How the texture is sampled when a texel covers less than one pixel.
+ * Supported values are {@link LinearMipmapLinearFilter}, {@link LinearMipMapNearestFilter}, {@link NearestMipMapNearestFilter}, {@link NearestMipMapLinearFilter} and {@link LinearMipMapLinearFilter}.
+ * @property {Number} [maxAnisotropy=false] Max anisotropy to use for texture filtering (see EXT_texture_filter_anisotropic).
+ * @property {Number} [magFilter=LinearFilter] How the texture is sampled when a texel covers more than one pixel. Supported values are {@link LinearFilter} and {@link NearestFilter}.
+ * @property {Number} [wrapS=RepeatWrapping] Wrap parameter for texture coordinate *S*. Supported values are {@link ClampToEdgeWrapping}, {@link MirroredRepeatWrapping} and {@link RepeatWrapping}.
+ * @property {Number} [wrapT=RepeatWrapping] Wrap parameter for texture coordinate *T*. Supported values are {@link ClampToEdgeWrapping}, {@link MirroredRepeatWrapping} and {@link RepeatWrapping}..
+ * @property {Boolean} [flipY=false] Flips this Texture's source data along its vertical axis when ````true````.
+ * @property {Number} [encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
+ * @property {Number[]} [translate=[0,0]] 2D translation vector that will be added to texture's *S* and *T* coordinates.
+ * @property {Number[]} [scale=[1,1]] 2D scaling vector that will be applied to texture's *S* and *T* coordinates.
+ * @property {Number} [rotate=0] Rotation, in degrees, that will be applied to texture's *S* and *T* coordinates.
+ */
 class Texture extends Component {
 
     /**
@@ -97,21 +115,7 @@ class Texture extends Component {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this Texture as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID for this Texture, unique among all components in the parent scene, generated automatically when omitted.
-     * @param {String} [cfg.src=null] Path to image file to load into this Texture. See the {@link Texture#src} property for more info.
-     * @param {HTMLImageElement} [cfg.image=null] HTML Image object to load into this Texture. See the {@link Texture#image} property for more info.
-     * @param {Number} [cfg.minFilter=LinearMipmapLinearFilter] How the texture is sampled when a texel covers less than one pixel.
-     * Supported values are {@link LinearMipmapLinearFilter}, {@link LinearMipMapNearestFilter}, {@link NearestMipMapNearestFilter}, {@link NearestMipMapLinearFilter} and {@link LinearMipMapLinearFilter}.
-     * @param {Number} [cfg.maxAnisotropy=false] Max anisotropy to use for texture filtering (see EXT_texture_filter_anisotropic).
-     * @param {Number} [cfg.magFilter=LinearFilter] How the texture is sampled when a texel covers more than one pixel. Supported values are {@link LinearFilter} and {@link NearestFilter}.
-     * @param {Number} [cfg.wrapS=RepeatWrapping] Wrap parameter for texture coordinate *S*. Supported values are {@link ClampToEdgeWrapping}, {@link MirroredRepeatWrapping} and {@link RepeatWrapping}.
-     * @param {Number} [cfg.wrapT=RepeatWrapping] Wrap parameter for texture coordinate *T*. Supported values are {@link ClampToEdgeWrapping}, {@link MirroredRepeatWrapping} and {@link RepeatWrapping}..
-     * @param {Boolean} [cfg.flipY=false] Flips this Texture's source data along its vertical axis when ````true````.
-     * @param  {Number} [cfg.encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
-     * @param {Number[]} [cfg.translate=[0,0]] 2D translation vector that will be added to texture's *S* and *T* coordinates.
-     * @param {Number[]} [cfg.scale=[1,1]] 2D scaling vector that will be applied to texture's *S* and *T* coordinates.
-     * @param {Number} [cfg.rotate=0] Rotation, in degrees, that will be applied to texture's *S* and *T* coordinates.
+     * @param {TextureConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
 

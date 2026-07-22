@@ -2,6 +2,7 @@ import {math} from "../../viewer/scene/math/math.js";
 
 /**
  * @private
+ * @constructor
  */
 function CubeTextureCanvas(viewer, navCubeScene, cfg = {}) {
 

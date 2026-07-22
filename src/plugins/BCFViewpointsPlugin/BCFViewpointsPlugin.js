@@ -1,4 +1,5 @@
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {SectionPlane} from "../../viewer/scene/sectionPlane/SectionPlane.js";
 import {Bitmap} from "../../viewer/scene/Bitmap/index.js";
 import {LineSet} from "../../viewer/scene/LineSet/index.js";
@@ -307,15 +308,19 @@ const tempVec3c = math.vec3();
  *
  * @class BCFViewpointsPlugin
  */
+
+/**
+ * @typedef {Object} BCFViewpointsPluginConfiguration
+ * @property {String} [id="BCFViewpoints"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {String} [originatingSystem] Identifies the originating system for BCF records.
+ * @property {String} [authoringTool] Identifies the authoring tool for BCF records.
+ */
 class BCFViewpointsPlugin extends Plugin {
 
     /**
      * @constructor
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="BCFViewpoints"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {String} [cfg.originatingSystem] Identifies the originating system for BCF records.
-     * @param {String} [cfg.authoringTool] Identifies the authoring tool for BCF records.
+     * @param {BCFViewpointsPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 

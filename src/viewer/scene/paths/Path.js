@@ -1,5 +1,6 @@
 import {utils} from "../utils.js";
 import {Curve} from "./Curve.js"
+import {Component} from "../Component.js";
 
 /**
  * @desc A complex curved path constructed from various {@link Curve} subtypes.
@@ -8,15 +9,19 @@ import {Curve} from "./Curve.js"
  * * You can sample a {@link Path#point} and a {@link Curve#tangent} vector on a Path for any given value of {@link Path#t} in the range ````[0..1]````.
  * * When you set {@link Path#t} on a Path, its {@link Path#point} and {@link Curve#tangent} properties will update accordingly.
  */
+
+/**
+ * @typedef {Object} PathConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {String[]} [paths=[]] IDs or instances of {{#crossLink "path"}}{{/crossLink}} subtypes to add to this Path.
+ * @property {Number} [t=0] Current position on this Path, in range between 0..1.
+ */
 class Path extends Curve {
 
     /**
      * @constructor
-     * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this SectionPlane as well.
-     * @param {*} [cfg]  Path configuration
-     * @param {String} [cfg.id]  Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {String []} [cfg.paths=[]] IDs or instances of {{#crossLink "path"}}{{/crossLink}} subtypes to add to this Path.
-     * @param {Number} [cfg.t=0] Current position on this Path, in range between 0..1.
+     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this Path as well.
+     * @param {PathConfiguration} [cfg] Path configuration
      */
     constructor(owner, cfg = {}) {
         super(owner, cfg);

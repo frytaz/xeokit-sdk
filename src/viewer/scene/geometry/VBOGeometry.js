@@ -1,4 +1,5 @@
 import {Geometry} from './Geometry.js';
+import {Component} from '../Component.js';
 import {RenderState} from '../webgl/RenderState.js';
 import {ArrayBuf} from '../webgl/ArrayBuf.js';
 import {math} from '../math/math.js';
@@ -44,6 +45,19 @@ const tempAABB = math.AABB3();
  *     });
  * ````
  */
+
+/**
+ * @typedef {Object} VBOGeometryConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Object.<string, Object>} [meta] Optional map of user-defined metadata to attach to this Geometry.
+ * @property {String} [primitive="triangles"] The primitive type. Accepted values are 'points', 'lines', 'line-loop', 'line-strip', 'triangles', 'triangle-strip' and 'triangle-fan'.
+ * @property {Number[]} [positions] Positions array.
+ * @property {Number[]} [normals] Vertex normal vectors array.
+ * @property {Number[]} [uv] UVs array.
+ * @property {Number[]} [colors] Vertex colors.
+ * @property {Number[]} [indices] Indices array.
+ * @property {Number} [edgeThreshold=10] When autogenerating edges for supporting {@link Drawable#edges}, this indicates the threshold angle (in degrees) between the face normals of adjacent triangles below which the edge is discarded.
+ */
 class VBOGeometry extends Geometry {
 
     /**
@@ -64,15 +78,7 @@ class VBOGeometry extends Geometry {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {String} [cfg.primitive="triangles"]  The primitive type. Accepted values are 'points', 'lines', 'line-loop', 'line-strip', 'triangles', 'triangle-strip' and 'triangle-fan'.
-     * @param {Number[]} [cfg.positions]  Positions array.
-     * @param {Number[]} [cfg.normals]  Vertex normal vectors array.
-     * @param {Number[]} [cfg.uv]  UVs array.
-     * @param {Number[]} [cfg.colors]  Vertex colors.
-     * @param {Number[]} [cfg.indices]  Indices array.
-     * @param {Number} [cfg.edgeThreshold=10]  When autogenerating edges for supporting {@link Drawable#edges}, this indicates the threshold angle (in degrees) between the face normals of adjacent triangles below which the edge is discarded.
+     * @param {VBOGeometryConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
 

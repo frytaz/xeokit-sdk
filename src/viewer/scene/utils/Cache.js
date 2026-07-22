@@ -1,3 +1,14 @@
+/**
+ * @typedef {Object} CacheType
+ * @property {Boolean} enabled
+ * @property {Object.<string, *>} files
+ * @property {function(string, *): void} add
+ * @property {function(string): *} get
+ * @property {function(string): void} remove
+ * @property {function(): void} clear
+ */
+
+/** @type {CacheType} */
 const Cache = {
 
     enabled: false,

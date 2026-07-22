@@ -3,6 +3,8 @@ import {ReadableGeometry} from "../geometry/ReadableGeometry.js";
 import {PhongMaterial, Texture} from "../materials/index.js";
 import {math} from "../math/math.js";
 import {Marker} from "./Marker.js";
+import {Component} from "../Component.js";
+import {Entity} from "../Entity.js";
 
 /**
  * A {@link Marker} with a billboarded and textured quad attached to it.
@@ -44,20 +46,24 @@ import {Marker} from "./Marker.js";
  *  });
  *````
  */
+
+/**
+ * @typedef {Object} SpriteMarkerConfiguration
+ * @property {String} [id] Optional ID for this SpriteMarker, unique among all components in the parent scene, generated automatically when omitted.
+ * @property {Entity} [entity] Entity to associate this SpriteMarker with. When the SpriteMarker has an Entity, then {@link SpriteMarker#visible} will always be ````false```` if {@link Entity#visible} is false.
+ * @property {Boolean} [occludable=false] Indicates whether or not this SpriteMarker is hidden (ie. {@link SpriteMarker#visible} is ````false```` whenever occluded by {@link Entity}s in the {@link Scene}.
+ * @property {Number[]} [worldPos=[0,0,0]] World-space 3D SpriteMarker position.
+ * @property {String} [src=null] Path to image file to load into this SpriteMarker. See the {@link SpriteMarker#src} property for more info.
+ * @property {HTMLImageElement} [image=null] HTML Image object to load into this SpriteMarker. See the {@link SpriteMarker#image} property for more info.
+ * @property {Boolean} [flipY=false] Flips this SpriteMarker's texture image along its vertical axis when true.
+ * @property {String} [encoding="linear"] Texture encoding format. See the {@link Texture#encoding} property for more info.
+ */
 class SpriteMarker extends Marker {
 
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this SpriteMarker as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID for this SpriteMarker, unique among all components in the parent scene, generated automatically when omitted.
-     * @param {Entity} [cfg.entity] Entity to associate this Marker with. When the SpriteMarker has an Entity, then {@link Marker#visible} will always be ````false```` if {@link Entity#visible} is false.
-     * @param {Boolean} [cfg.occludable=false] Indicates whether or not this Marker is hidden (ie. {@link Marker#visible} is ````false```` whenever occluded by {@link Entity}s in the {@link Scene}.
-     * @param {Number[]} [cfg.worldPos=[0,0,0]] World-space 3D Marker position.
-     * @param {String} [cfg.src=null] Path to image file to load into this SpriteMarker. See the {@link SpriteMarker#src} property for more info.
-     * @param {HTMLImageElement} [cfg.image=null] HTML Image object to load into this SpriteMarker. See the {@link SpriteMarker#image} property for more info.
-     * @param {Boolean} [cfg.flipY=false] Flips this SpriteMarker's texture image along its vertical axis when true.
-     * @param  {String} [cfg.encoding="linear"] Texture encoding format.  See the {@link Texture#encoding} property for more info.
+     * @param {SpriteMarkerConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
 

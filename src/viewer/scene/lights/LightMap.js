@@ -1,4 +1,5 @@
 import {CubeTexture} from './CubeTexture.js';
+import {Component} from '../Component.js';
 
 /**
  * @desc A **LightMap** specifies a cube texture light map.
@@ -44,6 +45,15 @@ import {CubeTexture} from './CubeTexture.js';
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} LightMapConfiguration
+ * @property {String} [id] Optional ID for this LightMap, unique among all components in the parent scene, generated automatically when omitted.
+ * @property {Object.<string, *>} [meta] Optional map of user-defined metadata to attach to this LightMap.
+ * @property {String[]} [src=null] Paths to six image files to load into this LightMap.
+ * @property {Boolean} [flipY=false] Flips this LightMap's source data along its vertical axis when true.
+ * @property {Number} [encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
+ */
 class LightMap extends CubeTexture {
 
     /**
@@ -56,12 +66,7 @@ class LightMap extends CubeTexture {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID for this LightMap, unique among all components in the parent scene, generated automatically when omitted.
-     * @param {String:Object} [cfg.meta] Optional map of user-defined metadata to attach to this LightMap.
-     * @param {String[]} [cfg.src=null] Paths to six image files to load into this LightMap.
-     * @param {Boolean} [cfg.flipY=false] Flips this LightMap's source data along its vertical axis when true.
-     * @param {Number} [cfg.encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
+     * @param {LightMapConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
         super(owner, cfg);

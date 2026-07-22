@@ -269,6 +269,16 @@ class Item {
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} ContextMenuConfiguration
+ * @property {Object} [items] The context menu items. These can also be dynamically set on {@link ContextMenu#items}. See the class documentation for an example.
+ * @property {Object} [context] The context, which is passed into the item callbacks. This can also be dynamically set on {@link ContextMenu#context}. This must be set before calling {@link ContextMenu#show}.
+ * @property {Boolean} [enabled=true] Whether this ````ContextMenu```` is initially enabled. {@link ContextMenu#show} does nothing while this is ````false````.
+ * @property {Boolean} [hideOnMouseDown=true] Whether this ````ContextMenu```` automatically hides whenever we mouse-down or tap anywhere in the page.
+ * @property {Boolean} [hideOnAction=true] Whether this ````ContextMenu```` automatically hides after we select a menu item. Se false if we want the menu to remain shown and show any updates to its item titles, after we've selected an item.
+ * @property {Node | undefined} [parentNode] Optional reference to an existing DOM Node (e.g. ShadowRoot), to which the menu's HTML element will be appended, defaults to ````document.body````.
+ */
 class ContextMenu {
 
     /**
@@ -276,13 +286,7 @@ class ContextMenu {
      *
      * The ````ContextMenu```` will be initially hidden.
      *
-     * @param {Object} [cfg] ````ContextMenu```` configuration.
-     * @param {Object} [cfg.items] The context menu items. These can also be dynamically set on {@link ContextMenu#items}. See the class documentation for an example.
-     * @param {Object} [cfg.context] The context, which is passed into the item callbacks. This can also be dynamically set on {@link ContextMenu#context}. This must be set before calling {@link ContextMenu#show}.
-     * @param {Boolean} [cfg.enabled=true] Whether this ````ContextMenu```` is initially enabled. {@link ContextMenu#show} does nothing while this is ````false````.
-     * @param {Boolean} [cfg.hideOnMouseDown=true] Whether this ````ContextMenu```` automatically hides whenever we mouse-down or tap anywhere in the page.
-     * @param {Boolean} [cfg.hideOnAction=true] Whether this ````ContextMenu```` automatically hides after we select a menu item. Se false if we want the menu to remain shown and show any updates to its item titles, after we've selected an item.
-     * @param {Node | undefined} [cfg.parentNode] Optional reference to an existing DOM Node (e.g. ShadowRoot), to which the menu's HTML element will be appended, defaults to ````document.body````.
+     * @param {ContextMenuConfiguration} [cfg] ````ContextMenu```` configuration.
      */
     constructor(cfg = {}) {
 

@@ -61,6 +61,18 @@ import {OBJSceneGraphLoader} from "./OBJSceneGraphLoader.js";
  * ````
  * @class OBJLoaderPlugin
  */
+
+/**
+ * @typedef {Object} LoadOBJModel
+ * @property {String} id ID to assign to the model's root {@link Entity}, unique among all components in the Viewer's {@link Scene}.
+ * @property {String} src Path to an OBJ file.
+ * @property {String} [metaModelSrc] Path to an optional metadata file.
+ * @property {Number[]} [position=[0,0,0]] The model World-space 3D position.
+ * @property {Number[]} [scale=[1,1,1]] The model's World-space scale.
+ * @property {Number[]} [rotation=[0,0,0]] The model's World-space rotation, as Euler angles given in degrees, for each of the X, Y and Z axis.
+ * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters.
+ * @property {Number} [edgeThreshold=20] When xraying, highlighting, selecting or edging, this is the threshold angle between normals of adjacent triangles, below which their shared wireframe edge is not drawn.
+ */
 class OBJLoaderPlugin extends Plugin {
 
     /**
@@ -83,15 +95,7 @@ class OBJLoaderPlugin extends Plugin {
     /**
      * Loads an OBJ model from a file into this OBJLoader's {@link Viewer}.
      *
-     * @param {*} params  Loading parameters.
-     * @param {String} params.id ID to assign to the model's root {@link Entity}, unique among all components in the Viewer's {@link Scene}.
-     * @param {String} params.src Path to an OBJ file.
-     * @param {String} [params.metaModelSrc] Path to an optional metadata file.
-     * @param {Number[]} [params.position=[0,0,0]] The model World-space 3D position.
-     * @param {Number[]} [params.scale=[1,1,1]] The model's World-space scale.
-     * @param {Number[]} [params.rotation=[0,0,0]] The model's World-space rotation, as Euler angles given in degrees, for each of the X, Y and Z axis.
-     * @param {Number[]} [params.matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters.
-     * @param {Number} [params.edgeThreshold=20] When xraying, highlighting, selecting or edging, this is the threshold angle between normals of adjacent triangles, below which their shared wireframe edge is not drawn.
+     * @param {LoadOBJModel} params Loading parameters.
      * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
      */
     load(params = {}) {
