@@ -38,7 +38,7 @@ import {transformToNode} from "../plugins/lib/ui/index.js";
  * @property {Number[]} [backgroundColor=[1,1,1]] Sets the canvas background color to use when ````transparent```` is false.
  * @property {Boolean} [backgroundColorFromAmbientLight=true] When ````transparent```` is false, set this ````true````
  * to derive the canvas background color from {@link AmbientLight#color}, or ````false```` to set the canvas background to ````backgroundColor````.
- * @property {String} [units="meters"] The measurement unit type. Accepted values are ````"meters"````, ````"metres"````, , ````"centimeters"````, ````"centimetres"````, ````"millimeters"````,  ````"millimetres"````, ````"yards"````, ````"feet"```` and ````"inches"````.
+ * @property {"meters" | "centimeters" | "millimeters" | "yards" | "feet" | "inches"} [units="meters"] The measurement unit type. Accepted values are ````"meters"````, ````"metres"````, , ````"centimeters"````, ````"centimetres"````, ````"millimeters"````,  ````"millimetres"````, ````"yards"````, ````"feet"```` and ````"inches"````.
  * @property {Number} [scale=1] The number of Real-space units in each World-space coordinate system unit.
  * @property {Number[]} [origin=[0,0,0]] The Real-space 3D origin, in current measurement units, at which the World-space coordinate origin ````[0,0,0]```` sits.
  * @property {Boolean} [saoEnabled=false] Whether to enable Scalable Ambient Obscurance (SAO) effect. See {@link SAO} for more info.
