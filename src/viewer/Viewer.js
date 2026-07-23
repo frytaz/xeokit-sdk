@@ -381,7 +381,7 @@ class Viewer {
      * @param {Object} [params] Capture options.
      * @param {Number} [params.width] Desired width of result in pixels - defaults to width of canvas.
      * @param {Number} [params.height] Desired height of result in pixels - defaults to height of canvas.
-     * @param {String} [params.format="jpeg"] Desired format; "jpeg", "png" or "bmp".
+     * @param {"jpeg" | "png" | "bmp"} [params.format="jpeg"] Desired format; "jpeg", "png" or "bmp".
      * @param {Boolean} [params.includeGizmos=false] When true, will include gizmos like {@link SectionPlane} in the snapshot.
      * @returns {String} String-encoded image data URI.
      */
