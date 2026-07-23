@@ -631,6 +631,9 @@ class Scene extends Component {
             alert("xeokit failed to find WebGL!");
         });
 
+        /**
+         * @private
+         */
         this._renderer = new Renderer(this, {
             transparent: transparent,
             alphaDepthMask: alphaDepthMask
@@ -638,6 +641,9 @@ class Scene extends Component {
 
         this.canvas._renderer = this._renderer;
 
+        /**
+         * @private
+         */
         this._sectionPlanesState = new (function () {
 
             this.sectionPlanes = [];
@@ -701,6 +707,9 @@ class Scene extends Component {
 
         this._sectionPlanesState.setNumCachedSectionPlanes(cfg.numCachedSectionPlanes || 0);
 
+        /**
+         * @private
+         */
         this._lightsState = new (function () {
 
             const DEFAULT_AMBIENT = math.vec4([0, 0, 0, 0]);
