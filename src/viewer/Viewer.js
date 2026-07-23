@@ -150,7 +150,6 @@ class Viewer {
         /**
          * The Viewer's {@link Camera}. This is also found on {@link Scene#camera}.
          * @property camera
-         * @type {Camera}
          */
         this.camera = this.scene.camera;
 
