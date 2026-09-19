@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>xeokit visual test</title>
+    <link href="css/pageStyle.css" rel="stylesheet" />
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+  </body>
+  <script type="module">
+    // LAS 1.4 COPC LAZ (point data record format 7, LASzip layered chunks, 16-bit colors, WKT coordinate system)
+    import { Viewer, LASLoaderPlugin } from "../../dist/xeokit-sdk.min.es.js";
+    import { signalTestComplete } from "./lib/utils.js";
+    const viewer = new Viewer({
+      canvasId: "myCanvas",
+      transparent: true,
+    });
+    viewer.scene.pointsMaterial.pointSize = 3;
+    viewer.scene.pointsMaterial.perspectivePoints = false;
+    const lasLoader = new LASLoaderPlugin(viewer, {
+      skip: 1,
+      fp64: false,
+      colorDepth: "auto",
+      rotateX: true,
+    });
+    const sceneModel = lasLoader.load({
+      id: "myModel",
+      src: "../../assets/models/las/simple_1.4.copc.laz",
+    });
+    sceneModel.on("loaded", () => {
+      const metaModel = viewer.metaScene.metaModels[sceneModel.id];
+      const header = metaModel.rootMetaObject.children[0].attributes;
+      if (sceneModel.numEntities !== 1 || header.VersionMinor !== 4 || header.PointDataFormatID !== 7 || header.epsg !== 2991) {
+        console.error("LAS model did not load as expected", header);
+      }
+      viewer.cameraFlight.jumpTo({ aabb: sceneModel.aabb });
+      viewer.scene.camera.orbitPitch(-60);
+      signalTestComplete(viewer);
+    });
+  </script>
+</html>
