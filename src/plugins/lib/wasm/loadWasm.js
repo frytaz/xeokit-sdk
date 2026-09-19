@@ -4,6 +4,7 @@
  */
 
 const instances = new Map();
+const modules = new Map();
 
 /**
  * @param {String} base64 The module bytes as base64.
@@ -14,6 +15,20 @@ export function loadWasm(base64) {
     if (!promise) {
         promise = WebAssembly.instantiate(decodeBase64(base64), {}).then((result) => result.instance);
         instances.set(base64, promise);
+    }
+    return promise;
+}
+
+/**
+ * Compiles a module without instantiating it, once per module; the result can be posted to a Web Worker.
+ * @param {String} base64 The module bytes as base64.
+ * @returns {Promise<WebAssembly.Module>}
+ */
+export function compileWasm(base64) {
+    let promise = modules.get(base64);
+    if (!promise) {
+        promise = WebAssembly.compile(decodeBase64(base64));
+        modules.set(base64, promise);
     }
     return promise;
 }

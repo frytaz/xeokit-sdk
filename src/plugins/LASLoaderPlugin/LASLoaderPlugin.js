@@ -18,6 +18,7 @@ const MAX_VERTICES = 500000; // TODO: Rough estimate
  *
  * * Loads [LAS Formats](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) 1.0 to 1.5 (point data record formats 0 to 10) from both *.las* and LASzip-compressed *.laz* files.
  * * Exposes the public header block, including the LAS 1.5 GPS time range and time offset, the WKT coordinate system and the EPSG code, as the {@link MetaObject#attributes} of the point cloud.
+ * * Decodes in a Web Worker when the browser allows one, so the page stays responsive while large point clouds load; set ````workerEnabled: false```` to decode on the main thread.
  * * Loads lidar point cloud positions, colors and intensities.
  * * Supports 32 and 64-bit positions.
  * * Supports 8 and 16-bit color depths.
@@ -215,6 +216,7 @@ class LASLoaderPlugin extends Plugin {
      * @param {Boolean} [cfg.rotateX=false] Whether to rotate the LAS point positions 90 degrees. Applied after "center".
      * @param {Number[]} [cfg.rotate=[0,0,0]] Rotations to immediately apply to the LAS points, given as Euler angles in degrees, for each of the X, Y and Z axis. Rotation is applied after "center" and "rotateX".
      * @param {Number[]} [cfg.transform] 4x4 transform matrix to immediately apply to the LAS points. This is applied after "center", "rotateX" and "rotate". Typically used instead of "rotateX" and "rotate".
+     * @param {Boolean} [cfg.workerEnabled=true] Whether to decode LAS/LAZ data in a Web Worker. Falls back to the main thread when the browser does not allow a worker (for example a Content-Security-Policy without ````worker-src blob:````).
      */
     constructor(viewer, cfg = {}) {
 
@@ -228,6 +230,29 @@ class LASLoaderPlugin extends Plugin {
         this.rotate = cfg.rotate;
         this.rotateX = cfg.rotateX;
         this.transform = cfg.transform;
+        this.workerEnabled = cfg.workerEnabled;
+    }
+
+    /**
+     * Gets whether LAS/LAZ data is decoded in a Web Worker.
+     *
+     * Default value is ````true````.
+     *
+     * @returns {Boolean} Whether a Web Worker is used when the browser allows one.
+     */
+    get workerEnabled() {
+        return this._workerEnabled;
+    }
+
+    /**
+     * Sets whether LAS/LAZ data is decoded in a Web Worker.
+     *
+     * Default value is ````true````.
+     *
+     * @param {Boolean} value Whether to use a Web Worker when the browser allows one.
+     */
+    set workerEnabled(value) {
+        this._workerEnabled = (value !== false);
     }
 
     /**
@@ -461,7 +486,8 @@ class LASLoaderPlugin extends Plugin {
             las: {
                 skip: this._skip,
                 fp64: this._fp64,
-                colorDepth: this._colorDepth
+                colorDepth: this._colorDepth,
+                worker: this._workerEnabled
             }
         };
 
@@ -674,7 +700,8 @@ class LASLoaderPlugin extends Plugin {
 
             try {
 
-                parseLAS(arrayBuffer, options.las).then((lasData) => {
+                // Buffers fetched by the data source can be handed to the worker; a buffer supplied by the caller is copied
+                parseLAS(arrayBuffer, {...options.las, transfer: !params.las}).then((lasData) => {
 
                     if (lasData.numPoints === 0) {
                         sceneModel.finalize();

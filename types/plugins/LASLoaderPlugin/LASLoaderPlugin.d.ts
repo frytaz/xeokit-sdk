@@ -35,6 +35,7 @@ export declare type LASLoaderPluginConfiguration = {
     rotate?: number[];
     /** 4x4 transform matrix to immediately apply to the LAS points. This is applied after "center", "rotateX" and "rotate". Typically used instead of "rotateX" and "rotate". */
     transform?: number[];
+    workerEnabled?: boolean;
 };
 
 export declare type LoadLASModel = {
@@ -193,6 +194,10 @@ export declare class LASLoaderPlugin extends Plugin {
    * @param {Number[]|null} transform A 16-element array containing a 4x4 transformation matrix.
    */
   set transform(transform: number[]);
+
+  get workerEnabled(): boolean;
+
+  set workerEnabled(value: boolean);
 
   /**
    * Gets the current rotations to apply to LAS positions as they are loaded.

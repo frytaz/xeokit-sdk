@@ -12,7 +12,10 @@ so the single-file `dist/` bundles keep working without any extra assets to host
 Both expose a plain C ABI (no wasm-bindgen): `alloc`/`dealloc` for passing bytes, `error_ptr`/`error_len` for the
 last error, and the loader-specific calls documented in each crate's `src/lib.rs`. The JavaScript side
 (`src/plugins/lib/wasm/loadWasm.js`, `parseLAS.js`, `parseGLTF.js`) only copies bytes in and out, fetches external
-resources, decodes images and links object references.
+resources, decodes images and links object references. LAS/LAZ decoding runs in a Web Worker created from a Blob
+URL (the worker script is the stringified decode function plus the compiled module, so nothing extra is hosted);
+it falls back to the calling thread when a worker cannot be created, or when `LASLoaderPlugin` is configured with
+`workerEnabled: false`.
 
 ## Building
 

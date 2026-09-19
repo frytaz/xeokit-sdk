@@ -11,7 +11,7 @@
     <canvas id="myCanvas"></canvas>
   </body>
   <script type="module">
-    // LAS 1.5, uncompressed (393-byte header, format 7)
+    // LAS 1.5, uncompressed (393-byte header, format 7), decoded on the main thread (workerEnabled: false)
     import { Viewer, LASLoaderPlugin } from "../../dist/xeokit-sdk.min.es.js";
     import { signalTestComplete } from "./lib/utils.js";
     const viewer = new Viewer({
@@ -25,6 +25,7 @@
       fp64: false,
       colorDepth: "auto",
       rotateX: true,
+      workerEnabled: false,
     });
     const sceneModel = lasLoader.load({
       id: "myModel",
