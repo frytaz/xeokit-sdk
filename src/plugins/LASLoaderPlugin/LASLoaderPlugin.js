@@ -3,9 +3,7 @@ import {SceneModel} from "../../viewer/scene/model/index.js";
 import {Plugin} from "../../viewer/Plugin.js";
 import {LASDefaultDataSource} from "./LASDefaultDataSource.js";
 import {math} from "../../viewer/index.js";
-import {parse} from "../../external.js";
-import {LASLoader} from "../../external.js";
-import {loadLASHeader} from "./loadLASHeader.js";
+import {parseLAS} from "./parseLAS.js";
 
 const MAX_VERTICES = 500000; // TODO: Rough estimate
 
@@ -18,7 +16,7 @@ const MAX_VERTICES = 500000; // TODO: Rough estimate
  *
  * ## Summary
  *
- * * Loads [LAS Formats](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) up to v1.3 from both *.las* and *.laz* files. It does not support LAS v1.4.
+ * * Loads [LAS Formats](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) 1.0 to 1.4 (point data record formats 0 to 10) from both *.las* and LASzip-compressed *.laz* files.
  * * Loads lidar point cloud positions, colors and intensities.
  * * Supports 32 and 64-bit positions.
  * * Supports 8 and 16-bit color depths.
@@ -570,8 +568,7 @@ class LASLoaderPlugin extends Plugin {
 
     _parseModel(arrayBuffer, params, options, sceneModel) {
 
-        const readPositions = (attributesPosition) => {
-            const positionsValue = attributesPosition.value;
+        const readPositions = (positionsValue) => {
             if (this._center) {
                 const centerPos = math.vec3();
                 const numPoints = positionsValue.length;
@@ -630,13 +627,10 @@ class LASLoaderPlugin extends Plugin {
             return positionsValue;
         }
 
-        function readColorsAndIntensities(attributesColor, attributesIntensity) {
-            const colors = attributesColor.value;
-            const colorSize = attributesColor.size;
-            const intensities = attributesIntensity.value;
+        function readColorsAndIntensities(colors, intensities) {
             const colorsCompressedSize = intensities.length * 4;
             const colorsCompressed = new Uint8Array(colorsCompressedSize);
-            for (let i = 0, j = 0, k = 0, len = intensities.length; i < len; i++, k += colorSize, j += 4) {
+            for (let i = 0, j = 0, k = 0, len = intensities.length; i < len; i++, k += 3, j += 4) {
                 colorsCompressed[j + 0] = colors[k + 0];
                 colorsCompressed[j + 1] = colors[k + 1];
                 colorsCompressed[j + 2] = colors[k + 2];
@@ -645,11 +639,10 @@ class LASLoaderPlugin extends Plugin {
             return colorsCompressed;
         }
 
-        function readIntensities(attributesIntensity) {
-            const intensities = attributesIntensity.value;
+        function readIntensities(intensities) {
             const colorsCompressedSize = intensities.length * 4;
             const colorsCompressed = new Uint8Array(colorsCompressedSize);
-            for (let i = 0, j = 0, k = 0, len = intensities.length; i < len; i++, k += 3, j += 4) {
+            for (let i = 0, j = 0, len = intensities.length; i < len; i++, j += 4) {
                 colorsCompressed[j + 0] = 0;
                 colorsCompressed[j + 1] = 0;
                 colorsCompressed[j + 2] = 0;
@@ -680,56 +673,19 @@ class LASLoaderPlugin extends Plugin {
 
             try {
 
-                const lasHeader = loadLASHeader(arrayBuffer);
+                parseLAS(arrayBuffer, options.las).then((lasData) => {
 
-                parse(arrayBuffer, LASLoader, options).then((parsedData) => {
-
-                    const attributes = parsedData.attributes;
-                    const loaderData = parsedData.loaderData;
-                    const pointsFormatId = loaderData.pointsFormatId !== undefined ? loaderData.pointsFormatId : -1;
-
-                    if (!attributes.POSITION) {
+                    if (lasData.numPoints === 0) {
                         sceneModel.finalize();
                         reject("No positions found in file");
                         return;
                     }
 
-                    let positionsValue
-                    let colorsCompressed;
-
-                    switch (pointsFormatId) {
-                        case 0:
-                            positionsValue = readPositions(attributes.POSITION);
-                            colorsCompressed = readIntensities(attributes.intensity);
-                            break;
-                        case 1:
-                            if (!attributes.intensity) {
-                                sceneModel.finalize();
-                                reject("No positions found in file");
-                                return;
-                            }
-                            positionsValue = readPositions(attributes.POSITION);
-                            colorsCompressed = readIntensities(attributes.intensity);
-                            break;
-                        case 2:
-                            if (!attributes.intensity) {
-                                sceneModel.finalize();
-                                reject("No positions found in file");
-                                return;
-                            }
-                            positionsValue = readPositions(attributes.POSITION);
-                            colorsCompressed = readColorsAndIntensities(attributes.COLOR_0, attributes.intensity);
-                            break;
-                        case 3:
-                            if (!attributes.intensity) {
-                                sceneModel.finalize();
-                                reject("No positions found in file");
-                                return;
-                            }
-                            positionsValue = readPositions(attributes.POSITION);
-                            colorsCompressed = readColorsAndIntensities(attributes.COLOR_0, attributes.intensity);
-                            break;
-                    }
+                    const lasHeader = lasData.header;
+                    const positionsValue = readPositions(lasData.positions);
+                    const colorsCompressed = lasData.colors
+                        ? readColorsAndIntensities(lasData.colors, lasData.intensities)
+                        : readIntensities(lasData.intensities);
 
                     const pointsChunks = chunkArray(positionsValue, MAX_VERTICES * 3);
                     const colorsChunks = chunkArray(colorsCompressed, MAX_VERTICES * 4);
@@ -788,6 +744,9 @@ class LASLoaderPlugin extends Plugin {
                     }
 
                     resolve();
+                }, (e) => {
+                    sceneModel.finalize();
+                    reject(e);
                 });
             } catch (e) {
                 sceneModel.finalize();
