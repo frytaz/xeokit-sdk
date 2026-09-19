@@ -1,0 +1,16 @@
+[workspace]
+members = ["las", "gltf"]
+resolver = "2"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# The glTF module is JSON-bound, so it trades a little speed for size (built with `--profile release-small`);
+# the LAZ decoder keeps full optimization.
+[profile.release-small]
+inherits = "release"
+opt-level = "s"

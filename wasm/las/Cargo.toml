@@ -1,0 +1,11 @@
+[package]
+name = "xeokit-las"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0"
+description = "LAS 1.0-1.4 / LAZ (LASzip) point cloud decoder for the xeokit SDK, compiled to WebAssembly"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]

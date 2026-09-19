@@ -1,0 +1,12 @@
+[package]
+name = "xeokit-gltf"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0"
+description = "glTF 1.0 / 2.x container and accessor parser for the xeokit SDK, compiled to WebAssembly"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde_json = { version = "1", features = ["float_roundtrip"] }

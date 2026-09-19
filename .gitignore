@@ -120,3 +120,6 @@ out
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Rust build output of the WebAssembly loaders
+/wasm/target/
