@@ -321,11 +321,7 @@ class GLTFLoaderPlugin extends Plugin {
      * primitives. Only works while {@link DTX#enabled} is also ````true````.
      * @param {Boolean} [params.autoMetaModel] When supplied, creates a default MetaModel with a single MetaObject.
      * @param {Boolean} [params.globalizeObjectIds=false] Indicates whether to globalize each {@link Entity#id} and {@link MetaObject#id}, in case you need to prevent ID clashes with other models.
-     * @param {*} [params.parseOptions={}] Options to pass to loaders.gl parse method, eg. ````{ gltf: { excludeExtensions: { "KHR_texture_transform": false } } }````.
      * @param {Boolean} [params.entityPerMesh=false] Create an entity for each mesh, instead of grouping leaf meshes under their common entity.
-     * @param {*} [params.loadersGl={core,gltf}] Alternative user-provided loaders.gl library.
-     * This feature has been tested with loaders.gl 4.3.4 version.
-     * Because loaders.gl is supplied externally, xeokit cannot guarantee compatibility with all loaders.gl versions.
      * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
      */
     load(params = {}) {
