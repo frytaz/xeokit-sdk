@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>xeokit visual test</title>
+    <link href="css/pageStyle.css" rel="stylesheet" />
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+  </body>
+  <script type="module">
+    import { Viewer, GLTFLoaderPlugin } from "../../dist/xeokit-sdk.min.es.js";
+    import { signalTestComplete } from "./lib/utils.js";
+    const viewer = new Viewer({
+      canvasId: "myCanvas",
+      transparent: true,
+    });
+    viewer.scene.camera.eye = [-5.13, 16.83, 39.46];
+    viewer.scene.camera.look = [22.2, 1.86, 4.44];
+    viewer.scene.camera.up = [0.19, 0.94, -0.25];
+    const gltfLoader = new GLTFLoaderPlugin(viewer);
+    const sceneModel = gltfLoader.load({
+      id: "myModel",
+      src: "../../assets/models/gltf/Duplex/glTF-Embedded/Duplex.gltf",
+      edges: true,
+    });
+    sceneModel.on("loaded", () => {
+      if (sceneModel.numEntities !== 291) {
+        console.error("glTF model did not load as expected");
+      }
+      signalTestComplete(viewer);
+    });
+  </script>
+</html>
