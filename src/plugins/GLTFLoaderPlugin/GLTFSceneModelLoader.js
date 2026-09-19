@@ -1,5 +1,4 @@
-import { parse } from "../../external.js";
-import { GLTFLoader, postProcessGLTF } from "../../external.js";
+import { parseGLTF } from "./parseGLTF.js";
 import { sRGBEncoding } from "../../viewer/scene/constants/constants.js";
 import { core } from "../../viewer/scene/core.js";
 import { math } from "../../viewer/scene/math/math.js";
@@ -56,7 +55,7 @@ class GLTFSceneModelLoader {
 
     parse(plugin, gltf, metaModelJSON, options, sceneModel, ok, error) {
         options = options || {};
-        parseGLTF(plugin, "", gltf, metaModelJSON, options, sceneModel, function () {
+        loadParsedGLTF(plugin, "", gltf, metaModelJSON, options, sceneModel, function () {
                 sceneModel.scene.fire("modelLoaded", sceneModel.id); // FIXME: Assumes listeners know order of these two events
                 sceneModel.fire("loaded", true, false);
                 if (ok) {
@@ -80,7 +79,7 @@ function loadGLTF(plugin, src, metaModelJSON, options, sceneModel, ok, error) {
     if (isGLB) {
         plugin.dataSource.getGLB(src, (arrayBuffer) => { // OK
                 options.basePath = getBasePath(src);
-                parseGLTF(plugin, src, arrayBuffer, metaModelJSON, options, sceneModel, ok, error);
+                loadParsedGLTF(plugin, src, arrayBuffer, metaModelJSON, options, sceneModel, ok, error);
                 spinner.processes--;
             },
             (err) => {
@@ -90,7 +89,7 @@ function loadGLTF(plugin, src, metaModelJSON, options, sceneModel, ok, error) {
     } else {
         plugin.dataSource.getGLTF(src, (gltf) => { // OK
                 options.basePath = getBasePath(src);
-                parseGLTF(plugin, src, gltf, metaModelJSON, options, sceneModel, ok, error);
+                loadParsedGLTF(plugin, src, gltf, metaModelJSON, options, sceneModel, ok, error);
                 spinner.processes--;
             },
             (err) => {
@@ -105,15 +104,14 @@ function getBasePath(src) {
     return (i !== 0) ? src.substring(0, i + 1) : "";
 }
 
-function parseGLTF(plugin, src, gltf, metaModelJSON, options, sceneModel, ok, error) {
+function loadParsedGLTF(plugin, src, gltf, metaModelJSON, options, sceneModel, ok, error) {
     const spinner = plugin.viewer.scene.canvas.spinner;
     spinner.processes++;
-    const loadersGl = options.loadersGl;
-    (loadersGl ? loadersGl.core.parse : parse)(gltf, loadersGl ? loadersGl.gltf.GLTFLoader : GLTFLoader, {
-        ...(options.parseOptions || { }),
-        baseUri: options.basePath
-    }).then((gltfData) => {
-        const processedGLTF = (loadersGl ? loadersGl.gltf.postProcessGLTF : postProcessGLTF)(gltfData);
+    parseGLTF(gltf, {
+        src,
+        dataSource: plugin.dataSource,
+        log: (msg) => plugin.warn(msg)
+    }).then((processedGLTF) => {
         const ctx = {
             src: src,
             entityId: options.entityId,
@@ -157,6 +155,7 @@ function parseGLTF(plugin, src, gltf, metaModelJSON, options, sceneModel, ok, er
         spinner.processes--;
         ok();
     }).catch((err) => {
+        spinner.processes--;
         if (error) error(err);
     });
 }
@@ -172,7 +171,8 @@ function loadTextures(ctx) {
 }
 
 function loadTexture(ctx, texture) {
-    if (!texture.source || !texture.source.image) {
+    const source = texture.source;
+    if (!source || (!source.image && !source.buffers)) {
         return;
     }
     const textureId = `texture-${ctx.nextId++}`;
@@ -247,9 +247,8 @@ function loadTexture(ctx, texture) {
             wrapR = RepeatWrapping;
             break;
     }
-    ctx.sceneModel.createTexture({
+    const textureCfg = {
         id: textureId,
-        image: texture.source.image,
         flipY: !!texture.flipY,
         minFilter,
         magFilter,
@@ -257,7 +256,13 @@ function loadTexture(ctx, texture) {
         wrapT,
         wrapR,
         encoding: sRGBEncoding
-    });
+    };
+    if (source.image) {
+        textureCfg.image = source.image;
+    } else {
+        textureCfg.buffers = source.buffers; // KTX2 - transcoded by the SceneModel's TextureTranscoder
+    }
+    ctx.sceneModel.createTexture(textureCfg);
     texture._textureId = textureId;
 }
 
@@ -333,7 +338,7 @@ function loadTextureSet(ctx, material) {
         textureSetCfg.emissiveTextureId !== undefined ||
         textureSetCfg.colorTextureId !== undefined ||
         textureSetCfg.metallicRoughnessTextureId !== undefined) {
-        textureSetCfg.id = `textureSet-${ctx.nextId++};`
+        textureSetCfg.id = `textureSet-${ctx.nextId++}`;
         ctx.sceneModel.createTextureSet(textureSetCfg);
         return textureSetCfg.id;
     }
@@ -521,7 +526,7 @@ function loadDefaultScene(ctx) {
             }
         });
     })(nodes, 0, null);
-};
+}
 
 /**
  * Parses transform at the given glTF node.

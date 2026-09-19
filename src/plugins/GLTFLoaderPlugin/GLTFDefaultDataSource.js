@@ -127,8 +127,7 @@ function loadArraybuffer(glTFSrc, binarySrc, ok, err) {
             });
         }
     } else {
-        const basePath = getBasePath(glTFSrc);
-        const url = basePath + binarySrc;
+        const url = /^[a-z][a-z0-9+.-]*:/i.test(binarySrc) ? binarySrc : getBasePath(glTFSrc) + binarySrc;
         const request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.responseType = 'arraybuffer';
