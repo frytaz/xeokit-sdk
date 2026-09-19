@@ -16,7 +16,8 @@ const MAX_VERTICES = 500000; // TODO: Rough estimate
  *
  * ## Summary
  *
- * * Loads [LAS Formats](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) 1.0 to 1.4 (point data record formats 0 to 10) from both *.las* and LASzip-compressed *.laz* files.
+ * * Loads [LAS Formats](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) 1.0 to 1.5 (point data record formats 0 to 10) from both *.las* and LASzip-compressed *.laz* files.
+ * * Exposes the public header block, including the LAS 1.5 GPS time range and time offset, the WKT coordinate system and the EPSG code, as the {@link MetaObject#attributes} of the point cloud.
  * * Loads lidar point cloud positions, colors and intensities.
  * * Supports 32 and 64-bit positions.
  * * Supports 8 and 16-bit color depths.

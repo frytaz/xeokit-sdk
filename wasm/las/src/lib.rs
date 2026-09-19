@@ -1,4 +1,4 @@
-//! LAS 1.0 - 1.4 (R15) point cloud reader for the xeokit SDK, with LASzip (LAZ) decompression.
+//! LAS 1.0 - 1.5 point cloud reader for the xeokit SDK, with LASzip (LAZ) decompression.
 //!
 //! Compiled to WebAssembly with a plain C ABI (see the `extern "C"` functions at the bottom); the JavaScript side
 //! copies the file into WebAssembly memory, calls `las_open`, then `las_read` repeatedly (so it can yield to the
@@ -36,7 +36,14 @@ pub struct Header {
     pub num_evlrs: Option<u32>,
     pub num_point_records: Option<u64>,
     pub num_points_by_return_ext: Option<[u64; 15]>,
-    pub epsg: Option<u16>,
+    /// LAS 1.5 header fields
+    pub max_gps_time: Option<f64>,
+    pub min_gps_time: Option<f64>,
+    pub time_offset: Option<u16>,
+    /// OGC WKT coordinate system (LASF_Projection record 2112, VLR or EVLR)
+    pub wkt: Option<String>,
+    /// EPSG code, from the GeoTIFF keys (LAS 1.0 - 1.4) or the WKT record (LAS 1.4 - 1.5)
+    pub epsg: Option<u32>,
     pub laz_vlr: Option<Vec<u8>>,
 }
 
@@ -67,7 +74,7 @@ fn ascii(b: &[u8], start: usize, len: usize) -> String {
 }
 
 /// Reads the EPSG code from a GeoTIFF GeoKeyDirectoryTag (ProjectedCSTypeGeoKey, else GeographicTypeGeoKey).
-fn read_epsg(data: &[u8]) -> Option<u16> {
+fn read_epsg_geotiff(data: &[u8]) -> Option<u32> {
     if data.len() < 8 {
         return None;
     }
@@ -83,14 +90,64 @@ fn read_epsg(data: &[u8]) -> Option<u16> {
         let value = rd_u16(data, pos + 6);
         if tag_location == 0 {
             if key_id == 3072 {
-                return Some(value);
+                return Some(value as u32);
             }
             if key_id == 2048 {
-                geographic = Some(value);
+                geographic = Some(value as u32);
             }
         }
     }
     geographic
+}
+
+/// Reads the EPSG code of the outermost coordinate system from an OGC WKT string (WKT1 `AUTHORITY["EPSG","n"]`
+/// or WKT2 `ID["EPSG",n]`): the identifier at the smallest bracket depth wins, the first one on ties, so that a
+/// compound CRS without its own identifier yields its horizontal component.
+fn read_epsg_wkt(wkt: &str) -> Option<u32> {
+    let bytes = wkt.as_bytes();
+    let mut depth = 0i32;
+    let mut in_string = false;
+    let mut best: Option<(i32, u32)> = None;
+    let mut i = 0;
+    while i < bytes.len() {
+        let c = bytes[i];
+        if in_string {
+            in_string = c != b'"';
+            i += 1;
+            continue;
+        }
+        match c {
+            b'"' => in_string = true,
+            b'[' | b'(' => depth += 1,
+            b']' | b')' => depth -= 1,
+            b'A' | b'I' if i == 0 || !bytes[i - 1].is_ascii_alphanumeric() => {
+                let rest = &wkt[i..];
+                let keyword = ["AUTHORITY[", "AUTHORITY(", "ID[", "ID("].iter().find(|k| rest.starts_with(*k)).map(|k| k.len());
+                if let Some(len) = keyword {
+                    if let Some(end) = rest[len..].find([']', ')']) {
+                        let mut parts = rest[len..len + end].split(',').map(|s| s.trim().trim_matches('"'));
+                        if parts.next().map(|a| a.eq_ignore_ascii_case("EPSG")).unwrap_or(false) {
+                            if let Some(code) = parts.next().and_then(|n| n.parse::<u32>().ok()) {
+                                if best.map_or(true, |(d, _)| depth < d) {
+                                    best = Some((depth, code));
+                                }
+                            }
+                        }
+                        i += len + end + 1;
+                        continue;
+                    }
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    best.map(|(_, code)| code)
+}
+
+fn wkt_string(data: &[u8]) -> String {
+    let end = data.iter().position(|&c| c == 0).unwrap_or(data.len());
+    String::from_utf8_lossy(&data[..end]).trim().to_string()
 }
 
 pub fn parse_header(bytes: &[u8]) -> Result<Header, String> {
@@ -99,6 +156,9 @@ pub fn parse_header(bytes: &[u8]) -> Result<Header, String> {
     }
     let version_major = bytes[24];
     let version_minor = bytes[25];
+    if version_major != 1 {
+        return Err(format!("LAS: unsupported version {}.{}", version_major, version_minor));
+    }
     let header_size = rd_u16(bytes, 94);
     let pdrf = bytes[104];
     let mut h = Header {
@@ -128,6 +188,10 @@ pub fn parse_header(bytes: &[u8]) -> Result<Header, String> {
         num_evlrs: None,
         num_point_records: None,
         num_points_by_return_ext: None,
+        max_gps_time: None,
+        min_gps_time: None,
+        time_offset: None,
+        wkt: None,
         epsg: None,
         laz_vlr: None,
     };
@@ -148,6 +212,11 @@ pub fn parse_header(bytes: &[u8]) -> Result<Header, String> {
             h.num_points = n;
         }
     }
+    if version_major == 1 && version_minor >= 5 && header_size >= 393 && bytes.len() >= 393 {
+        h.max_gps_time = Some(rd_f64(bytes, 375));
+        h.min_gps_time = Some(rd_f64(bytes, 383));
+        h.time_offset = Some(rd_u16(bytes, 391));
+    }
     if h.offset_to_point_data as usize > bytes.len() {
         return Err("LAS: offset to point data lies beyond the end of the file".into());
     }
@@ -161,16 +230,47 @@ pub fn parse_header(bytes: &[u8]) -> Result<Header, String> {
         let record_id = rd_u16(bytes, pos + 18);
         let length = rd_u16(bytes, pos + 20) as usize;
         let data = &bytes[pos + 54..(pos + 54 + length).min(bytes.len())];
-        if user_id == "laszip encoded" && record_id == 22204 {
-            h.laz_vlr = Some(data.to_vec());
-        } else if user_id == "LASF_Projection" && record_id == 34735 {
-            if let Some(epsg) = read_epsg(data) {
-                h.epsg = Some(epsg);
-            }
-        }
+        h.take_record(&user_id, record_id, data);
         pos += 54 + length;
     }
+    // Extended variable length records (LAS 1.4+); the WKT record may live here
+    if let (Some(start), Some(count)) = (h.start_of_first_evlr, h.num_evlrs) {
+        let mut pos = start as usize;
+        for _ in 0..count {
+            if start == 0 || pos + 60 > bytes.len() {
+                break;
+            }
+            let user_id = ascii(bytes, pos + 2, 16);
+            let record_id = rd_u16(bytes, pos + 18);
+            let length = rd_u64(bytes, pos + 20).min(bytes.len() as u64) as usize;
+            let end = (pos + 60).saturating_add(length).min(bytes.len());
+            h.take_record(&user_id, record_id, &bytes[pos + 60..end]);
+            pos = end;
+        }
+    }
+    if h.epsg.is_none() {
+        if let Some(wkt) = &h.wkt {
+            h.epsg = read_epsg_wkt(wkt);
+        }
+    }
     Ok(h)
+}
+
+impl Header {
+    /// Picks up the records the reader uses: the LASzip VLR, GeoTIFF keys and the WKT coordinate system.
+    fn take_record(&mut self, user_id: &str, record_id: u16, data: &[u8]) {
+        if user_id == "laszip encoded" && record_id == 22204 {
+            self.laz_vlr = Some(data.to_vec());
+        } else if user_id == "LASF_Projection" {
+            if record_id == 34735 {
+                if let Some(epsg) = read_epsg_geotiff(data) {
+                    self.epsg = Some(epsg);
+                }
+            } else if record_id == 2112 && self.wkt.is_none() {
+                self.wkt = Some(wkt_string(data));
+            }
+        }
+    }
 }
 
 fn json_string(s: &str) -> String {
@@ -234,6 +334,15 @@ impl Header {
         }
         if let Some(v) = &self.num_points_by_return_ext {
             s.push_str(&format!(",\"NumberOfPointsByReturn\":[{}]", v.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(",")));
+        }
+        if let (Some(max), Some(min)) = (self.max_gps_time, self.min_gps_time) {
+            s.push_str(&format!(",\"MaxGPSTime\":{},\"MinGPSTime\":{}", json_f64(max), json_f64(min)));
+        }
+        if let Some(v) = self.time_offset {
+            s.push_str(&format!(",\"TimeOffset\":{}", v));
+        }
+        if let Some(wkt) = &self.wkt {
+            s.push_str(&format!(",\"CoordinateSystemWKT\":{}", json_string(wkt)));
         }
         if let Some(epsg) = self.epsg {
             s.push_str(&format!(",\"epsg\":{}", epsg));
@@ -624,21 +733,40 @@ mod tests {
         assert!(reader.header_json.contains("\"PointDataFormatID\":3,\"Compressed\":true"));
     }
 
-    /// Builds an uncompressed LAS 1.4 file with two format-8 points (RGB + NIR).
-    fn synthetic_las_1_4() -> Vec<u8> {
-        let mut b = vec![0u8; 375];
+    const WKT1_NM: &str = "PROJCS[\"NAD83(HARN) / New Mexico Central (ftUS)\",GEOGCS[\"NAD83(HARN)\",DATUM[\"NAD83_High_Accuracy_Reference_Network\",SPHEROID[\"GRS 1980\",6378137,298.257222101,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6152\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4152\"]],PROJECTION[\"Transverse_Mercator\"],UNIT[\"US survey foot\",0.304800609601219,AUTHORITY[\"EPSG\",\"9003\"]],AUTHORITY[\"EPSG\",\"2903\"]]";
+
+    /// Builds an uncompressed LAS 1.4 or 1.5 file with two format-8 points (RGB + NIR) and a WKT VLR.
+    fn synthetic_las(minor: u8) -> Vec<u8> {
+        let header_size: usize = if minor >= 5 { 393 } else { 375 };
+        let wkt = WKT1_NM.as_bytes();
+        let vlr_len = wkt.len() + 1;
+        let mut b = vec![0u8; header_size];
         b[0..4].copy_from_slice(b"LASF");
+        b[6..8].copy_from_slice(&0x10u16.to_le_bytes());
         b[24] = 1;
-        b[25] = 4;
+        b[25] = minor;
         b[26..32].copy_from_slice(b"xeokit");
-        b[94..96].copy_from_slice(&375u16.to_le_bytes());
-        b[96..100].copy_from_slice(&375u32.to_le_bytes());
+        b[94..96].copy_from_slice(&(header_size as u16).to_le_bytes());
+        b[96..100].copy_from_slice(&((header_size + 54 + vlr_len) as u32).to_le_bytes());
+        b[100..104].copy_from_slice(&1u32.to_le_bytes());
         b[104] = 8;
         b[105..107].copy_from_slice(&38u16.to_le_bytes());
         for (i, v) in [0.01f64, 0.01, 0.001, 100.0, 200.0, 300.0].iter().enumerate() {
             b[131 + i * 8..139 + i * 8].copy_from_slice(&v.to_le_bytes());
         }
         b[247..255].copy_from_slice(&2u64.to_le_bytes());
+        if minor >= 5 {
+            b[375..383].copy_from_slice(&1234.5f64.to_le_bytes()); // Max GPS Time
+            b[383..391].copy_from_slice(&1230.25f64.to_le_bytes()); // Min GPS Time
+            b[391..393].copy_from_slice(&7u16.to_le_bytes()); // Time Offset
+        }
+        let mut vlr = vec![0u8; 54];
+        vlr[2..17].copy_from_slice(b"LASF_Projection");
+        vlr[18..20].copy_from_slice(&2112u16.to_le_bytes());
+        vlr[20..22].copy_from_slice(&(vlr_len as u16).to_le_bytes());
+        b.extend_from_slice(&vlr);
+        b.extend_from_slice(wkt);
+        b.push(0);
         for (x, intensity, class, rgb) in [(1000i32, 500u16, 2u8, [65535u16, 0, 256]), (-1000, 7, 6, [1000, 2000, 3000])] {
             let mut rec = vec![0u8; 38];
             rec[0..4].copy_from_slice(&x.to_le_bytes());
@@ -656,7 +784,7 @@ mod tests {
 
     #[test]
     fn las_1_4_uncompressed_format_8() {
-        let mut reader = LasReader::open(synthetic_las_1_4(), 1, true, 0).unwrap();
+        let mut reader = LasReader::open(synthetic_las(4), 1, true, 0).unwrap();
         assert_eq!(reader.read(10).unwrap(), 0);
         let p = &reader.points;
         assert_eq!(p.positions_f64, vec![110.0, 220.0, 303.0, 90.0, 180.0, 297.0]);
@@ -666,9 +794,117 @@ mod tests {
         assert!(reader.header_json.contains("\"VersionMinor\":4"));
         assert!(reader.header_json.contains("\"NumberOfPointRecords\":2"));
         assert!(reader.header_json.contains("\"SystemIdentifier\":\"xeokit\""));
-        let mut reader8 = LasReader::open(synthetic_las_1_4(), 1, false, 8).unwrap();
+        assert_eq!(reader.header.epsg, Some(2903), "EPSG from the WKT VLR");
+        assert!(!reader.header_json.contains("MaxGPSTime"));
+        let mut reader8 = LasReader::open(synthetic_las(4), 1, false, 8).unwrap();
         reader8.read(10).unwrap();
         assert_eq!(reader8.points.colors, vec![255, 0, 255, 255, 255, 255]); // clamped 8-bit interpretation
+    }
+
+    #[test]
+    fn las_1_5_uncompressed_header_fields() {
+        let mut reader = LasReader::open(synthetic_las(5), 1, true, 0).unwrap();
+        assert_eq!(reader.read(10).unwrap(), 0);
+        let h = &reader.header;
+        assert_eq!((h.version_major, h.version_minor, h.header_size), (1, 5, 393));
+        assert_eq!((h.max_gps_time, h.min_gps_time, h.time_offset), (Some(1234.5), Some(1230.25), Some(7)));
+        assert_eq!(h.epsg, Some(2903));
+        assert!(h.wkt.as_deref().unwrap().starts_with("PROJCS[\"NAD83(HARN)"));
+        assert_eq!(reader.points.positions_f64, vec![110.0, 220.0, 303.0, 90.0, 180.0, 297.0]);
+        assert_eq!(reader.points.colors, vec![255, 0, 1, 3, 7, 11]);
+        for needle in ["\"VersionMinor\":5", "\"MaxGPSTime\":1234.5,\"MinGPSTime\":1230.25", "\"TimeOffset\":7", "\"CoordinateSystemWKT\":\"PROJCS[", "\"epsg\":2903"] {
+            assert!(reader.header_json.contains(needle), "header JSON lacks {}", needle);
+        }
+    }
+
+    /// Reads every point of a file with the given options.
+    fn read_all(path: &str, skip: u32, fp64: bool) -> LasReader {
+        let mut reader = LasReader::open(std::fs::read(path).unwrap_or_else(|_| panic!("missing test file {}", path)), skip, fp64, 0).unwrap();
+        while reader.read(500).unwrap() > 0 {}
+        assert_eq!(reader.points.kept, reader.num_kept);
+        reader
+    }
+
+    fn assert_same_points(a: &LasReader, b: &LasReader) {
+        assert_eq!(a.num_kept, b.num_kept);
+        assert_eq!(a.points.positions_f64, b.points.positions_f64);
+        assert_eq!(a.points.positions_f32, b.points.positions_f32);
+        assert_eq!(a.points.intensities, b.points.intensities);
+        assert_eq!(a.points.classifications, b.points.classifications);
+        assert_eq!(a.points.colors, b.points.colors);
+    }
+
+    #[test]
+    fn las_1_4_format_6_laz_matches_las() {
+        // LAS 1.4 with an EVLR, WKT VLR, point format 6; LAZ compressor 3 with POINT14 v3 (laspy test data)
+        let las = read_all("tests/data/format6_1.4.las", 1, true);
+        let laz = read_all("tests/data/format6_1.4.laz", 1, true);
+        assert_same_points(&las, &laz);
+        assert_eq!(las.num_kept, 1000);
+        assert!(las.points.colors.is_empty());
+        for h in [&las.header, &laz.header] {
+            assert_eq!((h.version_minor, h.point_data_format, h.num_evlrs, h.num_point_records), (4, 6, Some(1), Some(1000)));
+            assert_eq!(h.epsg, Some(2903), "outermost EPSG of a WKT1 PROJCS");
+            assert!(h.max_gps_time.is_none());
+        }
+        assert!(laz.header.compressed && !las.header.compressed);
+    }
+
+    #[test]
+    fn las_1_5_format_7_laz_matches_las() {
+        // LAS 1.5 (393-byte header, WKT-only CRS) derived from a LAS 1.4 COPC file: compressed and uncompressed twins
+        let las = read_all("../../assets/models/las/simple_1.5.las", 1, false);
+        let laz = read_all("../../assets/models/las/simple_1.5.laz", 1, false);
+        assert_same_points(&las, &laz);
+        assert_eq!(las.num_kept, 1065);
+        assert_eq!(las.points.colors.len(), 1065 * 3);
+        for h in [&las.header, &laz.header] {
+            assert_eq!((h.version_minor, h.header_size, h.point_data_format, h.legacy_num_points, h.num_point_records), (5, 393, 7, 0, Some(1065)));
+            assert_eq!(h.time_offset, Some(0));
+            assert!(h.max_gps_time.unwrap() > h.min_gps_time.unwrap());
+            assert_eq!(h.epsg, Some(2991), "horizontal component of a WKT1 COMPD_CS");
+            assert!(h.global_encoding & 0x10 != 0, "WKT bit");
+        }
+        // skipping and the 1.4 original of the same points agree with the 1.5 files
+        let skipped = read_all("../../assets/models/las/simple_1.5.laz", 4, false);
+        assert_eq!(skipped.num_kept, (1065 + 3) / 4);
+        assert_eq!(&skipped.points.positions_f32[..3], &laz.points.positions_f32[..3]);
+        let original = read_all("../../assets/models/las/simple_1.4.copc.laz", 1, false);
+        assert_same_points(&original, &laz);
+        assert_eq!(original.header.version_minor, 4);
+    }
+
+    #[test]
+    fn laz_1_4_format_10_wave_packets_and_wkt2() {
+        // POINT14 + RGBNIR14 + WAVEPACKET14 v3 items, WKT2 coordinate system (laspy test data)
+        let reader = read_all("tests/data/fullwave_1.4.laz", 1, true);
+        let h = &reader.header;
+        assert_eq!((h.version_minor, h.point_data_format, reader.num_kept), (4, 10, 10750));
+        assert_eq!(h.epsg, Some(32723), "root ID of a WKT2 PROJCRS");
+        assert!(h.wkt.as_deref().unwrap().starts_with("PROJCRS[\"WGS 84 / UTM zone 23S\""));
+        assert_eq!(reader.points.colors.len(), 10750 * 3);
+        for (i, chunk) in reader.points.positions_f64.chunks(3).enumerate() {
+            for c in 0..3 {
+                assert!(chunk[c] >= h.min[c] - 0.01 && chunk[c] <= h.max[c] + 0.01, "point {} out of bounds", i);
+            }
+        }
+    }
+
+    #[test]
+    fn wkt_epsg_extraction() {
+        assert_eq!(read_epsg_wkt(WKT1_NM), Some(2903));
+        assert_eq!(read_epsg_wkt("COMPD_CS[\"x\",PROJCS[\"p\",GEOGCS[\"g\",AUTHORITY[\"EPSG\",\"4269\"]],AUTHORITY[\"EPSG\",\"2991\"]],VERT_CS[\"v\",VERT_DATUM[\"d\",2005,AUTHORITY[\"EPSG\",\"5103\"]],AUTHORITY[\"EPSG\",\"6360\"]]]"), Some(2991));
+        assert_eq!(read_epsg_wkt("PROJCRS[\"WGS 84 / UTM zone 23S\",BASEGEOGCRS[\"WGS 84\",ID[\"EPSG\",4326]],CONVERSION[\"c\",METHOD[\"m\",ID[\"EPSG\",9807]]],ID[\"EPSG\",32723]]"), Some(32723));
+        assert_eq!(read_epsg_wkt("COMPOUNDCRS[\"x\",PROJCRS[\"p\",ID[\"EPSG\",32610]],VERTCRS[\"v\",ID[\"EPSG\",5703]]]"), Some(32610));
+        assert_eq!(read_epsg_wkt("GEOGCS[\"x\",DATUM[\"d\"]]"), None);
+        assert_eq!(read_epsg_wkt("PROJCS[\"tricky ID[\\\"EPSG\\\",1]\",AUTHORITY[\"ESRI\",\"102001\"]]"), None);
+    }
+
+    #[test]
+    fn rejects_unknown_major_version() {
+        let mut b = synthetic_las(4);
+        b[24] = 2;
+        assert!(LasReader::open(b, 1, false, 0).err().unwrap().contains("unsupported version 2.4"));
     }
 
     #[test]

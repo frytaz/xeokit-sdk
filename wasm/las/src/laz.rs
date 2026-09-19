@@ -4,7 +4,7 @@
 //! implementations in LASzip (Apache-2.0) and laz-rs (Apache-2.0/MIT). Supports compressors 1 (point-wise),
 //! 2 (point-wise chunked) and 3 (layered chunked) with the arithmetic coder, and every item type/version LASzip
 //! writes: POINT10/GPSTIME11/RGB12/WAVEPACKET13/BYTE versions 1 and 2, POINT14/RGB14/RGBNIR14/WAVEPACKET14/BYTE14
-//! versions 3 and 4. That covers all LAZ files for LAS 1.0 - 1.4 point data record formats 0 - 10.
+//! versions 3 and 4. That covers all LAZ files for LAS 1.0 - 1.5 point data record formats 0 - 10.
 
 const AC_MIN_LENGTH: u32 = 0x0100_0000;
 const DM_LENGTH_SHIFT: u32 = 15;

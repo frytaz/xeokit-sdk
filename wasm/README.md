@@ -6,7 +6,7 @@ so the single-file `dist/` bundles keep working without any extra assets to host
 
 | Crate  | Module                         | Scope                                                                                          |
 |--------|--------------------------------|------------------------------------------------------------------------------------------------|
-| `las`  | `xeokit_las.wasm` (~130 KB)    | LAS 1.0 - 1.4 (R15) headers and point records, LASzip decompression (compressors 1, 2, 3; item versions 1 - 4) |
+| `las`  | `xeokit_las.wasm` (~140 KB)    | LAS 1.0 - 1.5 headers (GPS time range and time offset of 1.5, WKT and GeoTIFF CRS), point records, LASzip decompression (compressors 1, 2, 3; item versions 1 - 4) |
 | `gltf` | `xeokit_gltf.wasm` (~170 KB)   | glTF 1.0 and 2.x containers (JSON, GLB v1/v2), glTF 1.0 normalization, accessors, KHR_texture_transform, embedded images |
 
 Both expose a plain C ABI (no wasm-bindgen): `alloc`/`dealloc` for passing bytes, `error_ptr`/`error_len` for the
@@ -29,6 +29,10 @@ Run `npm run build:wasm` after changing anything under `wasm/`.
 
 ## Test data
 
-`las/tests/data/simple-laszip-1.2r0.laz` comes from the [PDAL](https://github.com/PDAL/PDAL) test suite (BSD) and
-`las/tests/data/autzen.copc.laz` from [las-rs](https://github.com/gadomski/las-rs) (MIT/Apache-2.0). The other tests
-use models from `assets/models`.
+`las/tests/data/simple-laszip-1.2r0.laz` comes from the [PDAL](https://github.com/PDAL/PDAL) test suite (BSD),
+`las/tests/data/autzen.copc.laz` from [las-rs](https://github.com/gadomski/las-rs) (MIT/Apache-2.0), and
+`las/tests/data/format6_1.4.las`, `format6_1.4.laz` and `fullwave_1.4.laz` from the [laspy](https://github.com/laspy/laspy)
+test suite (BSD-2). `assets/models/las/simple_1.4.copc.laz` is laspy's `simple.copc.laz`; `simple_1.5.laz` and
+`simple_1.5.las` are the same points rewritten as LAS 1.5 (393-byte header with the GPS time range and time offset,
+legacy counts zeroed, COPC records dropped) - LAZ 1.5 keeps the LASzip point compression of LAZ 1.4 unchanged.
+The other tests use models from `assets/models`.

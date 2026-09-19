@@ -11,7 +11,7 @@ const POINTS_PER_CALL = 200000;
 /**
  * Parses a LAS or LAZ (LASzip-compressed) file with the WebAssembly decoder built from wasm/las.
  *
- * Supports LAS 1.0 - 1.4 (R15), point data record formats 0 - 10, with or without LASzip compression.
+ * Supports LAS 1.0 - 1.5, point data record formats 0 - 10, with or without LASzip compression.
  *
  * @private
  * @param {ArrayBuffer} arrayBuffer The LAS/LAZ file.
@@ -21,7 +21,8 @@ const POINTS_PER_CALL = 200000;
  * @param {Number|String} [options.colorDepth="auto"] 8, 16 or "auto" - whether colors are stored in 8 or 16 bits.
  * @returns {Promise<{header: Object, pointsFormatId: Number, numPoints: Number, positions: Float32Array|Float64Array, colors: Uint8Array|null, intensities: Uint16Array, classifications: Uint8Array}>}
  * `colors` holds 8-bit RGB triples, `intensities` the raw 16-bit intensities, `header` the public header block
- * and (when found) the `epsg` code from the GeoTIFF projection VLR.
+ * (with the LAS 1.5 `MaxGPSTime`, `MinGPSTime` and `TimeOffset` fields when present), the `CoordinateSystemWKT`
+ * and the `epsg` code from the GeoTIFF keys or the WKT record, when found.
  */
 export async function parseLAS(arrayBuffer, options = {}) {
     const wasm = await loadWasm(lasWasm);
