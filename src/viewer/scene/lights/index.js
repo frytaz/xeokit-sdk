@@ -3,3 +3,4 @@ export * from "./DirLight.js";
 export * from "./PointLight.js";
 export * from "./ReflectionMap.js";
 export * from "./LightMap.js";
+export * from "./CubeTexture.js";

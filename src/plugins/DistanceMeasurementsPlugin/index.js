@@ -1,4 +1,5 @@
 export * from "./DistanceMeasurementsPlugin.js";
+export * from "./DistanceMeasurement.js";
 export * from "./DistanceMeasurementsControl.js";
 export * from "./DistanceMeasurementsMouseControl.js";
 export * from "./DistanceMeasurementsTouchControl.js";

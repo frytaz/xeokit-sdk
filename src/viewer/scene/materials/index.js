@@ -6,3 +6,6 @@ export * from "./EmphasisMaterial.js";
 export * from "./EdgeMaterial.js";
 export * from "./Texture.js";
 export * from "./Fresnel.js";
+export * from "./Material.js";
+export * from "./LinesMaterial.js";
+export * from "./PointsMaterial.js";

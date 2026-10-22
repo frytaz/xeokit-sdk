@@ -4,3 +4,4 @@ export * from './utils/index.js';
 export * from "./Plugin.js";
 export * from "./Viewer.js";
 export * from "./Configs.js";
+export * from "./metadata/index.js";
