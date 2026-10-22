@@ -1,5 +1,6 @@
 import {Node} from "../../viewer/scene/nodes/Node.js";
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {STLSceneGraphLoader} from "./STLSceneGraphLoader.js";
 import {utils} from "../../viewer/scene/utils.js";
 import {STLDefaultDataSource} from "./STLDefaultDataSource.js";
@@ -177,15 +178,37 @@ import {STLDefaultDataSource} from "./STLDefaultDataSource.js";
  *
  * @class STLLoaderPlugin
  */
+
+/**
+ * @typedef {Object} STLLoaderPluginCOnfiguration
+ * @property {String} [id="STLLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Object} [dataSource] A custom data source through which the STLLoaderPlugin can load STL files. Defaults to an instance of {@link STLDefaultDataSource}, which loads over HTTP.
+ */
+
+/**
+ * @typedef {Object} LoadSTLModel
+ * @property {String} id ID to assign to the model's root {@link Entity}, unique among all components in the Viewer's {@link Scene}.
+ * @property {String} [src] Path to an STL file. Overrides the ````stl```` parameter.
+ * @property {String} [stl] Contents of an STL file, either binary of ASCII. Overridden by the ````src```` parameter.
+ * @property {Boolean} [edges=false] Whether or not to renders the model with edges emphasized.
+ * @property {Number[]} [origin=[0,0,0]] The model's World-space double-precision 3D origin. Use this to position the model within xeokit's World coordinate system, using double-precision coordinates.
+ * @property {Number[]} [position=[0,0,0]] The model single-precision 3D position, relative to the ````origin```` parameter.
+ * @property {Number[]} [scale=[1,1,1]] The model's scale.
+ * @property {Number[]} [rotation=[0,0,0]] The model's orientation, given as Euler angles in degrees, for each of the X, Y and Z axis.
+ * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
+ * @property {Boolean} [backfaces=false] When true, allows visible backfaces, wherever specified in the STL.  When false, ignores backfaces.
+ * @property {Boolean} [smoothNormals=true] When true, automatically converts face-oriented normals to vertex normals for a smooth appearance.
+ * @property {Number} [smoothNormalsAngleThreshold=20] When xraying, highlighting, selecting or edging, this is the threshold angle between normals of adjacent triangles, below which their shared wireframe edge is not drawn.
+ * @property {Number} [edgeThreshold=20] When xraying, highlighting, selecting or edging, this is the threshold angle between normals of adjacent triangles, below which their shared wireframe edge is not drawn.
+ * @property {Boolean} [splitMeshes=true] When true, creates a separate {@link Mesh} for each group of faces that share the same vertex colors. Only works with binary STL.
+ */
 class STLLoaderPlugin extends Plugin {
 
     /**
      * @constructor
      *
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} [cfg]  Plugin configuration.
-     * @param {String} [cfg.id="STLLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {Object} [cfg.dataSource] A custom data source through which the STLLoaderPlugin can load STL files. Defaults to an instance of {@link STLDefaultDataSource}, which loads over HTTP.
+     * @param {STLLoaderPluginCOnfiguration} [cfg] Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 
@@ -224,21 +247,7 @@ class STLLoaderPlugin extends Plugin {
     /**
      * Loads an STL model from a file into this STLLoaderPlugin's {@link Viewer}.
      *
-     * @param {*} params Loading parameters.
-     * @param {String} params.id ID to assign to the model's root {@link Entity}, unique among all components in the Viewer's {@link Scene}.
-     * @param {String} [params.src] Path to an STL file. Overrides the ````stl```` parameter.
-     * @param {String} [params.stl] Contents of an STL file, either binary of ASCII. Overridden by the ````src```` parameter.
-     * @param {Boolean} [params.edges=false] Whether or not to renders the model with edges emphasized.
-     * @param {Number[]} [params.origin=[0,0,0]] The model's World-space double-precision 3D origin. Use this to position the model within xeokit's World coordinate system, using double-precision coordinates.
-     * @param {Number[]} [params.position=[0,0,0]] The model single-precision 3D position, relative to the ````origin```` parameter.
-     * @param {Number[]} [params.scale=[1,1,1]] The model's scale.
-     * @param {Number[]} [params.rotation=[0,0,0]] The model's orientation, given as Euler angles in degrees, for each of the X, Y and Z axis.
-     * @param {Number[]} [params.matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
-     * @param {Boolean} [params.backfaces=false] When true, allows visible backfaces, wherever specified in the STL.  When false, ignores backfaces.
-     * @param {Boolean} [params.smoothNormals=true] When true, automatically converts face-oriented normals to vertex normals for a smooth appearance.
-     * @param {Number} [params.smoothNormalsAngleThreshold=20] When xraying, highlighting, selecting or edging, this is the threshold angle between normals of adjacent triangles, below which their shared wireframe edge is not drawn.
-     * @param {Number} [params.edgeThreshold=20] When xraying, highlighting, selecting or edging, this is the threshold angle between normals of adjacent triangles, below which their shared wireframe edge is not drawn.
-     * @param {Boolean} [params.splitMeshes=true] When true, creates a separate {@link Mesh} for each group of faces that share the same vertex colors. Only works with binary STL.
+     * @param {LoadSTLModel} params Loading parameters.
      * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
      */
     load(params) {

@@ -1,5 +1,6 @@
 import {math} from '../math/math.js';
 import {Component} from '../Component.js';
+import {Entity} from '../Entity.js';
 import {worldToRTCPos} from "../math/rtcCoords.js";
 import {SceneModelEntity} from "../model/SceneModelEntity.js";
 
@@ -111,16 +112,20 @@ const tempVec4b = math.vec4();
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} MarkerConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Entity} [entity] Entity to associate this Marker with. When the Marker has an Entity, then {@link Marker#visible} will always be ````false```` if {@link Entity#visible} is false.
+ * @property {Boolean} [occludable=false] Indicates whether or not this Marker is hidden (ie. {@link Marker#visible} is ````false```` whenever occluded by {@link Entity}s in the {@link Scene}.
+ * @property {Number[]} [worldPos=[0,0,0]] World-space 3D Marker position.
+ */
 class Marker extends Component {
 
     /**
      * @constructor
-     * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this Marker as well.
-     * @param {*} [cfg]  Marker configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Entity} [cfg.entity] Entity to associate this Marker with. When the Marker has an Entity, then {@link Marker#visible} will always be ````false```` if {@link Entity#visible} is false.
-     * @param {Boolean} [cfg.occludable=false] Indicates whether or not this Marker is hidden (ie. {@link Marker#visible} is ````false```` whenever occluded by {@link Entity}s in the {@link Scene}.
-     * @param {Number[]} [cfg.worldPos=[0,0,0]] World-space 3D Marker position.
+     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this Marker as well.
+     * @param {MarkerConfiguration} [cfg] Marker configuration
      */
     constructor(owner, cfg) {
 

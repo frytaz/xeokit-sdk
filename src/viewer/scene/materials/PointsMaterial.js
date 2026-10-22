@@ -1,4 +1,5 @@
 import {Material} from './Material.js';
+import {Component} from '../Component.js';
 import {RenderState} from '../webgl/RenderState.js';
 
 const PRESETS = {
@@ -63,6 +64,20 @@ const PRESETS = {
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} PointsMaterialConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number} [pointSize=2] Point size in pixels.
+ * @property {Boolean} [roundPoints=true] Whether points are round (````true````) or square (````false````).
+ * @property {Boolean} [perspectivePoints=true] Whether apparent point size reduces with distance when {@link Camera#projection} is set to "perspective".
+ * @property {Number} [minPerspectivePointSize=1] When ````perspectivePoints```` is ````true````, this is the minimum rendered size of each point in pixels.
+ * @property {Number} [maxPerspectivePointSize=6] When ````perspectivePoints```` is ````true````, this is the maximum rendered size of each point in pixels.
+ * @property {Boolean} [filterIntensity=false] When this is true, points are only rendered when their intensity value falls within the range given in {@link }
+ * @property {Number} [minIntensity=0] When ````filterIntensity```` is ````true````, points with intensity below this value will not be rendered.
+ * @property {Number} [maxIntensity=1] When ````filterIntensity```` is ````true````, points with intensity above this value will not be rendered.
+ * @property {String} [preset] Selects a preset PointsMaterial configuration - see {@link PointsMaterial#presets}.
+ */
 class PointsMaterial extends Material {
 
     /**
@@ -84,17 +99,7 @@ class PointsMaterial extends Material {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] The PointsMaterial configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number} [cfg.pointSize=2] Point size in pixels.
-     * @param {Boolean} [cfg.roundPoints=true] Whether points are round (````true````) or square (````false````).
-     * @param {Boolean} [cfg.perspectivePoints=true] Whether apparent point size reduces with distance when {@link Camera#projection} is set to "perspective".
-     * @param {Number} [cfg.minPerspectivePointSize=1] When ````perspectivePoints```` is ````true````, this is the minimum rendered size of each point in pixels.
-     * @param {Number} [cfg.maxPerspectivePointSize=6] When ````perspectivePoints```` is ````true````, this is the maximum rendered size of each point in pixels.
-     * @param {Boolean} [cfg.filterIntensity=false] When this is true, points are only rendered when their intensity value falls within the range given in {@link }
-     * @param {Number} [cfg.minIntensity=0] When ````filterIntensity```` is ````true````, points with intensity below this value will not be rendered.
-     * @param {Number} [cfg.maxIntensity=1] When ````filterIntensity```` is ````true````, points with intensity above this value will not be rendered.
-     * @param {String} [cfg.preset] Selects a preset PointsMaterial configuration - see {@link PointsMaterial#presets}.
+     * @param {PointsMaterialConfiguration} [cfg] The PointsMaterial configuration
      */
     constructor(owner, cfg = {}) {
 

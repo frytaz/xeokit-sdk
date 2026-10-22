@@ -34,7 +34,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildGridGeometry
- * @param {*} [cfg] Configs
+ * @param {Object} [cfg] Configs
  * @param {String} [cfg.id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @param {Number} [cfg.size=1] Dimension on the X and Z-axis.
  * @param {Number} [cfg.divisions=1] Number of divisions on X and Z axis..

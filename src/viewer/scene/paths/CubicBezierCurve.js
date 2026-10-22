@@ -1,4 +1,5 @@
 import {Curve} from "./Curve.js"
+import {Component} from "../Component.js";
 import {math} from "../math/math.js";
 
 /**
@@ -14,18 +15,22 @@ import {math} from "../math/math.js";
  * <br>
  * [Cubic Bezier Curve from WikiPedia](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)
  */
+
+/**
+ * @typedef {Object} CubicBezierCurveConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [v0=[0,0,0]] The starting point.
+ * @property {Number[]} [v1=[0,0,0]] The first control point.
+ * @property {Number[]} [v2=[0,0,0]] The middle control point.
+ * @property {Number[]} [v3=[0,0,0]] The ending point.
+ * @property {Number} [t=0] Current position on this CubicBezierCurve, in range between 0..1.
+ */
 class CubicBezierCurve extends Curve {
 
     /**
      * @constructor
-     * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this CubicBezierCurve as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number[]} [cfg.v0=[0,0,0]] The starting point.
-     * @param {Number[]} [cfg.v1=[0,0,0]] The first control point.
-     * @param {Number[]} [cfg.v2=[0,0,0]] The middle control point.
-     * @param {Number[]} [cfg.v3=[0,0,0]] The ending point.
-     * @param {Number} [cfg.t=0] Current position on this CubicBezierCurve, in range between 0..1.
+     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this CubicBezierCurve as well.
+     * @param {CubicBezierCurveConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
         super(owner, cfg);

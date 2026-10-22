@@ -54,6 +54,16 @@ v               edgeBias: 0.2,
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} FresnelMaterialConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent scene, generated automatically when omitted.
+ * @property {Number[]} [edgeColor=[ 0.0, 0.0, 0.0 ]] Color used on edges.
+ * @property {Number[]} [centerColor=[ 1.0, 1.0, 1.0 ]] Color used on center.
+ * @property {Number} [edgeBias=0] Bias at the edge.
+ * @property {Number} [centerBias=1] Bias at the center.
+ * @property {Number} [power=0] The power.
+ */
 class Fresnel extends Component {
 
     /**
@@ -68,13 +78,7 @@ class Fresnel extends Component {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this Fresnel as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent scene, generated automatically when omitted.
-     * @param {Number[]} [cfg.edgeColor=[ 0.0, 0.0, 0.0 ]]  Color used on edges.
-     * @param {Number[]} [cfg.centerColor=[ 1.0, 1.0, 1.0 ]]  Color used on center.
-     * @param {Number} [cfg.edgeBias=0]  Bias at the edge.
-     * @param {Number} [cfg.centerBias=1]  Bias at the center.
-     * @param {Number} [cfg.power=0]  The power.
+     * @param {FresnelMaterialConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
 

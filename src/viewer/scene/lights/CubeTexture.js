@@ -33,6 +33,14 @@ function nextHighestPowerOfTwo(x) {
 /**
  * @desc A cube texture map.
  */
+
+/**
+ * @typedef {Object} CubeTextureConfiguration
+ * @property {String} [id] Optional ID for this CubeTexture, unique among all components in the parent scene, generated automatically when omitted.
+ * @property {String[]} [src=null] Paths to six image files to load into this CubeTexture.
+ * @property {Boolean} [flipY=false] Flips this CubeTexture's source data along its vertical axis when true.
+ * @property {Number} [encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
+ */
 class CubeTexture extends Component {
 
     /**
@@ -45,11 +53,7 @@ class CubeTexture extends Component {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID for this CubeTexture, unique among all components in the parent scene, generated automatically when omitted.
-     * @param {String[]} [cfg.src=null]  Paths to six image files to load into this CubeTexture.
-     * @param {Boolean} [cfg.flipY=false] Flips this CubeTexture's source data along its vertical axis when true.
-     * @param {Number} [cfg.encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
+     * @param {CubeTextureConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
 

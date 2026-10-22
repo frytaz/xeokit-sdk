@@ -1,4 +1,5 @@
 import {Curve} from "./Curve.js"
+import {Component} from "../Component.js";
 import {math} from "../math/math.js";
 
 /**
@@ -13,16 +14,19 @@ import {math} from "../math/math.js";
  *
  * * <a href="https://en.wikipedia.org/wiki/Spline_(mathematics)">Spline Curve from Wikipedia</a>*
  */
+
+/**
+ * @typedef {Object} SplineCurveConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Array} [points=[]] Control points on this SplineCurve.
+ * @property {Number} [t=0] Current position on this SplineCurve, in range between 0..1.
+ */
 class SplineCurve extends Curve {
 
     /**
      * @constructor
-     * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this SplineCurve as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Array} [cfg.points=[]] Control points on this SplineCurve.
-     * @param {Number} [cfg.t=0] Current position on this SplineCurve, in range between 0..1.
-     * @param {Number} [cfg.t=0] Current position on this CubicBezierCurve, in range between 0..1.
+     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this SplineCurve as well.
+     * @param {SplineCurveConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
         super(owner, cfg);

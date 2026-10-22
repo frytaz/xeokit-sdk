@@ -40,7 +40,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildCylinderGeometry
- * @param {*} [cfg] Configs
+ * @param {Object} [cfg] Configs
  * @param {String} [cfg.id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @param {Number[]} [cfg.center]  3D point indicating the center position.
  * @param {Number} [cfg.radiusTop=1]  Radius of top.

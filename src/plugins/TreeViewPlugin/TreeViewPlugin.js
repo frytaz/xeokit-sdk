@@ -1,4 +1,5 @@
 import { Plugin } from "../../viewer/Plugin.js";
+import { Viewer } from "../../viewer/Viewer.js";
 import { RenderService } from "./RenderService.js";
 
 const treeViews = [];
@@ -344,27 +345,31 @@ const treeViews = [];
  *
  * @class TreeViewPlugin
  */
+
+/**
+ * @typedef {Object} TreeViewPluginConfiguration
+ * @property {String} [containerElementId] ID of an existing HTML element to contain the TreeViewPlugin - either this or containerElement is mandatory. When both values are given, the element reference is always preferred to the ID.
+ * @property {HTMLElement} containerElement DOM element to contain the TreeViewPlugin.
+ * @property {Boolean} [autoAddModels=true] When ````true```` (default), will automatically add each model as it's created. Set this ````false```` if you want to manually add models using {@link TreeViewPlugin#addModel} instead.
+ * @property {Number} [autoExpandDepth] Optional depth to which to initially expand the tree.
+ * @property {String} [hierarchy="containment"] How to organize the tree nodes: "containment", "storeys" or "types". See the class documentation for details.
+ * @property {Boolean} [sortNodes=true] When true, will sort the children of each node. For a "storeys" hierarchy, the
+ * ````IfcBuildingStorey```` nodes will be ordered spatially, from the highest storey down to the lowest, on the
+ * vertical World axis. For all hierarchy types, other node types will be ordered in the ascending alphanumeric order of their titles.
+ * @property {Boolean} [pruneEmptyNodes=true] When true, will not contain nodes that don't have content in the {@link Scene}. These are nodes whose {@link MetaObject}s don't have {@link Entity}s.
+ * @property {RenderService} [renderService] Optional {@link RenderService} to use. Defaults to the {@link TreeViewPlugin}'s default {@link RenderService}.
+ * @property {Boolean} [showIndeterminate=false] When true, will show indeterminate state for checkboxes when some but not all child nodes are checked
+ * @property {Boolean} [showProjectNode=false] When true, will show top level project node when hierarchy is set to "storeys"
+ * @property {Function} [elevationSortFunction] Optional function to replace the default elevation sort function. The function should take two nodes and return -1, 0 or 1.
+ * @property {Function} [defaultSortFunction] Optional function to replace the default sort function. The function should take two nodes and return -1, 0 or 1.
+ */
 export class TreeViewPlugin extends Plugin {
 
     /**
      * @constructor
      *
      * @param {Viewer} viewer The Viewer.
-     * @param {*} cfg Plugin configuration.
-     * @param {String} [cfg.containerElementId]  ID of an existing HTML element to contain the TreeViewPlugin - either this or containerElement is mandatory. When both values are given, the element reference is always preferred to the ID.
-     * @param {HTMLElement} cfg.containerElement DOM element to contain the TreeViewPlugin.
-     * @param {Boolean} [cfg.autoAddModels=true] When ````true```` (default), will automatically add each model as it's created. Set this ````false```` if you want to manually add models using {@link TreeViewPlugin#addModel} instead.
-     * @param {Number} [cfg.autoExpandDepth] Optional depth to which to initially expand the tree.
-     * @param {String} [cfg.hierarchy="containment"] How to organize the tree nodes: "containment", "storeys" or "types". See the class documentation for details.
-     * @param {Boolean} [cfg.sortNodes=true] When true, will sort the children of each node. For a "storeys" hierarchy, the
-     * ````IfcBuildingStorey```` nodes will be ordered spatially, from the highest storey down to the lowest, on the
-     * vertical World axis. For all hierarchy types, other node types will be ordered in the ascending alphanumeric order of their titles.
-     * @param {Boolean} [cfg.pruneEmptyNodes=true] When true, will not contain nodes that don't have content in the {@link Scene}. These are nodes whose {@link MetaObject}s don't have {@link Entity}s.
-     * @param {RenderService} [cfg.renderService] Optional {@link RenderService} to use. Defaults to the {@link TreeViewPlugin}'s default {@link RenderService}.
-     * @param {Boolean} [cfg.showIndeterminate=false] When true, will show indeterminate state for checkboxes when some but not all child nodes are checked
-     * @param {Boolean} [cfg.showProjectNode=false] When true, will show top level project node when hierarchy is set to "storeys"
-     * @param {Function} [cfg.elevationSortFunction] Optional function to replace the default elevation sort function. The function should take two nodes and return -1, 0 or 1. 
-     * @param {Function} [cfg.defaultSortFunction] Optional function to replace the default sort function. The function should take two nodes and return -1, 0 or 1.
+     * @param {TreeViewPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 

@@ -144,14 +144,18 @@ import {Map} from "./../scene/utils/Map.js";
  * ````
  * @since 2.0
  */
+
+/**
+ * @typedef {Object} LocaleServiceConfiguration
+ * @property {JSON} [messages]
+ * @property {String} [locale]
+ */
 class LocaleService {
 
     /**
      * Constructs a LocaleService.
      *
-     * @param {*} [params={}]
-     * @param {JSON} [params.messages]
-     * @param {String} [params.locale]
+     * @param {LocaleServiceConfiguration} [params={}]
      */
     constructor(params = {}) {
 

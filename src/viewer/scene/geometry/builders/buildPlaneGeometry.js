@@ -37,7 +37,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildPlaneGeometry
- * @param {*} [cfg] Configs
+ * @param {Object} [cfg] Configs
  * @param {Number[]} [cfg.center]  3D point indicating the center position.
  * @param {String} [cfg.id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @param {Number} [cfg.xSize=1] Dimension on the X-axis.

@@ -34,7 +34,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildBoxLinesGeometry
- * @param {*} [cfg] Configs
+ * @param {Object} [cfg] Configs
  * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @param {Number[]} [cfg.center]  3D point indicating the center position.
  * @param {Number} [cfg.xSize=1.0]  Half-size on the X-axis.
@@ -216,7 +216,7 @@ function buildBoxLinesGeometry(cfg = {}) {
  * ````
  *
  * @function buildBoxLinesGeometryFromAABB
- * @param {*} [cfg] Configs
+ * @param {Object} [cfg] Configs
  * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @param {Number[]} [cfg.aabb]  AABB for which box will be created.
  * @returns {Object} Configuration for a {@link Geometry} subtype.

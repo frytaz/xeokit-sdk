@@ -2,6 +2,7 @@ import {math} from "../../viewer/scene/math/math.js";
 
 /**
  * @private
+ * @constructor
  */
 function CubeTextureCanvas(viewer, navCubeScene, cfg = {}) {
 
@@ -279,6 +280,9 @@ function CubeTextureCanvas(viewer, navCubeScene, cfg = {}) {
         return this._textureCanvas;
     };
 
+    /**
+     * @private
+     */
     this.destroy = function () {
         if (this._textureCanvas) {
             this._textureCanvas.parentNode.removeChild(this._textureCanvas);

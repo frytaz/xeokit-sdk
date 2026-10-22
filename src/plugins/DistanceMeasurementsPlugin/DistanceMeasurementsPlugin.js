@@ -1,4 +1,6 @@
 import { Plugin } from "../../viewer/Plugin.js";
+import { Viewer } from "../../viewer/Viewer.js";
+import { PointerCircle } from "../../extras/PointerCircle/PointerCircle.js";
 import { DistanceMeasurement } from "./DistanceMeasurement.js";
 import { DistanceMeasurementsMouseControl } from "./DistanceMeasurementsMouseControl.js";
 
@@ -262,32 +264,36 @@ import { DistanceMeasurementsMouseControl } from "./DistanceMeasurementsMouseCon
  * distanceMeasurementsTouchControl.activate();
  * ````
  */
+
+/**
+ * @typedef {Object} DistanceMeasurementsPluginConfiguration
+ * @property {String} [id="DistanceMeasurements"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Number} [labelMinAxisLength=25] The minimum length, in pixels, of an axis wire beyond which its label is shown.
+ * @property {HTMLElement} [container] Container DOM element for markers and labels. Defaults to ````document.body````, but different element should be specified to capture it with {@link Viewer.getSnapshotWithPlugins}.
+ * @property {boolean} [defaultVisible=true] The default value of the DistanceMeasurements `visible` property.
+ * @property {boolean} [defaultOriginVisible=true] The default value of the DistanceMeasurements `originVisible` property.
+ * @property {boolean} [defaultTargetVisible=true] The default value of the DistanceMeasurements `targetVisible` property.
+ * @property {boolean} [defaultWireVisible=true] The default value of the DistanceMeasurements `wireVisible` property.
+ * @property {boolean} [defaultLabelsVisible=true] The default value of the DistanceMeasurements `labelsVisible` property.
+ * @property {boolean} [defaultXLabelEnabled=true] The default value of the DistanceMeasurements `xLabelEnabled` property.
+ * @property {boolean} [defaultYLabelEnabled=true] The default value of the DistanceMeasurements `yLabelEnabled` property.
+ * @property {boolean} [defaultZLabelEnabled=true] The default value of the DistanceMeasurements `zLabelEnabled` property.
+ * @property {boolean} [defaultLengthLabelEnabled=true] The default value of the DistanceMeasurements `lengthLabelEnabled` property.
+ * @property {boolean} [defaultAxisVisible=true] The default value of the DistanceMeasurements `axisVisible` property.
+ * @property {boolean} [defaultXAxisVisible=true] The default value of the DistanceMeasurements `xAxisVisible` property.
+ * @property {boolean} [defaultYAxisVisible=true] The default value of the DistanceMeasurements `yAxisVisible` property.
+ * @property {boolean} [defaultZAxisVisible=true] The default value of the DistanceMeasurements `zAxisVisible` property.
+ * @property {boolean} [useRotationAdjustment=false] The default value of DistanceMeasurements `useRotationAdjustment` property.
+ * @property {string} [defaultColor=#00BBFF] The default color of the length dots, wire and label.
+ * @property {number} [zIndex] If set, the wires, dots and labels will have this zIndex (+1 for dots and +2 for labels).
+ * @property {boolean} [defaultLabelsOnWires=true] The default value of the DistanceMeasurements `labelsOnWires` property.
+ * @property {PointerCircle} [pointerLens] A PointerLens to help the user position the pointer. This can be shared with other plugins.
+ */
 class DistanceMeasurementsPlugin extends Plugin {
   /**
    * @constructor
    * @param {Viewer} viewer The Viewer.
-   * @param {Object} [cfg]  Plugin configuration.
-   * @param {String} [cfg.id="DistanceMeasurements"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-   * @param {Number} [cfg.labelMinAxisLength=25] The minimum length, in pixels, of an axis wire beyond which its label is shown.
-   * @param {HTMLElement} [cfg.container] Container DOM element for markers and labels. Defaults to ````document.body````, but different element should be specified to capture it with {@link Viewer.getSnapshotWithPlugins}.
-   * @param {boolean} [cfg.defaultVisible=true] The default value of the DistanceMeasurements `visible` property.
-   * @param {boolean} [cfg.defaultOriginVisible=true] The default value of the DistanceMeasurements `originVisible` property.
-   * @param {boolean} [cfg.defaultTargetVisible=true] The default value of the DistanceMeasurements `targetVisible` property.
-   * @param {boolean} [cfg.defaultWireVisible=true] The default value of the DistanceMeasurements `wireVisible` property.
-   * @param {boolean} [cfg.defaultLabelsVisible=true] The default value of the DistanceMeasurements `labelsVisible` property.
-   * @param {boolean} [cfg.defaultXLabelEnabled=true] The default value of the DistanceMeasurements `xLabelEnabled` property.
-   * @param {boolean} [cfg.defaultYLabelEnabled=true] The default value of the DistanceMeasurements `yLabelEnabled` property.
-   * @param {boolean} [cfg.defaultZLabelEnabled=true] The default value of the DistanceMeasurements `zLabelEnabled` property.
-   * @param {boolean} [cfg.defaultLengthLabelEnabled=true] The default value of the DistanceMeasurements `lengthLabelEnabled` property.
-   * @param {boolean} [cfg.defaultAxisVisible=true] The default value of the DistanceMeasurements `axisVisible` property.
-   * @param {boolean} [cfg.defaultXAxisVisible=true] The default value of the DistanceMeasurements `xAxisVisible` property.
-   * @param {boolean} [cfg.defaultYAxisVisible=true] The default value of the DistanceMeasurements `yAxisVisible` property.
-   * @param {boolean} [cfg.defaultZAxisVisible=true] The default value of the DistanceMeasurements `zAxisVisible` property.
-   * @param {boolean} [cfg.useRotationAdjustment=false] The default value of DistanceMeasurements `useRotationAdjustment` property.
-   * @param {string} [cfg.defaultColor=#00BBFF] The default color of the length dots, wire and label.
-   * @param {number} [cfg.zIndex] If set, the wires, dots and labels will have this zIndex (+1 for dots and +2 for labels).
-   * @param {boolean} [cfg.defaultLabelsOnWires=true] The default value of the DistanceMeasurements `labelsOnWires` property.
-   * @param {PointerCircle} [cfg.pointerLens] A PointerLens to help the user position the pointer. This can be shared with other plugins.
+   * @param {DistanceMeasurementsPluginConfiguration} [cfg] Plugin configuration.
    */
   constructor(viewer, cfg = {}) {
     super("DistanceMeasurements", viewer);
@@ -463,7 +469,7 @@ class DistanceMeasurementsPlugin extends Plugin {
    * @param {Boolean} [params.labelsOnWires=true] Determines if labels will be set on wires or one below the other.
    * @returns {DistanceMeasurement} The new {@link DistanceMeasurement}.
    */
-  createMeasurement(params = {}) {
+  createMeasurement(params) {
     if (this.viewer.scene.components[params.id]) {
       this.error(
         "Viewer scene component with this ID already exists: " + params.id

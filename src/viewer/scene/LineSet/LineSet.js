@@ -62,7 +62,7 @@ class LineSet extends Component {
      *
      * @constructor
      * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this ````LineSet```` as well.
-     * @param {*} [cfg]  ````LineSet```` configuration
+     * @param {Object} [cfg]  ````LineSet```` configuration
      * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
      * @param {Number[]} cfg.positions World-space 3D vertex positions.
      * @param {Number[]} [cfg.indices] Indices to connect ````positions```` into line segments. Note that these are separate line segments, not a polyline.

@@ -91,7 +91,7 @@ export class MarqueePicker extends Component {
     /**
      * Creates a MarqueePicker.
      *
-     * @param {*} cfg Configuration
+     * @param {Object} cfg Configuration
      * @param {Viewer} cfg.viewer The Viewer to pick Entities from.
      * @param {ObjectsKdTree3} cfg.objectsKdTree3 A k-d tree that indexes the Entities in the Viewer for fast spatial lookup.
      */

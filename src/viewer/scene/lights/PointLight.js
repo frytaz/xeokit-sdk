@@ -1,4 +1,5 @@
 import {Light} from './Light.js';
+import {Component} from '../Component.js';
 import {RenderState} from '../webgl/RenderState.js';
 import {RenderBuffer} from '../webgl/RenderBuffer.js';
 import {math} from '../math/math.js';
@@ -95,6 +96,19 @@ import {math} from '../math/math.js';
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} PointLightConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [pos=[ 1.0, 1.0, 1.0 ]] Position, in either World or View space, depending on the value of the **space** parameter.
+ * @property {Number[]} [color=[0.7, 0.7, 0.8 ]] Color of this PointLight.
+ * @property {Number} [intensity=1.0] Intensity of this PointLight, as a factor in range ````[0..1]````.
+ * @property {Number} [constantAttenuation=0] Constant attenuation factor.
+ * @property {Number} [linearAttenuation=0] Linear attenuation factor.
+ * @property {Number} [quadraticAttenuation=0] Quadratic attenuation factor.
+ * @property {String} [space="view"] The coordinate system this PointLight is defined in - "view" or "world".
+ * @property {Boolean} [castsShadow=false] Flag which indicates if this PointLight casts a castsShadow.
+ */
 class PointLight extends Light {
 
     /**
@@ -106,16 +120,7 @@ class PointLight extends Light {
 
     /**
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this PointLight as well.
-     * @param {*} [cfg] The PointLight configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number[]} [cfg.pos=[ 1.0, 1.0, 1.0 ]] Position, in either World or View space, depending on the value of the **space** parameter.
-     * @param {Number[]} [cfg.color=[0.7, 0.7, 0.8 ]] Color of this PointLight.
-     * @param {Number} [cfg.intensity=1.0] Intensity of this PointLight, as a factor in range ````[0..1]````.
-     * @param {Number} [cfg.constantAttenuation=0] Constant attenuation factor.
-     * @param {Number} [cfg.linearAttenuation=0] Linear attenuation factor.
-     * @param {Number} [cfg.quadraticAttenuation=0]Quadratic attenuation factor.
-     * @param {String} [cfg.space="view"]The coordinate system this PointLight is defined in - "view" or "world".
-     * @param {Boolean} [cfg.castsShadow=false] Flag which indicates if this PointLight casts a castsShadow.
+     * @param {PointLightConfiguration} [cfg] The PointLight configuration
      */
     constructor(owner, cfg = {}) {
 

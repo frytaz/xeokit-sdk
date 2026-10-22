@@ -1,4 +1,5 @@
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {math} from "../../viewer/scene/math/math.js";
 import {Scene} from "../../viewer/scene/scene/Scene.js";
 import {DirLight} from "./../../viewer/scene/lights/DirLight.js";
@@ -74,34 +75,38 @@ const tempMat4a = math.mat4();
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} NavCubePluginConfiguration
+ * @property {String} [id="NavCube"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {String} [canvasId] ID of an existing HTML canvas to display the NavCube - either this or canvasElement is mandatory. When both values are given, the element reference is always preferred to the ID.
+ * @property {HTMLCanvasElement} [canvasElement] Reference of an existing HTML canvas to display the NavCube - either this or canvasId is mandatory. When both values are given, the element reference is always preferred to the ID.
+ * @property {Boolean} [visible=true] Initial visibility.
+ * @property {Boolean} [shadowVisible=true] Whether the shadow of the cube is visible.
+ * @property {String} [cameraFly=true] Whether the {@link Camera} flies or jumps to each selected axis or diagonal.
+ * @property {String} [cameraFitFOV=45] How much of the field-of-view, in degrees, that the 3D scene should fill the {@link Canvas} when the {@link Camera} moves to an axis or diagonal.
+ * @property {String} [cameraFlyDuration=0.5] When flying the {@link Camera} to each new axis or diagonal, how long, in seconds, that the Camera takes to get there.
+ * @property {String} [color="lightgrey"] Custom uniform color for the faces of the NavCube.
+ * @property {String} [frontColor="#55FF55"] Custom color for the front face of the NavCube. Overrides ````color````.
+ * @property {String} [backColor="#55FF55"] Custom color for the back face of the NavCube. Overrides ````color````.
+ * @property {String} [leftColor="#FF5555"] Custom color for the left face of the NavCube. Overrides ````color````.
+ * @property {String} [rightColor="#FF5555"] Custom color for the right face of the NavCube. Overrides ````color````.
+ * @property {String} [topColor="#5555FF"] Custom color for the top face of the NavCube. Overrides ````color````.
+ * @property {String} [bottomColor="#5555FF"] Custom color for the bottom face of the NavCube. Overrides ````color````.
+ * @property {String} [hoverColor="rgba(0,0,0,0.4)"] Custom color for highlighting regions on the NavCube as we hover the pointer over them.
+ * @property {String} [textColor="black"] Custom text color for labels of the NavCube.
+ * @property {Boolean} [fitVisible=false] Sets whether the axis, corner and edge-aligned views will fit the
+ * view to the entire {@link Scene} or just to visible object-{@link Entity}s. Entitys are visible objects when {@link Entity#isObject} and {@link Entity#visible} are both ````true````.
+ * @property {Boolean} [synchProjection=false] Sets whether the NavCube switches between perspective and orthographic projections in synchrony with the {@link Camera}. When ````false````, the NavCube will always be rendered with perspective projection.
+ * @property {Boolean} [isProjectNorth] sets whether the NavCube switches between true north and project north - using the project north offset angle.
+ * @property {number} [projectNorthOffsetAngle] sets the NavCube project north offset angle - when the {@link isProjectNorth} is true.
+ */
 class NavCubePlugin extends Plugin {
 
     /**
      * @constructor
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg NavCubePlugin configuration.
-     * @param {String} [cfg.id="NavCube"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {String} [cfg.canvasId] ID of an existing HTML canvas to display the NavCube - either this or canvasElement is mandatory. When both values are given, the element reference is always preferred to the ID.
-     * @param {HTMLCanvasElement} [cfg.canvasElement] Reference of an existing HTML canvas to display the NavCube - either this or canvasId is mandatory. When both values are given, the element reference is always preferred to the ID.
-     * @param {Boolean} [cfg.visible=true] Initial visibility.
-     * @param {Boolean} [cfg.shadowVisible=true] Whether the shadow of the cube is visible.
-     * @param {String} [cfg.cameraFly=true] Whether the {@link Camera} flies or jumps to each selected axis or diagonal.
-     * @param {String} [cfg.cameraFitFOV=45] How much of the field-of-view, in degrees, that the 3D scene should fill the {@link Canvas} when the {@link Camera} moves to an axis or diagonal.
-     * @param {String} [cfg.cameraFlyDuration=0.5] When flying the {@link Camera} to each new axis or diagonal, how long, in seconds, that the Camera takes to get there.
-     * @param {String} [cfg.color="lightgrey"] Custom uniform color for the faces of the NavCube.
-     * @param {String} [cfg.frontColor="#55FF55"] Custom color for the front face of the NavCube. Overrides ````color````.
-     * @param {String} [cfg.backColor="#55FF55"] Custom color for the back face of the NavCube. Overrides ````color````.
-     * @param {String} [cfg.leftColor="#FF5555"] Custom color for the left face of the NavCube. Overrides ````color````.
-     * @param {String} [cfg.rightColor="#FF5555"] Custom color for the right face of the NavCube. Overrides ````color````.
-     * @param {String} [cfg.topColor="#5555FF"] Custom color for the top face of the NavCube. Overrides ````color````.
-     * @param {String} [cfg.bottomColor="#5555FF"] Custom color for the bottom face of the NavCube. Overrides ````color````.
-     * @param {String} [cfg.hoverColor="rgba(0,0,0,0.4)"] Custom color for highlighting regions on the NavCube as we hover the pointer over them.
-     * @param {String} [cfg.textColor="black"] Custom text color for labels of the NavCube.
-     * @param {Boolean} [cfg.fitVisible=false] Sets whether the axis, corner and edge-aligned views will fit the
-     * view to the entire {@link Scene} or just to visible object-{@link Entity}s. Entitys are visible objects when {@link Entity#isObject} and {@link Entity#visible} are both ````true````.
-     * @param {Boolean} [cfg.synchProjection=false] Sets whether the NavCube switches between perspective and orthographic projections in synchrony with the {@link Camera}. When ````false````, the NavCube will always be rendered with perspective projection.
-     * @param {Boolean} [cfg.isProjectNorth] sets whether the NavCube switches between true north and project north - using the project north offset angle.
-     * @param {number} [cfg.projectNorthOffsetAngle] sets the NavCube project north offset angle - when the {@link isProjectNorth} is true.
+     * @param {NavCubePluginConfiguration} cfg NavCubePlugin configuration.
      */
     constructor(viewer, cfg = {}) {
 

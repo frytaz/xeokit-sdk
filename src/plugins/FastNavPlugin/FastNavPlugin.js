@@ -1,4 +1,5 @@
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 
 /**
  * {@link Viewer} plugin that makes interaction smoother with large models, by temporarily switching
@@ -91,24 +92,28 @@ import {Plugin} from "../../viewer/Plugin.js";
  *
  * @class FastNavPlugin
  */
+
+/**
+ * @typedef {Object} FastNavPluginConfiguration
+ * @property {String} [id="FastNav"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Boolean} [hideColorTexture=true] Whether to temporarily hide color textures whenever we interact with the Viewer.
+ * @property {Boolean} [hidePBR=true] Whether to temporarily hide physically-based rendering (PBR) whenever we interact with the Viewer.
+ * @property {Boolean} [hideSAO=true] Whether to temporarily hide scalable ambient occlusion (SAO) whenever we interact with the Viewer.
+ * @property {Boolean} [hideEdges=true] Whether to temporarily hide edges whenever we interact with the Viewer.
+ * @property {Boolean} [hideTransparentObjects=false] Whether to temporarily hide transparent objects whenever we interact with the Viewer.
+ * @property {Number} [scaleCanvasResolution=false] Whether to temporarily down-scale the canvas resolution whenever we interact with the Viewer.
+ * @property {Number} [defaultScaleCanvasResolutionFactor=0.6] The factor by which we downscale the canvas resolution whenever we stop interacting with the Viewer.
+ * @property {Number} [scaleCanvasResolutionFactor=0.6] The factor by which we downscale the canvas resolution whenever we interact with the Viewer.
+ * @property {Boolean} [delayBeforeRestore=true] Whether to temporarily have a delay before restoring normal rendering after we stop interacting with the Viewer.
+ * @property {Number} [delayBeforeRestoreSeconds=0.5] Delay in seconds before restoring normal rendering after we stop interacting with the Viewer.
+ * @property {Function} [onMoved] Optional callback function fired during moving mode, should return the callback function that will be fired when the interaction stops.
+ */
 class FastNavPlugin extends Plugin {
 
     /**
      * @constructor
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg FastNavPlugin configuration.
-     * @param {String} [cfg.id="FastNav"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {Boolean} [cfg.hideColorTexture=true] Whether to temporarily hide color textures whenever we interact with the Viewer.
-     * @param {Boolean} [cfg.hidePBR=true] Whether to temporarily hide physically-based rendering (PBR) whenever we interact with the Viewer.
-     * @param {Boolean} [cfg.hideSAO=true] Whether to temporarily hide scalable ambient occlusion (SAO) whenever we interact with the Viewer.
-     * @param {Boolean} [cfg.hideEdges=true] Whether to temporarily hide edges whenever we interact with the Viewer.
-     * @param {Boolean} [cfg.hideTransparentObjects=false] Whether to temporarily hide transparent objects whenever we interact with the Viewer.
-     * @param {Number} [cfg.scaleCanvasResolution=false] Whether to temporarily down-scale the canvas resolution whenever we interact with the Viewer.
-     * @param {Number} [cfg.defaultScaleCanvasResolutionFactor=0.6] The factor by which we downscale the canvas resolution whenever we stop interacting with the Viewer.
-     * @param {Number} [cfg.scaleCanvasResolutionFactor=0.6] The factor by which we downscale the canvas resolution whenever we interact with the Viewer.
-     * @param {Boolean} [cfg.delayBeforeRestore=true] Whether to temporarily have a delay before restoring normal rendering after we stop interacting with the Viewer.
-     * @param {Number} [cfg.delayBeforeRestoreSeconds=0.5] Delay in seconds before restoring normal rendering after we stop interacting with the Viewer.
-     * @param {Function} [cfg.onMoved] Optional callback function fired during moving mode, should return the callback function that will be fired when the interaction stops.
+     * @param {FastNavPluginConfiguration} cfg FastNavPlugin configuration.
      */
     constructor(viewer, cfg = {}) {
 

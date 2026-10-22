@@ -7,6 +7,10 @@
 import {math} from '../math/math.js';
 import {createRTCViewMat} from '../math/rtcCoords.js';
 import {Component} from '../Component.js';
+import {Node} from '../nodes/Node.js';
+import {Geometry} from '../geometry/Geometry.js';
+import {Material} from '../materials/Material.js';
+import {EmphasisMaterial} from '../materials/EmphasisMaterial.js';
 import {RenderState} from '../webgl/RenderState.js';
 import {createProgramVariablesState} from '../webgl/WebGLRenderer.js';
 import {DrawShaderSource} from "./draw/DrawShaderSource.js";
@@ -182,49 +186,53 @@ const renderersCache = { };
  * @implements {Entity}
  * @implements {Drawable}
  */
+
+/**
+ * @typedef {Object} MeshConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent scene, generated automatically when omitted.
+ * @property {String} [originalSystemId] ID of the corresponding object within the originating system, if any.
+ * @property {Boolean} [isModel] Specify ````true```` if this Mesh represents a model, in which case the Mesh will be registered by {@link Mesh#id} in {@link Scene#models} and may also have a corresponding {@link MetaModel} with matching {@link MetaModel#id}, registered by that ID in {@link MetaScene#metaModels}.
+ * @property {Boolean} [isObject] Specify ````true```` if this Mesh represents an object, in which case the Mesh will be registered by {@link Mesh#id} in {@link Scene#objects} and may also have a corresponding {@link MetaObject} with matching {@link MetaObject#id}, registered by that ID in {@link MetaScene#metaObjects}.
+ * @property {Node} [parent] The parent Node.
+ * @property {Number[]} [origin] World-space origin for this Mesh. When this is given, then ````matrix````, ````position```` and ````geometry```` are all assumed to be relative to this center.
+ * @property {Number[]} [rtcCenter] Deprecated - renamed to ````origin````.
+ * @property {Number[]} [position=[0,0,0]] 3D position of this Mesh, relative to ````origin````.
+ * @property {Number[]} [scale=[1,1,1]] Local scale.
+ * @property {Number[]} [rotation=[0,0,0]] Local rotation, as Euler angles given in degrees, for each of the X, Y and Z axis.
+ * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] Local modelling transform matrix. Overrides the position, scale and rotation parameters.
+ * @property {Number[]} [offset=[0,0,0]] World-space 3D translation offset. Translates the Mesh in World space, after modelling transforms.
+ * @property {Boolean} [occluder=true] Indicates if the Mesh is able to occlude {@link Marker}s.
+ * @property {Boolean} [visible=true] Indicates if the Mesh is initially visible.
+ * @property {Boolean} [culled=false] Indicates if the Mesh is initially culled from view.
+ * @property {Boolean} [pickable=true] Indicates if the Mesh is initially pickable.
+ * @property {Boolean} [clippable=true] Indicates if the Mesh is initially clippable.
+ * @property {Boolean} [collidable=true] Indicates if the Mesh is initially included in boundary calculations.
+ * @property {Boolean} [castsShadow=true] Indicates if the Mesh initially casts shadows.
+ * @property {Boolean} [receivesShadow=true] Indicates if the Mesh initially receives shadows.
+ * @property {Boolean} [xrayed=false] Indicates if the Mesh is initially xrayed.
+ * @property {Boolean} [highlighted=false] Indicates if the Mesh is initially highlighted.
+ * @property {Boolean} [selected=false] Indicates if the Mesh is initially selected.
+ * @property {Boolean} [edges=false] Indicates if the Mesh's edges are initially emphasized.
+ * @property {Boolean} [background=false] Indicates if the Mesh should act as background, e.g., it can be used for a skybox.
+ * @property {Number[]} [colorize=[1.0,1.0,1.0]] Mesh's initial RGB colorize color, multiplies by the rendered fragment colors.
+ * @property {Number} [opacity=1.0] Mesh's initial opacity factor, multiplies by the rendered fragment alpha.
+ * @property {String} [billboard="none"] Mesh's billboarding behaviour. Options are "none" for no billboarding, "spherical" to always directly face {@link Camera.eye}, rotating both vertically and horizontally, or "cylindrical" to face the {@link Camera#eye} while rotating only about its vertically axis (use that mode for things like trees on a landscape).
+ * @property {Geometry} [geometry] {@link Geometry} to define the shape of this Mesh. Inherits {@link Scene#geometry} by default.
+ * @property {Material} [material] {@link Material} to define the normal rendered appearance for this Mesh. Inherits {@link Scene#material} by default.
+ * @property {EmphasisMaterial} [xrayMaterial] {@link EmphasisMaterial} to define the xrayed appearance for this Mesh. Inherits {@link Scene#xrayMaterial} by default.
+ * @property {EmphasisMaterial} [highlightMaterial] {@link EmphasisMaterial} to define the xrayed appearance for this Mesh. Inherits {@link Scene#highlightMaterial} by default.
+ * @property {EmphasisMaterial} [selectedMaterial] {@link EmphasisMaterial} to define the selected appearance for this Mesh. Inherits {@link Scene#selectedMaterial} by default.
+ * @property {EmphasisMaterial} [edgeMaterial] {@link EdgeMaterial} to define the appearance of enhanced edges for this Mesh. Inherits {@link Scene#edgeMaterial} by default.
+ * @property {Number} [renderOrder=0] Specifies the rendering order for this Mesh. This is used to control the order in which
+ * Meshes are drawn when they have transparent objects, to give control over the order in which those objects are blended within the transparent
+ * render pass.
+ */
 export class Mesh extends Component {
 
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent scene, generated automatically when omitted.
-     * @param {String} [cfg.originalSystemId] ID of the corresponding object within the originating system, if any.
-     * @param {Boolean} [cfg.isModel] Specify ````true```` if this Mesh represents a model, in which case the Mesh will be registered by {@link Mesh#id} in {@link Scene#models} and may also have a corresponding {@link MetaModel} with matching {@link MetaModel#id}, registered by that ID in {@link MetaScene#metaModels}.
-     * @param {Boolean} [cfg.isObject] Specify ````true```` if this Mesh represents an object, in which case the Mesh will be registered by {@link Mesh#id} in {@link Scene#objects} and may also have a corresponding {@link MetaObject} with matching {@link MetaObject#id}, registered by that ID in {@link MetaScene#metaObjects}.
-     * @param {Node} [cfg.parent] The parent Node.
-     * @param {Number[]} [cfg.origin] World-space origin for this Mesh. When this is given, then ````matrix````, ````position```` and ````geometry```` are all assumed to be relative to this center.
-     * @param {Number[]} [cfg.rtcCenter] Deprecated - renamed to ````origin````.
-     * @param {Number[]} [cfg.position=[0,0,0]] 3D position of this Mesh, relative to ````origin````.
-     * @param {Number[]} [cfg.scale=[1,1,1]] Local scale.
-     * @param {Number[]} [cfg.rotation=[0,0,0]] Local rotation, as Euler angles given in degrees, for each of the X, Y and Z axis.
-     * @param {Number[]} [cfg.matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] Local modelling transform matrix. Overrides the position, scale and rotation parameters.
-     * @param {Number[]} [cfg.offset=[0,0,0]] World-space 3D translation offset. Translates the Mesh in World space, after modelling transforms.
-     * @param {Boolean} [cfg.occluder=true] Indicates if the Mesh is able to occlude {@link Marker}s.
-     * @param {Boolean} [cfg.visible=true] Indicates if the Mesh is initially visible.
-     * @param {Boolean} [cfg.culled=false] Indicates if the Mesh is initially culled from view.
-     * @param {Boolean} [cfg.pickable=true] Indicates if the Mesh is initially pickable.
-     * @param {Boolean} [cfg.clippable=true] Indicates if the Mesh is initially clippable.
-     * @param {Boolean} [cfg.collidable=true] Indicates if the Mesh is initially included in boundary calculations.
-     * @param {Boolean} [cfg.castsShadow=true] Indicates if the Mesh initially casts shadows.
-     * @param {Boolean} [cfg.receivesShadow=true]  Indicates if the Mesh initially receives shadows.
-     * @param {Boolean} [cfg.xrayed=false] Indicates if the Mesh is initially xrayed.
-     * @param {Boolean} [cfg.highlighted=false] Indicates if the Mesh is initially highlighted.
-     * @param {Boolean} [cfg.selected=false] Indicates if the Mesh is initially selected.
-     * @param {Boolean} [cfg.edges=false] Indicates if the Mesh's edges are initially emphasized.
-     * @param {Boolean} [cfg.background=false] Indicates if the Mesh should act as background, e.g., it can be used for a skybox.
-     * @param {Number[]} [cfg.colorize=[1.0,1.0,1.0]] Mesh's initial RGB colorize color, multiplies by the rendered fragment colors.
-     * @param {Number} [cfg.opacity=1.0] Mesh's initial opacity factor, multiplies by the rendered fragment alpha.
-     * @param {String} [cfg.billboard="none"] Mesh's billboarding behaviour. Options are "none" for no billboarding, "spherical" to always directly face {@link Camera.eye}, rotating both vertically and horizontally, or "cylindrical" to face the {@link Camera#eye} while rotating only about its vertically axis (use that mode for things like trees on a landscape).
-     * @param {Geometry} [cfg.geometry] {@link Geometry} to define the shape of this Mesh. Inherits {@link Scene#geometry} by default.
-     * @param {Material} [cfg.material] {@link Material} to define the normal rendered appearance for this Mesh. Inherits {@link Scene#material} by default.
-     * @param {EmphasisMaterial} [cfg.xrayMaterial] {@link EmphasisMaterial} to define the xrayed appearance for this Mesh. Inherits {@link Scene#xrayMaterial} by default.
-     * @param {EmphasisMaterial} [cfg.highlightMaterial] {@link EmphasisMaterial} to define the xrayed appearance for this Mesh. Inherits {@link Scene#highlightMaterial} by default.
-     * @param {EmphasisMaterial} [cfg.selectedMaterial] {@link EmphasisMaterial} to define the selected appearance for this Mesh. Inherits {@link Scene#selectedMaterial} by default.
-     * @param {EmphasisMaterial} [cfg.edgeMaterial] {@link EdgeMaterial} to define the appearance of enhanced edges for this Mesh. Inherits {@link Scene#edgeMaterial} by default.
-     * @param {Number} [cfg.renderOrder=0] Specifies the rendering order for this mESH. This is used to control the order in which
-     * mESHES are drawn when they have transparent objects, to give control over the order in which those objects are blended within the transparent
-     * render pass.
+     * @param {MeshConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
 

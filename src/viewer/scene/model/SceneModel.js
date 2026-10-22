@@ -1077,7 +1077,7 @@ export class SceneModel extends Component {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] Configs
+     * @param {Object} [cfg] Configs
      * @param {String} [cfg.id] Optional ID, unique among all components in the parent scene, generated automatically when omitted.
      * @param {Boolean} [cfg.isModel] Specify ````true```` if this SceneModel represents a model, in which case the SceneModel will be registered by {@link SceneModel#id} in {@link Scene#models} and may also have a corresponding {@link MetaModel} with matching {@link MetaModel#id}, registered by that ID in {@link MetaScene#metaModels}.
      * @param {Number[]} [cfg.origin=[0,0,0]] World-space double-precision 3D origin.
@@ -2242,7 +2242,7 @@ export class SceneModel extends Component {
      * We can then supply the geometry ID to {@link SceneModel#createMesh} when we want to create meshes that
      * instance the geometry.
      *
-     * @param {*} cfg Geometry properties.
+     * @param {Object} cfg Geometry properties.
      * @param {String|Number} cfg.id Mandatory ID for the geometry, to refer to with {@link SceneModel#createMesh}.
      * @param {String} cfg.primitive The primitive type. Accepted values are 'points', 'lines', 'triangles', 'solid' and 'surface'.
      * @param {Number[]} [cfg.positions] Flat array of uncompressed 3D vertex positions positions. Required for all primitive types. Overridden by ````positionsCompressed````.
@@ -2368,7 +2368,7 @@ export class SceneModel extends Component {
      *
      * We can then supply the texture ID to {@link SceneModel#createTextureSet} when we want to create texture sets that use the texture.
      *
-     * @param {*} cfg Texture properties.
+     * @param {Object} cfg Texture properties.
      * @param {String|Number} cfg.id Mandatory ID for the texture, to refer to with {@link SceneModel#createTextureSet}.
      * @param {String} [cfg.src] Image file for the texture. Assumed to be transcoded if not having a recognized image file
      * extension (jpg, jpeg, png etc.). If transcoded, then assumes ````SceneModel```` is configured with a {@link TextureTranscoder}.
@@ -2530,7 +2530,7 @@ export class SceneModel extends Component {
      * a different part of the textures. This allows us to minimize the number of textures in our models, which
      * means faster rendering.
      *
-     * @param {*} cfg Texture set properties.
+     * @param {Object} cfg Texture set properties.
      * @param {String|Number} cfg.id Mandatory ID for the texture set, to refer to with {@link SceneModel#createMesh}.
      * @param {*} [cfg.colorTextureId] ID of *RGBA* base color texture, with color in *RGB* and alpha in *A*.
      * @param {*} [cfg.metallicRoughnessTextureId] ID of *RGBA* metal-roughness texture, with the metallic factor in *R*, and roughness factor in *G*.
@@ -2585,7 +2585,7 @@ export class SceneModel extends Component {
      * * Can be connected into hierarchies
      * * Each {@link SceneModelTransform} can be used by unlimited {@link SceneModelMesh}es
      *
-     * @param {*} cfg Transform creation parameters.
+     * @param {Object} cfg Transform creation parameters.
      * @param {String} cfg.id Mandatory ID for the new transform. Must not clash with any existing components within the {@link Scene}.
      * @param {String} [cfg.parentTransformId] ID of a parent transform, previously created with {@link SceneModel#createTextureSet}.
      * @param {Number[]} [cfg.position=[0,0,0]] Local 3D position of the mesh. Overridden by ````transformId````.

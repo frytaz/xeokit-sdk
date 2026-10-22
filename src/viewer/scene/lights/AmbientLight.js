@@ -1,5 +1,6 @@
 import {math} from '../math/math.js';
 import {Light} from './Light.js';
+import {Component} from '../Component.js';
 
 /**
  * @desc An ambient light source of fixed color and intensity that illuminates all {@link Mesh}es equally.
@@ -87,6 +88,13 @@ import {Light} from './Light.js';
  * ambientLight.color = [1.0, 0.8, 0.8];
  *````
  */
+
+/**
+ * @typedef {Object} AmbientLightConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [color=[0.7, 0.7, 0.8]] The color of this AmbientLight.
+ * @property {Number} [intensity=[1.0]] The intensity of this AmbientLight, as a factor in range ````[0..1]````.
+ */
 class AmbientLight extends Light {
 
     /**
@@ -98,10 +106,7 @@ class AmbientLight extends Light {
 
     /**
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this AmbientLight as well.
-     * @param {*} [cfg] AmbientLight configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number[]} [cfg.color=[0.7, 0.7, 0.8]]  The color of this AmbientLight.
-     * @param {Number} [cfg.intensity=[1.0]]  The intensity of this AmbientLight, as a factor in range ````[0..1]````.
+     * @param {AmbientLightConfiguration} [cfg] AmbientLight configuration
      */
     constructor(owner, cfg = {}) {
         super(owner, cfg);

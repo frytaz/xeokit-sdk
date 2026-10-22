@@ -181,7 +181,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildLineGeometry
- * @param {*} [cfg] Configs
+ * @param {Object} [cfg] Configs
  * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @param {Number[]} [cfg.startPoint]  3D start point (x0, y0, z0).
  * @param {Number[]} [cfg.endPoint]  3D end point (x1, y1, z1).

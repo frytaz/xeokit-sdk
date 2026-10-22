@@ -18,7 +18,7 @@ export class MarqueePickerMouseControl extends Component {
     /**
      * Creates a new MarqueePickerMouseControl.
      *
-     * @param {*} cfg Configuration
+     * @param {Object} cfg Configuration
      * @param {MarqueePicker} cfg.marqueePicker The MarqueePicker to control.
      */
     constructor(cfg) {

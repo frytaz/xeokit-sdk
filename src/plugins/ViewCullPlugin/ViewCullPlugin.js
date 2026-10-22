@@ -1,4 +1,5 @@
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {math} from "../../viewer/scene/math/math.js";
 import {Frustum, frustumIntersectsAABB3, setFrustum} from "../../viewer/scene/math/Frustum.js";
 import {getObjectCullStates} from "../lib/culling/ObjectCullStates.js";
@@ -42,14 +43,18 @@ const kdTreeDimLength = new Float32Array(3);
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} ViewCullPluginConfiguration
+ * @property {String} [id="ViewCull"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Number} [maxTreeDepth=8] Maximum depth of the kd-tree.
+ */
 class ViewCullPlugin extends Plugin {
 
     /**
      * @constructor
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="ViewCull"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {Number} [cfg.maxTreeDepth=8] Maximum depth of the kd-tree.
+     * @param {ViewCullPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 

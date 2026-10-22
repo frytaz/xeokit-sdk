@@ -1,4 +1,6 @@
 import {Material} from './Material.js';
+import {Component} from '../Component.js';
+import {Texture} from './Texture.js';
 import {RenderState} from '../webgl/RenderState.js';
 import {math} from '../math/math.js';
 
@@ -205,6 +207,29 @@ const alphaModeNames = ["opaque", "mask", "blend"];
  * | {@link SpecularMaterial#frontface} | String | "ccw", "cw" | "ccw" |  | The winding order for {@link Geometry} frontfaces - "cw" for clockwise, or "ccw" for counter-clockwise. |
  *
  */
+/**
+ * @typedef {Object} SpecularMaterialConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [diffuse=[1,1,1]] RGB diffuse color of this SpecularMaterial. Multiplies by the RGB components of {@link SpecularMaterial#diffuseMap}.
+ * @property {Texture} [diffuseMap=undefined] RGBA {@link Texture} containing the diffuse color of this SpecularMaterial, with optional *A* component for alpha. The RGB components multiply by {@link SpecularMaterial#diffuse}, while the *A* component, if present, multiplies by {@link SpecularMaterial#alpha}.
+ * @property {Number} [specular=[1,1,1]] RGB specular color of this SpecularMaterial. Multiplies by the {@link SpecularMaterial#specularMap} and the *RGB* components of {@link SpecularMaterial#specularGlossinessMap}.
+ * @property {Texture} [specularMap=undefined] RGB texture containing the specular color of this SpecularMaterial. Multiplies by the {@link SpecularMaterial#specular} property. Must be within the same {@link Scene} as this SpecularMaterial.
+ * @property {Number} [glossiness=1.0] Factor in the range [0..1] indicating how glossy this SpecularMaterial is. 0 is no glossiness, 1 is full glossiness. Multiplies by the *R* component of {@link SpecularMaterial#glossinessMap} and the *A* component of {@link SpecularMaterial#specularGlossinessMap}.
+ * @property {Texture} [specularGlossinessMap=undefined] RGBA {@link Texture} containing this SpecularMaterial's specular color in its *RGB* component and glossiness in its *A* component. Its *RGB* components multiply by {@link SpecularMaterial#specular}, while its *A* component multiplies by {@link SpecularMaterial#glossiness}. Must be within the same {@link Scene} as this SpecularMaterial.
+ * @property {Number} [specularF0=0.0] Factor in the range 0..1 indicating how reflective this SpecularMaterial is.
+ * @property {Number[]} [emissive=[0,0,0]] RGB emissive color of this SpecularMaterial. Multiplies by the RGB components of {@link SpecularMaterial#emissiveMap}.
+ * @property {Texture} [emissiveMap=undefined] RGB {@link Texture} containing the emissive color of this SpecularMaterial. Multiplies by the {@link SpecularMaterial#emissive} property. Must be within the same {@link Scene} as this SpecularMaterial.
+ * @property {Texture} [occlusionMap=undefined] RGB ambient occlusion {@link Texture}. Within shaders, multiplies by the specular and diffuse light reflected by surfaces. Must be within the same {@link Scene} as this SpecularMaterial.
+ * @property {Texture} [normalMap=undefined] RGB tangent-space normal {@link Texture}. Must be within the same {@link Scene} as this SpecularMaterial.
+ * @property {Number} [alpha=1.0] Factor in the range 0..1 indicating how transparent this SpecularMaterial is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque. Multiplies by the *R* component of {@link SpecularMaterial#alphaMap} and the *A* component, if present, of {@link SpecularMaterial#diffuseMap}.
+ * @property {Texture} [alphaMap=undefined] RGB {@link Texture} containing this SpecularMaterial's alpha in its *R* component. The *R* component multiplies by the {@link SpecularMaterial#alpha} property. Must be within the same {@link Scene} as this SpecularMaterial.
+ * @property {String} [alphaMode="opaque"] The alpha blend mode - accepted values are "opaque", "blend" and "mask". See the {@link SpecularMaterial#alphaMode} property for more info.
+ * @property {Number} [alphaCutoff=0.5] The alpha cutoff value. See the {@link SpecularMaterial#alphaCutoff} property for more info.
+ * @property {Boolean} [backfaces=false] Whether to render {@link Geometry} backfaces.
+ * @property {Boolean} [frontface="ccw"] The winding order for {@link Geometry} front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
+ * @property {Number} [lineWidth=1] Scalar that controls the width of {@link Geometry} lines.
+ * @property {Number} [pointSize=1] Scalar that controls the size of {@link Geometry} points.
+ */
 class SpecularMaterial extends Material {
 
     /**
@@ -218,27 +243,7 @@ class SpecularMaterial extends Material {
      *
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] The SpecularMaterial configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number[]} [cfg.diffuse=[1,1,1]] RGB diffuse color of this SpecularMaterial. Multiplies by the RGB components of {@link SpecularMaterial#diffuseMap}.
-     * @param {Texture} [cfg.diffuseMap=undefined] RGBA {@link Texture} containing the diffuse color of this SpecularMaterial, with optional *A* component for alpha. The RGB components multiply by {@link SpecularMaterial#diffuse}, while the *A* component, if present, multiplies by {@link SpecularMaterial#alpha}.
-     * @param {Number} [cfg.specular=[1,1,1]] RGB specular color of this SpecularMaterial. Multiplies by the {@link SpecularMaterial#specularMap} and the *RGB* components of {@link SpecularMaterial#specularGlossinessMap}.
-     * @param {Texture} [cfg.specularMap=undefined] RGB texture containing the specular color of this SpecularMaterial. Multiplies by the {@link SpecularMaterial#specular} property. Must be within the same {@link Scene} as this SpecularMaterial.
-     * @param {Number} [cfg.glossiness=1.0] Factor in the range [0..1] indicating how glossy this SpecularMaterial is. 0 is no glossiness, 1 is full glossiness. Multiplies by the *R* component of {@link SpecularMaterial#glossinessMap} and the *A* component of {@link SpecularMaterial#specularGlossinessMap}.
-     * @param {Texture} [cfg.specularGlossinessMap=undefined] RGBA {@link Texture} containing this SpecularMaterial's specular color in its *RGB* component and glossiness in its *A* component. Its *RGB* components multiply by {@link SpecularMaterial#specular}, while its *A* component multiplies by {@link SpecularMaterial#glossiness}. Must be within the same {@link Scene} as this SpecularMaterial.
-     * @param {Number} [cfg.specularF0=0.0] Factor in the range 0..1 indicating how reflective this SpecularMaterial is.
-     * @param {Number[]} [cfg.emissive=[0,0,0]]  RGB emissive color of this SpecularMaterial. Multiplies by the RGB components of {@link SpecularMaterial#emissiveMap}.
-     * @param {Texture} [cfg.emissiveMap=undefined] RGB {@link Texture} containing the emissive color of this SpecularMaterial. Multiplies by the {@link SpecularMaterial#emissive} property. Must be within the same {@link Scene} as this SpecularMaterial.
-     * @param {Texture} [cfg.occlusionMap=undefined] RGB ambient occlusion {@link Texture}. Within shaders, multiplies by the specular and diffuse light reflected by surfaces. Must be within the same {@link Scene} as this SpecularMaterial.
-     * @param {Texture} [cfg.normalMap=undefined] {Texture} RGB tangent-space normal {@link Texture}. Must be within the same {@link Scene} as this SpecularMaterial.
-     * @param {Number} [cfg.alpha=1.0] Factor in the range 0..1 indicating how transparent this SpecularMaterial is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque. Multiplies by the *R* component of {@link SpecularMaterial#alphaMap} and the *A* component, if present, of {@link SpecularMaterial#diffuseMap}.
-     * @param {Texture} [cfg.alphaMap=undefined] RGB {@link Texture} containing this SpecularMaterial's alpha in its *R* component. The *R* component multiplies by the {@link SpecularMaterial#alpha} property. Must be within the same {@link Scene} as this SpecularMaterial.
-     * @param {String} [cfg.alphaMode="opaque"] The alpha blend mode - accepted values are "opaque", "blend" and "mask". See the {@link SpecularMaterial#alphaMode} property for more info.
-     * @param {Number} [cfg.alphaCutoff=0.5] The alpha cutoff value. See the {@link SpecularMaterial#alphaCutoff} property for more info.
-     * @param {Boolean} [cfg.backfaces=false] Whether to render {@link Geometry} backfaces.
-     * @param {Boolean} [cfg.frontface="ccw"] The winding order for {@link Geometry} front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
-     * @param {Number} [cfg.lineWidth=1] Scalar that controls the width of {@link Geometry lines.
-     * @param {Number} [cfg.pointSize=1] Scalar that controls the size of {@link Geometry} points.
+     * @param {SpecularMaterialConfiguration} [cfg] The SpecularMaterial configuration
      */
     constructor(owner, cfg = {}) {
 

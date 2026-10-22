@@ -54,6 +54,14 @@ const up    = math.vec3([0,  1,  0]);
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} SectionPlaneConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Boolean} [active=true] Indicates whether or not this SectionPlane is active.
+ * @property {Number[]} [pos=[0,0,0]] World-space position of the SectionPlane.
+ * @property {Number[]} [dir=[0,0,-1]] Vector perpendicular to the plane surface, indicating the SectionPlane plane orientation.
+ */
 class SectionPlane extends Component {
 
     /**
@@ -65,12 +73,8 @@ class SectionPlane extends Component {
 
     /**
      * @constructor
-     * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this SectionPlane as well.
-     * @param {*} [cfg]  SectionPlane configuration
-     * @param  {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Boolean} [cfg.active=true] Indicates whether or not this SectionPlane is active.
-     * @param {Number[]} [cfg.pos=[0,0,0]] World-space position of the SectionPlane.
-     * @param {Number[]} [cfg.dir=[0,0,-1]] Vector perpendicular to the plane surface, indicating the SectionPlane plane orientation.
+     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this SectionPlane as well.
+     * @param {SectionPlaneConfiguration} [cfg] SectionPlane configuration
      */
     constructor(owner, cfg = {}) {
 

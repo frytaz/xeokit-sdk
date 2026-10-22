@@ -1,4 +1,5 @@
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {Storey} from "./Storey.js";
 import {math} from "../../viewer/scene/math/math.js";
 import {ObjectsMemento} from "../../viewer/scene/mementos/ObjectsMemento.js";
@@ -230,15 +231,19 @@ const EMPTY_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAA
  * }
  * ````
  */
+
+/**
+ * @typedef {Object} StoreyViewsPluginConfiguration
+ * @property {String} [id="StoreyViews"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Boolean} [fitStoreyMaps=false] If enabled, the elements of each floor map image will be proportionally resized to encompass the entire image. This leads to varying scales among different floor map images. If disabled, each floor map image will display the model's extents, ensuring a consistent scale across all images.
+ */
 class StoreyViewsPlugin extends Plugin {
 
     /**
      * @constructor
      *
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="StoreyViews"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {Boolean} [cfg.fitStoreyMaps=false] If enabled, the elements of each floor map image will be proportionally resized to encompass the entire image. This leads to varying scales among different floor map images. If disabled, each floor map image will display the model's extents, ensuring a consistent scale across all images.
+     * @param {StoreyViewsPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 

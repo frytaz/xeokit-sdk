@@ -1,4 +1,5 @@
 import {Material} from './Material.js';
+import {Component} from '../Component.js';
 import {RenderState} from '../webgl/RenderState.js';
 
 const PRESETS = {
@@ -48,6 +49,13 @@ const PRESETS = {
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} LinesMaterialConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number} [lineWidth=1] Line width in pixels.
+ * @property {String} [preset] Selects a preset LinesMaterial configuration - see {@link LinesMaterial#presets}.
+ */
 class LinesMaterial extends Material {
 
     /**
@@ -69,10 +77,7 @@ class LinesMaterial extends Material {
     /**
      * @constructor
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] The LinesMaterial configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number} [cfg.lineWidth=1] Line width in pixels.
-     * @param {String} [cfg.preset] Selects a preset LinesMaterial configuration - see {@link LinesMaterial#presets}.
+     * @param {LinesMaterialConfiguration} [cfg] The LinesMaterial configuration
      */
     constructor(owner, cfg = {}) {
 

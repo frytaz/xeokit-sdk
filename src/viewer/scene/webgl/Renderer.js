@@ -91,6 +91,7 @@ const makeRayAABBIntersectionTest = (O, D) => aabb => {
 
 /**
  * @private
+ * @constructor
  */
 const Renderer = function (scene, options) {
 
@@ -1708,7 +1709,7 @@ const Renderer = function (scene, options) {
 
     /**
      * Adds a {@link Marker} for occlusion testing.
-     * @param marker
+     * @type {(marker: any) => void}
      */
     this.addMarker = function (marker) {
         this._occlusionTester = this._occlusionTester || new OcclusionTester(scene);

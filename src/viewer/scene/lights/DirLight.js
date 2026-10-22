@@ -1,4 +1,5 @@
 import {Light} from './Light.js';
+import {Component} from '../Component.js';
 import {RenderState} from '../webgl/RenderState.js';
 import {RenderBuffer} from '../webgl/RenderBuffer.js';
 import {math} from '../math/math.js';
@@ -95,6 +96,16 @@ import {math} from '../math/math.js';
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} DirLightConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [dir=[1.0, 1.0, 1.0]] A unit vector indicating the direction that the light is shining,  given in either World or View space, depending on the value of the ````space```` parameter.
+ * @property {Number[]} [color=[0.7, 0.7, 0.8 ]] The color of this DirLight.
+ * @property {Number} [intensity=1.0] The intensity of this DirLight, as a factor in range ````[0..1]````.
+ * @property {String} [space="view"] The coordinate system the DirLight is defined in - ````"view"```` or ````"world"````.
+ * @property {Boolean} [castsShadow=false] Flag which indicates if this DirLight casts a castsShadow.
+ */
 class DirLight extends Light {
 
     /**
@@ -106,13 +117,7 @@ class DirLight extends Light {
 
     /**
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this DirLight as well.
-     * @param {*} [cfg] The DirLight configuration
-     * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {Number[]} [cfg.dir=[1.0, 1.0, 1.0]]  A unit vector indicating the direction that the light is shining,  given in either World or View space, depending on the value of the ````space```` parameter.
-     * @param {Number[]} [cfg.color=[0.7, 0.7, 0.8 ]] The color of this DirLight.
-     * @param {Number} [cfg.intensity=1.0] The intensity of this DirLight, as a factor in range ````[0..1]````.
-     * @param {String} [cfg.space="view"] The coordinate system the DirLight is defined in - ````"view"```` or ````"world"````.
-     * @param {Boolean} [cfg.castsShadow=false] Flag which indicates if this DirLight casts a castsShadow.
+     * @param {DirLightConfiguration} [cfg] The DirLight configuration
      */
     constructor(owner, cfg = {}) {
 

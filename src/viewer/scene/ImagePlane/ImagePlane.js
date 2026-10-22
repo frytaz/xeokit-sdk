@@ -135,7 +135,7 @@ class ImagePlane extends Component {
     /**
      * @constructor
      * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this ````ImagePlane```` as well.
-     * @param {*} [cfg]  ````ImagePlane```` configuration
+     * @param {Object} [cfg]  ````ImagePlane```` configuration
      * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
      * @param {Boolean} [cfg.visible=true] Indicates whether or not this ````ImagePlane```` is visible.
      * @param {Boolean} [cfg.gridVisible=true] Indicates whether or not the grid is visible.  Grid is only visible when ````ImagePlane```` is also visible.

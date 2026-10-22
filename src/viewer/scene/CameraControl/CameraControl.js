@@ -798,6 +798,11 @@ class CameraControl extends Component {
 
         const scene = this.scene;
 
+        /**
+         * Internal controllers dictionary.
+         * @private
+         * @type {Object}
+         */
         this._controllers = {
             cameraControl: this,
             pickController: new PickController(this, this._configs),
@@ -825,7 +830,7 @@ class CameraControl extends Component {
             dollyBackward: "zoom-out",
             rotate: 'grabbing',
             pan: 'move',
-        }
+        };
 
         // Applies scheduled updates to the Camera on each Scene "tick" event
 

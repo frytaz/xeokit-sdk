@@ -631,6 +631,9 @@ class Scene extends Component {
             alert("xeokit failed to find WebGL!");
         });
 
+        /**
+         * @private
+         */
         this._renderer = new Renderer(this, {
             transparent: transparent,
             alphaDepthMask: alphaDepthMask
@@ -638,6 +641,9 @@ class Scene extends Component {
 
         this.canvas._renderer = this._renderer;
 
+        /**
+         * @private
+         */
         this._sectionPlanesState = new (function () {
 
             this.sectionPlanes = [];
@@ -701,6 +707,9 @@ class Scene extends Component {
 
         this._sectionPlanesState.setNumCachedSectionPlanes(cfg.numCachedSectionPlanes || 0);
 
+        /**
+         * @private
+         */
         this._lightsState = new (function () {
 
             const DEFAULT_AMBIENT = math.vec4([0, 0, 0, 0]);
@@ -2301,7 +2310,7 @@ class Scene extends Component {
      * }
      *  ````
      *
-     * @param {*} params Picking parameters.
+     * @param {Object} [params] Picking parameters.
      * @param {Boolean} [params.pickSurface=false] Whether to find the picked position on the surface of the Entity.
      * @param {Boolean} [params.pickSurfacePrecision=false] When picking an Entity surface position, indicates whether or not we want full-precision {@link PickResult#worldPos}. Only works when {@link Scene#readableGeometryEnabled} is ````true````. If pick succeeds, the returned {@link PickResult} will have {@link PickResult#precision} set ````true````, to indicate that it contains full-precision surface pick results.
      * @param {Boolean} [params.pickSurfaceNormal=false] Whether to find the picked normal on the surface of the Entity. Only works if ````pickSurface```` is given.

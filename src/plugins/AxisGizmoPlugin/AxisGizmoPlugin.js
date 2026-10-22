@@ -1,4 +1,5 @@
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {Scene} from "../../viewer/scene/scene/Scene.js";
 import {AmbientLight} from "../../viewer/scene/lights/AmbientLight.js";
 import {DirLight} from "../../viewer/scene/lights/DirLight.js";
@@ -41,15 +42,19 @@ import {math} from "../../viewer/scene/math/math.js";
  * });
  * ````
  */
+
+/**
+ * @typedef {Object} AxisGizmoPluginConfiguration
+ * @property {String} [id="AxisGizmo"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {String} [canvasId] ID of an existing HTML canvas to display the AxisGizmo - either this or canvasElement is mandatory. When both values are given, the element reference is always preferred to the ID.
+ * @property {HTMLCanvasElement} [canvasElement] Reference of an existing HTML canvas to display the AxisGizmo - either this or canvasId is mandatory. When both values are given, the element reference is always preferred to the ID.
+ */
 class AxisGizmoPlugin extends Plugin {
 
     /**
      * @constructor
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="AxisGizmo"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {String} [cfg.canvasId] ID of an existing HTML canvas to display the AxisGizmo - either this or canvasElement is mandatory. When both values are given, the element reference is always preferred to the ID.
-     * @param {HTMLCanvasElement} [cfg.canvasElement] Reference of an existing HTML canvas to display the AxisGizmo - either this or canvasId is mandatory. When both values are given, the element reference is always preferred to the ID.
+     * @param {AxisGizmoPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg) {
 

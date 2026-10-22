@@ -44,7 +44,7 @@
  @submodule rendering
  @constructor
  @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
- @param {*} [cfg] Viewport configuration
+ @param {Object} [cfg] Viewport configuration
  @param {String} [cfg.id] Optional ID, unique among all components in the parent
  {@link Scene}, generated automatically when omitted.
  @param {String:Object} [cfg.meta] Optional map of user-defined metadata to attach to this Viewport.

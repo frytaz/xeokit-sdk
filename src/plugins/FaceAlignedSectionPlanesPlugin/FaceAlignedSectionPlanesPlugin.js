@@ -241,7 +241,7 @@ export class FaceAlignedSectionPlanesPlugin extends Plugin {
      *
      * The {@link SectionPlane} will be registered by {@link SectionPlane#id} in {@link FaceAlignedSectionPlanesPlugin#sectionPlanes}.
      *
-     * @param {Object} params {@link SectionPlane} configuration.
+     * @param {Object} [params] {@link SectionPlane} configuration.
      * @param {String} [params.id] Unique ID to assign to the {@link SectionPlane}. Must be unique among all components in the {@link Viewer}'s {@link Scene}. Auto-generated when omitted.
      * @param {Number[]} [params.pos=[0,0,0]] World-space position of the {@link SectionPlane}.
      * @param {Number[]} [params.dir=[0,0,-1]] World-space vector indicating the orientation of the {@link SectionPlane}.

@@ -63,7 +63,7 @@ class Bitmap extends Component {
      *
      * @constructor
      * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this ````Bitmap```` as well.
-     * @param {*} [cfg]  ````Bitmap```` configuration
+     * @param {Object} [cfg]  ````Bitmap```` configuration
      * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
      * @param {Boolean} [cfg.visible=true] Indicates whether or not this ````Bitmap```` is visible.
      * @param {Number[]} [cfg.pos=[0,0,0]] World-space position of the ````Bitmap````.

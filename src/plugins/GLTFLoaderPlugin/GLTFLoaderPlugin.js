@@ -1,4 +1,4 @@
-import {Plugin, SceneModel, utils} from "../../viewer/index.js"
+import {Plugin, SceneModel, utils, Viewer} from "../../viewer/index.js"
 import {GLTFSceneModelLoader} from "./GLTFSceneModelLoader.js";
 
 import {GLTFDefaultDataSource} from "./GLTFDefaultDataSource.js";
@@ -229,16 +229,20 @@ import {IFCObjectDefaults} from "../../viewer/metadata/IFCObjectDefaults.js";
  * ````
  * @class GLTFLoaderPlugin
  */
+
+/**
+ * @typedef {Object} GLTFLoaderPluginConfiguration
+ * @property {String} [id="GLTFLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {Object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
+ * @property {Object} [dataSource] A custom data source through which the GLTFLoaderPlugin can load metadata, glTF and binary attachments. Defaults to an instance of {@link GLTFDefaultDataSource}, which loads over HTTP.
+ */
 class GLTFLoaderPlugin extends Plugin {
 
     /**
      * @constructor
      *
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="GLTFLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {Object} [cfg.objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
-     * @param {Object} [cfg.dataSource] A custom data source through which the GLTFLoaderPlugin can load metadata, glTF and binary attachments. Defaults to an instance of {@link GLTFDefaultDataSource}, which loads over HTTP.
+     * @param {GLTFLoaderPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg = {}) {
 
@@ -297,7 +301,7 @@ class GLTFLoaderPlugin extends Plugin {
     /**
      * Loads a glTF model from a file into this GLTFLoaderPlugin's {@link Viewer}.
      *
-     * @param {*} params Loading parameters.
+     * @param {Object} params Loading parameters.
      * @param {String} [params.id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
      * @param {String} [params.src] Path to a glTF file, as an alternative to the ````gltf```` parameter.
      * @param {*} [params.gltf] glTF JSON, as an alternative to the ````src```` parameter.

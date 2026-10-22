@@ -1,4 +1,5 @@
 import {Plugin} from "../../viewer/Plugin.js";
+import {Viewer} from "../../viewer/Viewer.js";
 import {Annotation} from "./Annotation.js";
 import {utils} from "../../viewer/scene/utils.js";
 import {math} from "../../viewer/scene/math/math.js";
@@ -366,19 +367,23 @@ import {math} from "../../viewer/scene/math/math.js";
  * planes to a minimum, which improves the accuracy of the Annotation occlusion test. In general, a good default
  * value for ````Perspective#far```` and ````Ortho#far```` is around ````2.000````.
  */
+
+/**
+ * @typedef {Object} AnnotationsPluginConfiguration
+ * @property {String} [id="Annotations"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
+ * @property {String} [markerHTML] HTML text template for Annotation markers. Defaults to ````<div></div>````. Ignored on {@link Annotation}s configured with a ````markerElementId````.
+ * @property {String} [labelHTML] HTML text template for Annotation labels. Defaults to ````<div></div>````.  Ignored on {@link Annotation}s configured with a ````labelElementId````.
+ * @property {HTMLElement} [container] Container DOM element for markers and labels. Defaults to ````document.body````, but different element should be specified to capture it with {@link Viewer.getSnapshotWithPlugins}.
+ * @property {Object.<string, (string|number)>} [values={}] Map of default values to insert into the HTML templates for the marker and label.
+ * @property {Number} [surfaceOffset=0.3] The amount by which each {@link Annotation} is offset from the surface of
+ * its {@link Entity} when we create the Annotation by supplying a {@link PickResult} to {@link AnnotationsPlugin#createAnnotation}.
+ */
 class AnnotationsPlugin extends Plugin {
 
     /**
      * @constructor
      * @param {Viewer} viewer The Viewer.
-     * @param {Object} cfg  Plugin configuration.
-     * @param {String} [cfg.id="Annotations"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
-     * @param {String} [cfg.markerHTML] HTML text template for Annotation markers. Defaults to ````<div></div>````. Ignored on {@link Annotation}s configured with a ````markerElementId````.
-     * @param {String} [cfg.labelHTML] HTML text template for Annotation labels. Defaults to ````<div></div>````.  Ignored on {@link Annotation}s configured with a ````labelElementId````.
-     * @param {HTMLElement} [cfg.container] Container DOM element for markers and labels. Defaults to ````document.body````, but different element should be specified to capture it with {@link Viewer.getSnapshotWithPlugins}.
-     * @param {{String:(String|Number)}} [cfg.values={}] Map of default values to insert into the HTML templates for the marker and label.
-     * @param {Number}  [cfg.surfaceOffset=0.3] The amount by which each {@link Annotation} is offset from the surface of
-     * its {@link Entity} when we create the Annotation by supplying a {@link PickResult} to {@link AnnotationsPlugin#createAnnotation}.
+     * @param {AnnotationsPluginConfiguration} cfg Plugin configuration.
      */
     constructor(viewer, cfg) {
 

@@ -55,7 +55,7 @@ class ReflectionMap extends CubeTexture {
 
     /**
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {*} [cfg] Configs
+     * @param {Object} [cfg] Configs
      * @param {String} [cfg.id] Optional ID for this ReflectionMap, unique among all components in the parent scene, generated automatically when omitted.
      * @param {String[]} [cfg.src=null]  Paths to six image files to load into this ReflectionMap.
      * @param {Boolean} [cfg.flipY=false] Flips this ReflectionMap's source data along its vertical axis when true.

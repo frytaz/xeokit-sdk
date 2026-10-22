@@ -1,4 +1,4 @@
-import {math, Plugin, SceneModel, worldToRTCPositions} from "../../viewer/index.js";
+import {math, Plugin, SceneModel, worldToRTCPositions, Viewer} from "../../viewer/index.js";
 
 import {IFCOpenShellDefaultDataSource} from "./IFCOpenShellDefaultDataSource.js";
 
@@ -216,15 +216,37 @@ import {IFCOpenShellDefaultDataSource} from "./IFCOpenShellDefaultDataSource.js"
  * @class IFCOpenShellLoaderPlugin
  * @since 2.6.90
  */
+
+/**
+ * @typedef {Object} IFCOpenShellLoaderPluginConfigs
+ * @property {String} [id="IFCOpenShellLoader"] Optional ID for this plugin instance.
+ * @property {Object} [dataSource] Custom data source (defaults to {@link IFCOpenShellDefaultDataSource}).
+ * @property {Object} ifcopenshell IfcOpenShell API object.
+ * @property {Object} ifcopenshell_geom IfcOpenShell geometry API object.
+ */
+
+/**
+ * @typedef {Object} LoadIFCOpenShellModel
+ * @property {String} [id] Optional root Entity ID.
+ * @property {String} [src] IFC file path (alternative to `text`).
+ * @property {String} [text] IFC text (alternative to `src`).
+ * @property {String[]} [excludeTypes] Array of IFC types to exclude.
+ * @property {Number[]} [origin=[0,0,0]] Optional World-coordinate origin to apply to the model.
+ * @property {Number[]} [position=[0,0,0]] Optional position offset to apply to the model.
+ * @property {Number[]} [rotation=[0,0,0]] Optional XYZ Euler rotation (degrees) to apply to the model.
+ * @property {Boolean} [backfaces=true] Whether to render backfaces.
+ * @property {Boolean} [dtxEnabled=true] Whether to enable data texture storage for geometry buffers.
+ * @property {Boolean} [loadMetadata=true] Whether to load metadata.
+ * @property {Boolean} [loadMetadataPropertySets=true] Whether to load property sets within the metadata. Only works when `loadMetadata` is true.
+ * @property {Boolean} [edges=false] Whether to generate edge lines for the model.
+ * @property {Boolean} [saoEnabled=false] Whether to enable SAO for the model.
+ * @property {Boolean} [globalizeObjectIds=false] Whether to globalize each {@link Entity#id} and {@link MetaObject#id} as it loads the model.
+ */
 export class IFCOpenShellLoaderPlugin extends Plugin {
 
     /**
      * @param {Viewer} viewer The {@link Viewer} that will own this plugin.
-     * @param {Object} cfg Plugin configuration.
-     * @param {String} [cfg.id="IFCOpenShellLoader"] Optional ID for this plugin instance.
-     * @param {Object} [cfg.dataSource] Custom data source (defaults to {@link IFCOpenShellDefaultDataSource}).
-     * @param {Object} cfg.ifcopenshell IfcOpenShell API object.
-     * @param {Object} cfg.ifcopenshell_geom IfcOpenShell geometry API object.
+     * @param {IFCOpenShellLoaderPluginConfigs} cfg Plugin configuration.
      */
     constructor(viewer, cfg) {
 
@@ -299,22 +321,7 @@ export class IFCOpenShellLoaderPlugin extends Plugin {
     /**
      * Loads an IFC model from a file or text into the {@link Viewer}.
      *
-     * @param {Object} params
-     * @param {String} [params.id] Optional root Entity ID.
-     * @param {String} [params.src] IFC file path (alternative to `text`).
-     * @param {String} [params.text] IFC text (alternative to `src`).
-     * @param {{String:Object}} [params.objectDefaults]
-     * @param {String[]} [params.excludeTypes] Array of IFC types to exclude.
-     * @param {Number[]} [params.origin=[0,0,0]] Optional World-coordinate origin to apply to the model.
-     * @param {Number[]} [params.position=[0,0,0]] Optional position offset to apply to the model.
-     * @param {Number[]} [params.rotation=[0,0,0]] Optional XYZ Euler rotation (degrees) to apply to the model.
-     * @param {Boolean} [params.backfaces=true] Whether to render backfaces.
-     * @param {Boolean} [params.dtxEnabled=true] Whether to enable data texture storage for geometry buffers.
-     * @param {Boolean} [params.loadMetadata=true] Whether to load metadata.
-     * @param {Boolean} [params.loadMetadataPropertySets=true] Whether to load property sets within the metadata. Only works when `loadMetadata` is true.
-     * @param {Boolean} [params.edges=false] Whether to generate edge lines for the model.
-     * @param {Boolean} [params.saoEnabled=false] Whether to enable SAO for the model.
-     * @param {Boolean} [params.globalizeObjectIds=false] Whether to globalize each {@link Entity#id} and {@link MetaObject#id} as it loads the model.
+     * @param {LoadIFCOpenShellModel} params
      * @returns {Entity}
      */
     async load(params = {}) {
