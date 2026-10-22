@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "./src",
+    "outDir": "./gen-types",
+    "target": "ESNext",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "skipLibCheck": true,
+    "checkJs": false,
+    "noEmit": false,
+    "maxNodeModuleJsDepth": 0,
+    "types": ["node"],
+    "noEmitOnError": false
+  },
+  "include": ["src/**/*.js"],
+  "exclude": ["node_modules/", "dist/", "build/", "types/", "gen-types/", "gen-docs/"]
+}
