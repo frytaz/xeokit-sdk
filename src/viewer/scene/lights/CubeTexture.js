@@ -37,7 +37,7 @@ function nextHighestPowerOfTwo(x) {
 /**
  * @typedef {Object} CubeTextureConfiguration
  * @property {String} [id] Optional ID for this CubeTexture, unique among all components in the parent scene, generated automatically when omitted.
- * @property {String[]} [src=null] Paths to six image files to load into this CubeTexture.
+ * @property {String[]} src Paths to six image files to load into this CubeTexture.
  * @property {Boolean} [flipY=false] Flips this CubeTexture's source data along its vertical axis when true.
  * @property {Number} [encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
  */
@@ -63,8 +63,8 @@ class CubeTexture extends Component {
 
         this._state = new RenderState({
             texture: new Texture2D({gl, target: gl.TEXTURE_CUBE_MAP}),
-            flipY: this._checkFlipY(cfg.minFilter),
-            encoding: this._checkEncoding(cfg.encoding),
+            flipY: this.#checkFlipY(cfg.minFilter),
+            encoding: this.#checkEncoding(cfg.encoding),
             minFilter: LinearMipmapLinearFilter,
             magFilter: LinearFilter,
             wrapS: ClampToEdgeWrapping,
@@ -75,16 +75,16 @@ class CubeTexture extends Component {
         this._src = cfg.src;
         this._images = [];
 
-        this._loadSrc(cfg.src);
+        this.#loadSrc(cfg.src);
 
         stats.memory.textures++;
     }
 
-    _checkFlipY(value) {
+    #checkFlipY(value) {
         return !!value;
     }
 
-    _checkEncoding(value) {
+    #checkEncoding(value) {
         value = value || LinearEncoding;
         if (value !== LinearEncoding && value !== sRGBEncoding) {
             this.error("Unsupported value for 'encoding' - supported values are LinearEncoding and sRGBEncoding. Defaulting to LinearEncoding.");
@@ -93,7 +93,7 @@ class CubeTexture extends Component {
         return value;
     }
 
-    _loadSrc(src) {
+    #loadSrc(src) {
         const self = this;
         const gl = this.scene.canvas.gl;
         this._images = [];

@@ -3,6 +3,26 @@ import {Label} from "../html/Label.js";
 import {Wire} from "../html/Wire.js";
 import {math} from "../../../viewer/scene/math/math.js";
 import {Marker} from "../../../viewer/scene/marker/Marker.js";
+/** @import { Viewer } from "../../../viewer/Viewer.js" */
+/** @import { PointerCircle } from "../../../extras/PointerCircle/PointerCircle.js" */
+/** @import { CameraControl } from "../../../viewer/scene/CameraControl/CameraControl.js" */
+
+/** @typedef {number[]} Vec2 */
+/** @typedef {number[]} Vec3 */
+/**
+ * @template T
+ * @typedef {(origin: Vec3, direction: Vec3) => T | null} Ray2WorldPos
+ */
+/** @typedef {() => void} Cleanup */
+/** @typedef {() => void} OnCancel */
+/**
+ * @template T
+ * @typedef {(canvasPos: Vec2, worldPos: T | null) => void} OnChange
+ */
+/**
+ * @template T
+ * @typedef {(canvasPos: Vec2, worldPos: T | null) => void} OnCommit
+ */
 
 const tmpVec2a = math.vec2();
 const tmpVec2b = math.vec2();
@@ -767,6 +787,13 @@ export function activateDraggableDots(cfg) {
     };
 }
 
+/**
+ * @template T
+ * @param {Viewer} viewer
+ * @param {PointerCircle} pointerCircle
+ * @param {Ray2WorldPos<T>} ray2WorldPos
+ * @returns {(onCancel: OnCancel, onChange: OnChange<T>, onCommit: OnCommit<T>) => Cleanup}
+ */
 export const touchPointSelector = function(viewer, pointerCircle, ray2WorldPos) {
     return function(onCancel, onChange, onCommit) {
         const scene = viewer.scene;
@@ -985,6 +1012,11 @@ export const triangulateEarClipping = function(planeCoords) {
     return [ planeCoords, baseTriangles, isCCW ];
 };
 
+/**
+ * @param {HTMLElement} element
+ * @param {(canvasPos: Vec2 | null) => void} onChange
+ * @returns {Cleanup}
+ */
 export const addMousePressListener = function(element, onChange) {
     const moveTolerance = 4;
 
@@ -1036,6 +1068,13 @@ export const addMousePressListener = function(element, onChange) {
     return cleanup;
 };
 
+/**
+ * @param {HTMLElement} element
+ * @param {CameraControl} cameraControl
+ * @param {PointerCircle} pointerCircle
+ * @param {(canvasPos: Vec2 | null) => void} onChange
+ * @returns {Cleanup}
+ */
 export const addTouchPressListener = function(element, cameraControl, pointerCircle, onChange) {
     const longTouchTimeoutMs = 300;
     const moveTolerance = 20;

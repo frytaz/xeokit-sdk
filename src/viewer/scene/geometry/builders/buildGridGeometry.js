@@ -1,6 +1,13 @@
 import {utils} from '../../utils.js';
 
 /**
+ * @typedef {Object} buildGridGeometryConfiguration
+ * @property {String} [id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number} [size=1] Dimension on the X and Z-axis.
+ * @property {Number} [divisions=1] Number of divisions on X and Z axis..
+ */
+
+/**
  * @desc Creates a grid-shaped {@link Geometry}.
  *
  * ## Usage
@@ -34,10 +41,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildGridGeometry
- * @param {Object} [cfg] Configs
- * @param {String} [cfg.id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Number} [cfg.size=1] Dimension on the X and Z-axis.
- * @param {Number} [cfg.divisions=1] Number of divisions on X and Z axis..
+ * @param {buildGridGeometryConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildGridGeometry(cfg = {}) {

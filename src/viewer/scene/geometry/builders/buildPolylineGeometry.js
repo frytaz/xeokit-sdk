@@ -1,6 +1,12 @@
 import {utils} from '../../utils.js';
 
 /**
+ * @typedef {Object} buildPolylineGeometryConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [points]  3D points indicating vertices position.
+ */
+
+/**
  * @desc Creates a 3D polyline {@link Geometry}.
  *
  * ## Usage
@@ -57,9 +63,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildPolylineGeometry
- * @param {Object} [cfg] Configs
- * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Number[]} [cfg.points]  3D points indicating vertices position.
+ * @param {buildPolylineGeometryConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildPolylineGeometry(cfg = {}) {
@@ -83,6 +87,13 @@ function buildPolylineGeometry(cfg = {}) {
         indices: indices,
     });
 }
+
+/**
+ * @typedef {Object} buildPolylineGeometryFromCurveConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Object} [curve]  Curve for which polyline will be created.
+ * @property {Number} [divisions]  The number of divisions.
+ */
 
 /**
  * @desc Creates a 3D polyline from curve {@link Geometry}.
@@ -188,10 +199,7 @@ function buildPolylineGeometry(cfg = {}) {
  * ````
  *
  * @function buildPolylineGeometryFromCurve
- * @param {Object} [cfg] Configs
- * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Object} [cfg.curve]  Curve for which polyline will be created.
- * @param {Number} [cfg.divisions]  The number of divisions.
+ * @param {buildPolylineGeometryFromCurveConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildPolylineGeometryFromCurve(cfg = {}) {

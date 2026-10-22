@@ -1,4 +1,5 @@
 import {CubeTexture} from './CubeTexture.js';
+/** @import { CubeTextureConfiguration } from './CubeTexture.js' */
 
 /**
  * @desc A reflection cube map.
@@ -55,11 +56,7 @@ class ReflectionMap extends CubeTexture {
 
     /**
      * @param {Component} owner Owner component. When destroyed, the owner will destroy this component as well.
-     * @param {Object} [cfg] Configs
-     * @param {String} [cfg.id] Optional ID for this ReflectionMap, unique among all components in the parent scene, generated automatically when omitted.
-     * @param {String[]} [cfg.src=null]  Paths to six image files to load into this ReflectionMap.
-     * @param {Boolean} [cfg.flipY=false] Flips this ReflectionMap's source data along its vertical axis when true.
-     * @param {Number} [cfg.encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
+     * @param {CubeTextureConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
         super(owner, cfg);

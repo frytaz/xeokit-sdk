@@ -1,3 +1,6 @@
+/** @import { Viewer } from "../../viewer/Viewer.js" */
+/** @import { Scene } from "../../viewer/scene/scene/Scene.js" */
+
 /**
  * A PointerLens shows a magnified view of a {@link Viewer}'s canvas, centered at the position of the
  * mouse or touch pointer.
@@ -43,13 +46,27 @@ export class PointerLens {
 
     /**
      * Constructs a new PointerLens.
-     * @param viewer The Viewer
-     * @param [cfg] PointerLens configuration.
-     * @param [cfg.active=true] Whether PointerLens is active. The PointerLens can only be shown when this is `true` (default).
+     * @param {Viewer} viewer The Viewer
+     * @param {Object} [cfg] PointerLens configuration.
+     * @param {boolean} [cfg.active=true] Whether PointerLens is active. The PointerLens can only be shown when this is `true` (default).
+     * @param {number} [cfg.zoomLevel=2] Zoom level of the lens.
+     * @param {string} [cfg.containerId="xeokit-lens"] ID for the lens container element.
+     * @param {boolean} [cfg.lensPosToggle=true] Whether the lens moves aside when the pointer is over it.
+     * @param {number} [cfg.lensPosToggleAmount=85] Lens position toggle amount, in pixels.
+     * @param {number} [cfg.lensPosMarginLeft=85] Lens left margin, in pixels.
+     * @param {number} [cfg.lensPosMarginTop=25] Lens top margin, in pixels.
      */
     constructor(viewer, cfg={}) {
 
+        /**
+         * The Viewer.
+         * @type {Viewer}
+         */
         this.viewer = viewer;
+        /**
+         * The Viewer's Scene.
+         * @type {Scene}
+         */
         this.scene = this.viewer.scene;
 
         this._lensCursorDiv = document.createElement('div');
@@ -169,7 +186,7 @@ export class PointerLens {
      *
      * This is `2` by default.
      *
-     * @param zoomFactor
+     * @param {number} zoomFactor
      */
     set zoomFactor(zoomFactor) {
         this._zoomFactor = zoomFactor;
@@ -181,7 +198,7 @@ export class PointerLens {
      *
      * This is `2` by default.
      *
-     * @returns Number
+     * @returns {number}
      */
     get zoomFactor() {
         return this._zoomFactor;
@@ -189,7 +206,7 @@ export class PointerLens {
 
     /**
      * Sets the canvas central position of the lens.
-     * @param canvasPos
+     * @param {number[]} canvasPos
      */
     set canvasPos(canvasPos) {
         this._canvasPos = canvasPos;
@@ -206,7 +223,7 @@ export class PointerLens {
 
     /**
      * Sets the canvas coordinates of the pointer.
-     * @param snappedCanvasPos
+     * @param {number[]} snappedCanvasPos
      */
     set snappedCanvasPos(snappedCanvasPos) {
         this._snappedCanvasPos = snappedCanvasPos;
@@ -224,8 +241,7 @@ export class PointerLens {
     /**
      * Sets if the cursor has snapped to anything.
      * This is set by plugins.
-     * @param snapped
-     * @private
+     * @param {boolean} snapped
      */
     set snapped(snapped) {
         this._snapped = snapped;
@@ -238,24 +254,23 @@ export class PointerLens {
      * Gets  if the cursor has snapped to anything.
      * This is called by plugins.
      * @returns {Boolean}
-     * @private
      */
     get snapped() {
         return this._snapped;
     }
 
-    _updateActiveVisible() {
+    #updateActiveVisible() {
         this._lensContainer.style.visibility = (this._active && this._visible) ? "visible" : "hidden";
         this.update();
     }
 
     /**
      * Sets if this PointerLens is active.
-     * @param active
+     * @param {boolean} active
      */
     set active(active) {
         this._active = active;
-        this._updateActiveVisible();
+        this.#updateActiveVisible();
     }
 
     /**
@@ -269,19 +284,17 @@ export class PointerLens {
     /**
      * Sets if this PointerLens is visible.
      * This is set by plugins.
-     * @param visible
-     * @private
+     * @param {boolean} visible
      */
     set visible(visible) {
         this._visible = visible;
-        this._updateActiveVisible();
+        this.#updateActiveVisible();
     }
 
     /**
      * Gets if this PointerLens is visible.
      * This is called by plugins.
      * @returns {Boolean}
-     * @private
      */
     get visible() {
         return this._visible;

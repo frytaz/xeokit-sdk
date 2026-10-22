@@ -103,7 +103,7 @@ import {math} from '../math/math.js';
  * @property {Number[]} [dir=[1.0, 1.0, 1.0]] A unit vector indicating the direction that the light is shining,  given in either World or View space, depending on the value of the ````space```` parameter.
  * @property {Number[]} [color=[0.7, 0.7, 0.8 ]] The color of this DirLight.
  * @property {Number} [intensity=1.0] The intensity of this DirLight, as a factor in range ````[0..1]````.
- * @property {String} [space="view"] The coordinate system the DirLight is defined in - ````"view"```` or ````"world"````.
+ * @property {"view" | "world"} [space="view"] The coordinate system the DirLight is defined in - ````"view"```` or ````"world"````.
  * @property {Boolean} [castsShadow=false] Flag which indicates if this DirLight casts a castsShadow.
  */
 class DirLight extends Light {

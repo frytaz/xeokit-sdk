@@ -217,18 +217,30 @@ import {IFCObjectDefaults} from "../../viewer/metadata/IFCObjectDefaults.js";
  */
 
 /**
+ * A data source through which a {@link DotBIMLoaderPlugin} loads .BIM files.
+ *
+ * * ````getDotBIM```` - Gets the contents of the given .BIM file.
+ * * ````cacheBuster```` - Whether cache-busting is enabled.
+ *
+ * @typedef {{
+ *     getDotBIM(dotBIMSrc: string | number, ok: (buffer: ArrayBuffer) => void, error: (e: Error) => void): void;
+ *     cacheBuster: boolean;
+ * }} IDotBIMDefaultDataSource
+ */
+
+/**
  * @typedef {Object} DotBIMLoaderPluginConfiguration
  * @property {String} [id="DotBIMLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
- * @property {Object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
- * @property {Object} [dataSource] A custom data source through which the DotBIMLoaderPlugin can load metadata, glTF and binary attachments. Defaults to an instance of {@link DotBIMDefaultDataSource}, which loads over HTTP.
+ * @property {IFCObjectDefaults} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
+ * @property {IDotBIMDefaultDataSource} [dataSource] A custom data source through which the DotBIMLoaderPlugin can load metadata, glTF and binary attachments. Defaults to an instance of {@link DotBIMDefaultDataSource}, which loads over HTTP.
  */
 
 /**
  * @typedef {Object} LoadDotBIMModel
  * @property {String} [id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
- * @property {String} [src] Path to a .BIM file, as an alternative to the ````bim```` parameter.
- * @property {*} [bim] .BIM JSON, as an alternative to the ````src```` parameter.
- * @property {Object.<string, Object>} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
+ * @property {String} [src] Path to a .BIM file, as an alternative to the ````dotBIM```` parameter.
+ * @property {Object} [dotBIM] .BIM JSON, as an alternative to the ````src```` parameter.
+ * @property {object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
  * @property {String[]} [includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {String[]} [excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {Number[]} [origin=[0,0,0]] The double-precision World-space origin of the model's coordinates.
@@ -262,7 +274,7 @@ export class DotBIMLoaderPlugin extends Plugin {
      *
      * Default value is {@link DotBIMDefaultDataSource}, which loads via an XMLHttpRequest.
      *
-     * @type {Object}
+     * @type {IDotBIMDefaultDataSource}
      */
     set dataSource(value) {
         this._dataSource = value || new DotBIMDefaultDataSource();
@@ -273,7 +285,7 @@ export class DotBIMLoaderPlugin extends Plugin {
      *
      * Default value is {@link DotBIMDefaultDataSource}, which loads via an XMLHttpRequest.
      *
-     * @type {Object}
+     * @type {IDotBIMDefaultDataSource}
      */
     get dataSource() {
         return this._dataSource;
@@ -284,7 +296,7 @@ export class DotBIMLoaderPlugin extends Plugin {
      *
      * Default value is {@link IFCObjectDefaults}.
      *
-     * @type {{String: Object}}
+     * @type {IFCObjectDefaults}
      */
     set objectDefaults(value) {
         this._objectDefaults = value || IFCObjectDefaults;
@@ -295,7 +307,7 @@ export class DotBIMLoaderPlugin extends Plugin {
      *
      * Default value is {@link IFCObjectDefaults}.
      *
-     * @type {{String: Object}}
+     * @type {IFCObjectDefaults}
      */
     get objectDefaults() {
         return this._objectDefaults;
@@ -305,9 +317,9 @@ export class DotBIMLoaderPlugin extends Plugin {
      * Loads a .BIM model from a file into this DotBIMLoaderPlugin's {@link Viewer}.
      *
      * @param {LoadDotBIMModel} params Loading parameters.
-     * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
+     * @returns {SceneModel} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
      */
-    load(params = {}) {
+    load(params) {
 
         if (params.id && this.viewer.scene.components[params.id]) {
             this.error("Component with this ID already exists in viewer: " + params.id + " - will autogenerate this ID");

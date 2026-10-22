@@ -1,5 +1,6 @@
 import {Map} from "./scene/utils/Map.js";
 import {core} from "./scene/core.js";
+/** @import { Viewer } from "./Viewer.js" */
 
 /**
  @desc Base class for {@link Viewer} plugin classes.
@@ -41,7 +42,7 @@ class Plugin {
 
     /**
      * Schedule a task to perform on the next browser interval
-     * @param task
+     * @param {Function} task
      */
     scheduleTask(task) {
         core.scheduleTask(task, null);

@@ -375,10 +375,10 @@ class ContextMenu {
      * @type {Object[]}
      */
     set items(itemsCfg) {
-        this._clear();
+        this.#clear();
         this._itemsCfg = itemsCfg || [];
-        this._parseItems(itemsCfg);
-        this._createUI();
+        this.#parseItems(itemsCfg);
+        this.#createUI();
     }
 
     /**
@@ -464,11 +464,11 @@ class ContextMenu {
         if (this._shown) {
             return;
         }
-        this._hideAllMenus();
-        this._updateItemsTitles();
-        this._updateItemsEnabledStatus();
-        this._showMenu(this._rootMenu.id, pageX, pageY);
-        this._updateSubMenuInfo();
+        this.#hideAllMenus();
+        this.#updateItemsTitles();
+        this.#updateItemsEnabledStatus();
+        this.#showMenu(this._rootMenu.id, pageX, pageY);
+        this.#updateSubMenuInfo();
         this._shown = true;
         this.fire("shown", {});
     }
@@ -494,7 +494,7 @@ class ContextMenu {
         if (!this._shown) {
             return;
         }
-        this._hideAllMenus();
+        this.#hideAllMenus();
         this._shown = false;
         this.fire("hidden", {});
     }
@@ -504,14 +504,14 @@ class ContextMenu {
      */
     destroy() {
         this._context = null;
-        this._clear();
+        this.#clear();
         if (this._id !== null) {
             idMap.removeItem(this._id);
             this._id = null;
         }
     }
 
-    _clear() { // Destroys DOM elements, clears menu data
+    #clear() { // Destroys DOM elements, clears menu data
         for (let i = 0, len = this._menuList.length; i < len; i++) {
             const menu = this._menuList[i];
             const menuElement = menu.menuElement;
@@ -525,11 +525,11 @@ class ContextMenu {
         this._itemMap = {};
     }
 
-    _parseItems(itemsCfg) { // Parses "items" config into menu data
+    #parseItems(itemsCfg) { // Parses "items" config into menu data
 
         const visitItems = (itemsCfg) => {
 
-            const menuId = this._getNextId();
+            const menuId = this.#getNextId();
             const menu = new Menu(menuId);
 
             for (let i = 0, len = itemsCfg.length; i < len; i++) {
@@ -545,7 +545,7 @@ class ContextMenu {
                     const itemCfg = itemsGroupCfg[j];
                     const subItemsCfg = itemCfg.items;
                     const hasSubItems = (subItemsCfg && (subItemsCfg.length > 0));
-                    const itemId = this._getNextId();
+                    const itemId = this.#getNextId();
 
                     const getTitle = itemCfg.getTitle || (() => {
                         return (itemCfg.title || "");
@@ -588,15 +588,15 @@ class ContextMenu {
         this._rootMenu = visitItems(itemsCfg);
     }
 
-    _getNextId() { // Returns a unique ID
+    #getNextId() { // Returns a unique ID
         return "ContextMenu_" + this._id + "_" + this._nextId++; // Start ID with alpha chars to make a valid DOM element selector
     }
 
-    _createUI() { // Builds DOM elements for the entire menu tree
+    #createUI() { // Builds DOM elements for the entire menu tree
 
         const visitMenu = (menu) => {
 
-            this._createMenuUI(menu);
+            this.#createMenuUI(menu);
 
             const groups = menu.groups;
             for (let i = 0, len = groups.length; i < len; i++) {
@@ -615,7 +615,7 @@ class ContextMenu {
         visitMenu(this._rootMenu);
     }
 
-    _createMenuUI(menu) { // Builds DOM elements for a menu
+    #createMenuUI(menu) { // Builds DOM elements for a menu
 
         const groups = menu.groups;
         const html = [];
@@ -724,13 +724,13 @@ class ContextMenu {
                             const subMenu = item.subMenu;
                             if (!subMenu) {
                                 if (lastSubMenu) {
-                                    self._hideMenu(lastSubMenu.id);
+                                    self.#hideMenu(lastSubMenu.id);
                                     lastSubMenu = null;
                                 }
                                 return;
                             }
                             if (lastSubMenu && (lastSubMenu.id !== subMenu.id)) {
-                                self._hideMenu(lastSubMenu.id);
+                                self.#hideMenu(lastSubMenu.id);
                                 lastSubMenu = null;
                             }
 
@@ -750,15 +750,15 @@ class ContextMenu {
                             const showOnLeft = (itemRect.left - subMenuWidth) > offsetRect.left;
                         
                             if(showOnRight)
-                                self._showMenu(subMenu.id, itemRect.right + window.scrollX - 5, itemRect.top + window.scrollY - 1);
+                                self.#showMenu(subMenu.id, itemRect.right + window.scrollX - 5, itemRect.top + window.scrollY - 1);
                             else if (showOnLeft)
-                                self._showMenu(subMenu.id, itemRect.left - subMenuWidth + window.scrollX, itemRect.top + window.scrollY - 1);
+                                self.#showMenu(subMenu.id, itemRect.left - subMenuWidth + window.scrollX, itemRect.top + window.scrollY - 1);
                             else {
                                 const spaceOnLeft = itemRect.left - offsetRect.left, spaceOnRight = offsetRect.right - itemRect.right;
                                 if(spaceOnRight > spaceOnLeft) 
-                                    self._showMenu(subMenu.id, itemRect.right - 5 - (subMenuWidth - spaceOnRight), itemRect.top + window.scrollY - 1);
+                                    self.#showMenu(subMenu.id, itemRect.right - 5 - (subMenuWidth - spaceOnRight), itemRect.top + window.scrollY - 1);
                                 else 
-                                    self._showMenu(subMenu.id, itemRect.left - spaceOnLeft, itemRect.top + window.scrollY - 1);
+                                    self.#showMenu(subMenu.id, itemRect.left - spaceOnLeft, itemRect.top + window.scrollY - 1);
                             }
 
                             lastSubMenu = subMenu;
@@ -783,8 +783,8 @@ class ContextMenu {
                                 if (this._hideOnAction) {
                                     self.hide();
                                 } else {
-                                    self._updateItemsTitles();
-                                    self._updateItemsEnabledStatus();
+                                    self.#updateItemsTitles();
+                                    self.#updateItemsEnabledStatus();
                                 }
                             });
                             item.itemElement.addEventListener("mouseup", (event) => {
@@ -804,8 +804,8 @@ class ContextMenu {
                                 if (this._hideOnAction) {
                                     self.hide();
                                 } else {
-                                    self._updateItemsTitles();
-                                    self._updateItemsEnabledStatus();
+                                    self.#updateItemsTitles();
+                                    self.#updateItemsEnabledStatus();
                                 }
                             });
                             item.itemElement.addEventListener("mouseenter", (event) => {
@@ -825,7 +825,7 @@ class ContextMenu {
         }
     }
 
-    _updateItemsTitles() { // Dynamically updates the title of each Item to the result of Item#getTitle()
+    #updateItemsTitles() { // Dynamically updates the title of each Item to the result of Item#getTitle()
         if (!this._context) {
             return;
         }
@@ -848,7 +848,7 @@ class ContextMenu {
         }
     }
 
-    _updateItemsEnabledStatus() { // Enables or disables each Item, depending on the result of Item#getEnabled()
+    #updateItemsEnabledStatus() { // Enables or disables each Item, depending on the result of Item#getEnabled()
         if (!this._context) {
             return;
         }
@@ -885,7 +885,7 @@ class ContextMenu {
         }
     }
 
-    _updateSubMenuInfo() {
+    #updateSubMenuInfo() {
         if (!this._context) return;
         let itemElement, itemRect, subMenuElement, initialStyles, showOnLeft, subMenuWidth;
         this._itemList.forEach((item) => {
@@ -908,7 +908,7 @@ class ContextMenu {
         })
     }
 
-    _showMenu(menuId, pageX, pageY) { // Shows the given menu, at the specified page coordinates
+    #showMenu(menuId, pageX, pageY) { // Shows the given menu, at the specified page coordinates
         const menu = this._menuMap[menuId];
         if (!menu) {
             console.error("Menu not found: " + menuId);
@@ -919,12 +919,12 @@ class ContextMenu {
         }
         const menuElement = menu.menuElement;
         if (menuElement) {
-            this._showMenuElement(menuElement, pageX, pageY);
+            this.#showMenuElement(menuElement, pageX, pageY);
             menu.shown = true;
         }
     }
 
-    _hideMenu(menuId) { // Hides the given menu
+    #hideMenu(menuId) { // Hides the given menu
         const menu = this._menuMap[menuId];
         if (!menu) {
             console.error("Menu not found: " + menuId);
@@ -935,19 +935,19 @@ class ContextMenu {
         }
         const menuElement = menu.menuElement;
         if (menuElement) {
-            this._hideMenuElement(menuElement);
+            this.#hideMenuElement(menuElement);
             menu.shown = false;
         }
     }
 
-    _hideAllMenus() {
+    #hideAllMenus() {
         for (let i = 0, len = this._menuList.length; i < len; i++) {
             const menu = this._menuList[i];
-            this._hideMenu(menu.id);
+            this.#hideMenu(menu.id);
         }
     }
 
-    _showMenuElement(menuElement, pageX, pageY) { // Shows the given menu element, at the specified page coordinates
+    #showMenuElement(menuElement, pageX, pageY) { // Shows the given menu element, at the specified page coordinates
         menuElement.style.display = 'block';
         const menuHeight = menuElement.offsetHeight;
         const menuWidth = menuElement.offsetWidth;
@@ -973,7 +973,7 @@ class ContextMenu {
         menuElement.style.top = pageY - offsetRect.top - window.scrollY + 'px';
     }
 
-    _hideMenuElement(menuElement) {
+    #hideMenuElement(menuElement) {
         menuElement.style.display = 'none';
     }
 }

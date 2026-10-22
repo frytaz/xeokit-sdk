@@ -220,7 +220,7 @@ import {IFCOpenShellDefaultDataSource} from "./IFCOpenShellDefaultDataSource.js"
 /**
  * @typedef {Object} IFCOpenShellLoaderPluginConfigs
  * @property {String} [id="IFCOpenShellLoader"] Optional ID for this plugin instance.
- * @property {Object} [dataSource] Custom data source (defaults to {@link IFCOpenShellDefaultDataSource}).
+ * @property {IFCOpenShellDefaultDataSource} [dataSource] Custom data source (defaults to {@link IFCOpenShellDefaultDataSource}).
  * @property {Object} ifcopenshell IfcOpenShell API object.
  * @property {Object} ifcopenshell_geom IfcOpenShell geometry API object.
  */
@@ -272,7 +272,7 @@ export class IFCOpenShellLoaderPlugin extends Plugin {
 
     /**
      * Sets a custom data source for IFC files.
-     * @param value
+     * @type {IFCOpenShellDefaultDataSource}
      */
     set dataSource(value) {
         this._dataSource = value || new IFCOpenShellDefaultDataSource();
@@ -280,7 +280,7 @@ export class IFCOpenShellLoaderPlugin extends Plugin {
 
     /**
      * Gets the data source for IFC files.
-     * @returns {*|IFCOpenShellDefaultDataSource}
+     * @type {IFCOpenShellDefaultDataSource}
      */
     get dataSource() {
         return this._dataSource;
@@ -321,8 +321,8 @@ export class IFCOpenShellLoaderPlugin extends Plugin {
     /**
      * Loads an IFC model from a file or text into the {@link Viewer}.
      *
-     * @param {LoadIFCOpenShellModel} params
-     * @returns {Entity}
+     * @param {LoadIFCOpenShellModel} [params]
+     * @returns {Promise<SceneModel>}
      */
     async load(params = {}) {
 
@@ -381,9 +381,9 @@ export class IFCOpenShellLoaderPlugin extends Plugin {
             if (excludeTypes) {
                 ctx.excludeTypes = excludeTypes;
             }
-            this._loadIFCGeometry(ctx);
+            this.#loadIFCGeometry(ctx);
             if (loadMetadata !== false) {
-                const metaModelData = this._loadIFCMetaModel(ctx, ifc);
+                const metaModelData = this.#loadIFCMetaModel(ctx, ifc);
                 this.viewer.metaScene.createMetaModel(modelId, metaModelData);
             }
             this.viewer.scene.canvas.spinner.processes--;
@@ -413,7 +413,7 @@ export class IFCOpenShellLoaderPlugin extends Plugin {
         return sceneModel;
     }
 
-    _loadIFCGeometry(ctx) {
+    #loadIFCGeometry(ctx) {
         const {ifc, sceneModel} = ctx;
         const {ifcopenshell_geom} = this;
 
@@ -432,7 +432,7 @@ export class IFCOpenShellLoaderPlugin extends Plugin {
                 const obj = iterator.get();
                 if (obj) {
                     const entity = ifc.by_id(obj.id)
-                    this._parseIFCEntity(ctx, obj, entity);
+                    this.#parseIFCEntity(ctx, obj, entity);
                 }
             } while (iterator.next());
         }
@@ -447,7 +447,7 @@ export class IFCOpenShellLoaderPlugin extends Plugin {
         });
     }
 
-    _parseIFCEntity(ctx, obj, ifcEntity) {
+    #parseIFCEntity(ctx, obj, ifcEntity) {
         const {sceneModel, geometryCache} = ctx;
         const geometry_id = obj.geometry.id;
 
@@ -534,7 +534,7 @@ export class IFCOpenShellLoaderPlugin extends Plugin {
         });
     }
 
-    _loadIFCMetaModel(ctx, ifc) {
+    #loadIFCMetaModel(ctx, ifc) {
 
         const visited = new Set();
         const metaObjects = [];

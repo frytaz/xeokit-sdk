@@ -316,7 +316,7 @@ class AxisGizmoPlugin extends Plugin {
 
     /** Shows or hides this AxisGizmoPlugin.
      *
-     * @param visible
+     * @param {Boolean} visible Whether to show this AxisGizmoPlugin.
      */
     setVisible(visible) {
         for (let i = 0; i < this._meshes.length; i++) {

@@ -14,6 +14,7 @@ import {TouchPanRotateAndDollyHandler} from "./lib/handlers/TouchPanRotateAndDol
 import {utils} from "../utils.js";
 import {math} from "../math/math.js";
 import {TouchPickHandler} from "./lib/handlers/TouchPickHandler.js";
+/** @import { Material } from '../materials/Material.js' */
 
 const DEFAULT_SNAP_PICK_RADIUS = 30;
 const DEFAULT_SNAP_VERTEX = true;
@@ -872,7 +873,7 @@ class CameraControl extends Component {
      *
      * See class docs for usage.
      *
-     * @param {{Number:(Number | Number[])[]} | String} value Either a set of new key mappings, or a string to select a keyboard layout,
+     * @param {{[key: number]: (Number | Number[])[]} | String} value Either a set of new key mappings, or a string to select a keyboard layout,
      * which causes ````CameraControl```` to use the default key mappings for that layout.
      */
     set keyMap(value) {
@@ -951,13 +952,13 @@ class CameraControl extends Component {
     /**
      * Gets custom mappings of keys to {@link CameraControl} actions.
      *
-     * @returns {{Number:(Number | Number[])[]}} Current key mappings.
+     * @type {{[key: number]: (Number | Number[])[]}} Current key mappings.
      */
     get keyMap() {
         return this._keyMap;
     }
 
-    _areAllKeysDown(keyDownMap, keys) {
+    #areAllKeysDown(keyDownMap, keys) {
         if (!keys || keys.length <= 0) {
             return true;
         }
@@ -972,7 +973,7 @@ class CameraControl extends Component {
         return true;
     }
 
-    _isAnyOtherKeyDown(keyDownMap, keyMap) {
+    #isAnyOtherKeyDown(keyDownMap, keyMap) {
         for (let i = 0, len = keyDownMap.length; i < len; i++) {
             if (keyDownMap[i]) {
                 if (Array.isArray(keyMap)) {
@@ -984,7 +985,7 @@ class CameraControl extends Component {
         return false;
     }
 
-    _isMouseAction(action) {
+    #isMouseAction(action) {
         switch (action) {
             case this.MOUSE_ROTATE:
             case this.MOUSE_DOLLY:
@@ -1006,18 +1007,18 @@ class CameraControl extends Component {
         if (!keys) {
             return false;
         }
-        if (keys.length === 0 && this._isMouseAction(action)) return true;
+        if (keys.length === 0 && this.#isMouseAction(action)) return true;
         if (!keyDownMap) {
             keyDownMap = this.scene.input.keyDown;
         }
         for (let i = 0, len = keys.length; i < len; i++) {
             const key = keys[i];
             if (!Array.isArray(key)) {
-                if (keyDownMap[key] && !this._isAnyOtherKeyDown(keyDownMap, key))
+                if (keyDownMap[key] && !this.#isAnyOtherKeyDown(keyDownMap, key))
                     return true;
             }
             else {
-                if (this._areAllKeysDown(keyDownMap, key) && !this._isAnyOtherKeyDown(keyDownMap, key))
+                if (this.#areAllKeysDown(keyDownMap, key) && !this.#isAnyOtherKeyDown(keyDownMap, key))
                     return true;
             }
 
@@ -1152,7 +1153,7 @@ class CameraControl extends Component {
      *
      * See class comments for more info.
      *
-     * @param {String} navMode The navigation mode: "orbit", "firstPerson" or "planView".
+     * @param {"orbit" | "firstPerson" | "planView"} navMode The navigation mode: "orbit", "firstPerson" or "planView".
      */
     set navMode(navMode) {
         navMode = navMode || "orbit";
@@ -1172,7 +1173,7 @@ class CameraControl extends Component {
     /**
      * Gets the current navigation mode.
      *
-     * @returns {String} The navigation mode: "orbit", "firstPerson" or "planView".
+     * @returns {"orbit" | "firstPerson" | "planView"} The navigation mode: "orbit", "firstPerson" or "planView".
      */
     get navMode() {
         return this._configs.navMode;
@@ -1189,7 +1190,7 @@ class CameraControl extends Component {
      * @param {Boolean} value Set ````true```` to enable mouse and touch input.
      */
     set pointerEnabled(value) {
-        this._reset();
+        this.#reset();
         this._configs.pointerEnabled = !!value;
     }
 
@@ -1218,13 +1219,13 @@ class CameraControl extends Component {
      * Gets the current style for a particular action.
      *
      * @param {String} action To get the style for
-     * @returns {String} style set on the cursor for action
+     * @returns {String|null} style set on the cursor for action
      */
     getCursorStyle(action) {
         return this._cursors[action] || null;
     }
 
-    _reset() {
+    #reset() {
         for (let i = 0, len = this._handlers.length; i < len; i++) {
             const handler = this._handlers[i];
             if (handler.reset) {
@@ -1866,8 +1867,8 @@ class CameraControl extends Component {
      * Sets a sphere as the representation of the pivot position.
      *
      * @param {Object} [cfg] Sphere configuration.
-     * @param {String} [cfg.size=1] Optional size factor of the sphere. Defaults to 1.
-     * @param {String} [cfg.material=PhongMaterial] Optional size factor of the sphere. Defaults to a red opaque material.
+     * @param {Number} [cfg.size=1] Optional size factor of the sphere. Defaults to 1.
+     * @param {Material} [cfg.material=PhongMaterial] Optional material of the sphere. Defaults to a red opaque material.
      */
     enablePivotSphere(cfg = {}) {
         this._controllers.pivotController.enablePivotSphere(cfg);
@@ -1962,13 +1963,13 @@ class CameraControl extends Component {
      * @private
      */
     destroy() {
-        this._destroyHandlers();
-        this._destroyControllers();
+        this.#destroyHandlers();
+        this.#destroyControllers();
         this._cameraUpdater.destroy();
         super.destroy();
     }
 
-    _destroyHandlers() {
+    #destroyHandlers() {
         for (let i = 0, len = this._handlers.length; i < len; i++) {
             const handler = this._handlers[i];
             if (handler.destroy) {
@@ -1977,7 +1978,7 @@ class CameraControl extends Component {
         }
     }
 
-    _destroyControllers() {
+    #destroyControllers() {
         for (let i = 0, len = this._controllers.length; i < len; i++) {
             const controller = this._controllers[i];
             if (controller.destroy) {

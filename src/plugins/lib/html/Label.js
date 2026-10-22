@@ -136,7 +136,7 @@ class Label {
         this._label.style.opacity = opacity;
     }
 
-    _updateVisibility() {
+    #updateVisibility() {
         this._label.style.visibility = this._visible && !this._culled ? "visible" : "hidden";
     }
 
@@ -145,7 +145,7 @@ class Label {
             return;
         }
         this._visible = !!visible;
-        this._updateVisibility();
+        this.#updateVisibility();
     }
 
     setCulled(culled) {
@@ -153,7 +153,7 @@ class Label {
             return;
         }
         this._culled = !!culled;
-        this._updateVisibility();
+        this.#updateVisibility();
     }
 
     setHighlighted(highlighted) {

@@ -14,7 +14,10 @@ class Geometry extends Component {
         return "Geometry";
     }
 
-    /** @private */
+    /**
+     * @private
+     * @type {Boolean}
+     */
     get isGeometry() {
         return true;
     }

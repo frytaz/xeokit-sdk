@@ -8,19 +8,7 @@ import {SceneModel} from "./SceneModel.js";
  * * See {@link SceneModel} for API details.
  *
  * @deprecated
- * @implements {Drawable}
- * @implements {Entity}
  * @extends {SceneModel}
  */
 export class VBOSceneModel extends SceneModel {
-
-    /**
-     * See {@link VBOSceneModel} for details.
-     *
-     * @param owner
-     * @param cfg
-     */
-    constructor(owner, cfg = {}) {
-        super(owner, cfg);
-    }
 }

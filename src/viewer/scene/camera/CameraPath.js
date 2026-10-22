@@ -2,6 +2,20 @@ import {Component} from "../Component.js"
 import {SplineCurve} from "../paths/SplineCurve.js"
 import {math} from "../math/math.js";
 
+/**
+ * @typedef {Object} Frame
+ * @property {Number} t Time instant of the frame.
+ * @property {Number[]} eye Eye position of the frame.
+ * @property {Number[]} look Look position of the frame.
+ * @property {Number[]} up Up vector of the frame.
+ */
+
+/**
+ * @typedef {Object} CameraPathConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Frame[]} [frames] Initial sequence of frames.
+ */
+
 const tempVec3a = math.vec3();
 
 /**
@@ -25,9 +39,7 @@ class CameraPath extends Component {
     /**
      * @constructor
      * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this CameraPath as well.
-     * @param [cfg] {*} Configuration
-     * @param {String} [cfg.id]  Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {{t:Number, eye:Object, look:Object, up: Object}[]} [cfg.frames] Initial sequence of frames.
+     * @param {CameraPathConfiguration} [cfg] Configuration
      */
     constructor(owner, cfg = {}) {
 
@@ -48,7 +60,7 @@ class CameraPath extends Component {
     /**
      * Gets the camera frames in this CameraPath.
      *
-     * @returns {{t:Number, eye:Object, look:Object, up: Object}[]} The frames on this CameraPath.
+     * @returns {Frame[]} The frames on this CameraPath.
      */
     get frames() {
         return this._frames;
@@ -112,7 +124,7 @@ class CameraPath extends Component {
     /**
      * Adds multiple frames to this CameraPath, each frame specified as a set of values for eye, look and up vectors at a given time instant.
      *
-     * @param {{t:Number, eye:Object, look:Object, up: Object}[]} frames Frames to add to this CameraPath.
+     * @param {Frame[]} frames Frames to add to this CameraPath.
      */
     addFrames(frames) {
         let frame;

@@ -1,5 +1,8 @@
 const SHRINK_SPEED = 3;
 
+/** @import { Viewer } from "../../viewer/Viewer.js" */
+/** @import { Scene } from "../../viewer/scene/scene/Scene.js" */
+
 /**
  * A PointerCircle shows a circle, centered at the position of the
  * mouse or touch pointer.
@@ -8,13 +11,21 @@ export class PointerCircle {
 
     /**
      * Constructs a new PointerCircle.
-     * @param viewer The Viewer
-     * @param [cfg] PointerCircle configuration.
-     * @param [cfg.active=true] Whether PointerCircle is active. The PointerCircle can only be shown when this is `true` (default).
+     * @param {Viewer} viewer The Viewer
+     * @param {Object} [cfg] PointerCircle configuration.
+     * @param {boolean} [cfg.active=true] Whether PointerCircle is active. The PointerCircle can only be shown when this is `true` (default).
      */
     constructor(viewer, cfg = {}) {
 
+        /**
+         * The Viewer.
+         * @type {Viewer}
+         */
         this.viewer = viewer;
+        /**
+         * The Viewer's Scene.
+         * @type {Scene}
+         */
         this.scene = this.viewer.scene;
         this._circleDiv = document.createElement('div');
         this.viewer.scene.canvas.canvas.parentNode.insertBefore(this._circleDiv, this.viewer.scene.canvas.canvas);
@@ -42,6 +53,8 @@ export class PointerCircle {
 
     /**
      * Show the circle at the given canvas coordinates and begin shrinking it.
+     *
+     * @param {number[]} circlePos Canvas coordinates.
      */
     start(circlePos) {
         if (this._destroyed) {
@@ -104,7 +117,7 @@ export class PointerCircle {
      *
      * This is `2` by default.
      *
-     * @param durationMs
+     * @param {number} durationMs
      */
     set durationMs(durationMs) {
         this.stop();
@@ -116,7 +129,7 @@ export class PointerCircle {
      *
      * This is `2` by default.
      *
-     * @returns Number
+     * @returns {number}
      */
     get durationMs() {
         return this._durationMs;

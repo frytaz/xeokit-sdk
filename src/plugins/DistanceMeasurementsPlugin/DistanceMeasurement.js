@@ -337,10 +337,20 @@ class DistanceMeasurement extends Component {
         return this._length;
     }
 
+    /**
+     * Gets the color of this DistanceMeasurement.
+     *
+     * @type {String}
+     */
     get color() {
         return this._color;
     }
 
+    /**
+     * Sets the color of this DistanceMeasurement.
+     *
+     * @type {String}
+     */
     set color(value) {
         this._color = value;
         this._originDot.setFillColor(value);
@@ -661,7 +671,7 @@ class DistanceMeasurement extends Component {
 
     /**
      * Sets if this DistanceMeasurement appears highlighted.
-     * @param highlighted
+     * @param {Boolean} highlighted
      */
     setHighlighted(highlighted) {
         this._drawables.forEach(d => d.setHighlighted(highlighted));

@@ -2,6 +2,9 @@ import {math} from "../../viewer/scene/math/math.js";
 import {PointerCircle} from "../../extras/PointerCircle/PointerCircle.js";
 import {AngleMeasurementsControl} from "./AngleMeasurementsControl.js";
 import {transformToNode} from "../lib/ui/index.js";
+/** @import { PointerLens } from "../../extras/PointerLens/PointerLens.js" */
+/** @import { AngleMeasurementsPlugin } from "./AngleMeasurementsPlugin.js" */
+/** @import { AngleMeasurement } from "./AngleMeasurement.js" */
 
 const WAITING_FOR_ORIGIN_TOUCH_START = 0;
 const WAITING_FOR_ORIGIN_QUICK_TOUCH_END = 1;
@@ -29,11 +32,20 @@ export class AngleMeasurementsTouchControl extends AngleMeasurementsControl {
 
     /**
      * Creates a AngleMeasurementsTouchControl bound to the given AngleMeasurementsPlugin.
+     *
+     * @param {AngleMeasurementsPlugin} angleMeasurementsPlugin The AngleMeasurementsPlugin to control.
+     * @param {Object} [cfg] Configuration
+     * @param {PointerLens} [cfg.pointerLens] A PointerLens to use to provide a magnified view of the cursor when snapping is enabled.
+     * @param {boolean} [cfg.snapping=true] Whether to initially enable snap-to-vertex and snap-to-edge for this AngleMeasurementsTouchControl.
      */
     constructor(angleMeasurementsPlugin, cfg = {}) {
 
         super(angleMeasurementsPlugin.viewer.scene);
 
+        /**
+         * The PointerLens used to provide a magnified view of the cursor when snapping is enabled, if any.
+         * @type {PointerLens}
+         */
         this.pointerLens = cfg.pointerLens;
         this.pointerCircle = new PointerCircle(angleMeasurementsPlugin.viewer);
 
@@ -61,10 +73,10 @@ export class AngleMeasurementsTouchControl extends AngleMeasurementsControl {
         this._snapping = cfg.snapping !== false;
         this._touchState = WAITING_FOR_ORIGIN_TOUCH_START;
 
-        this._attachPlugin(angleMeasurementsPlugin, cfg);
+        this.#attachPlugin(angleMeasurementsPlugin, cfg);
     }
 
-    _attachPlugin(angleMeasurementsPlugin) {
+    #attachPlugin(angleMeasurementsPlugin) {
 
         /**
          * The {@link AngleMeasurementsPlugin} that owns this AngleMeasurementsTouchControl.

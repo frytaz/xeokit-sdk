@@ -265,6 +265,38 @@ import { DistanceMeasurementsMouseControl } from "./DistanceMeasurementsMouseCon
  * ````
  */
 
+/** @import { PointerLens } from "../../extras/PointerLens/PointerLens.js" */
+
+/**
+ * Event fired by {@link DistanceMeasurementsPlugin} when the mouse enters over a {@link DistanceMeasurement}.
+ *
+ * @typedef {Object} DistanceMeasurementMouseOverEvent
+ * @property {DistanceMeasurementsPlugin} plugin The plugin.
+ * @property {DistanceMeasurement} distanceMeasurement The measurement.
+ * @property {DistanceMeasurement} measurement The measurement.
+ * @property {MouseEvent} event The original mouse event.
+ */
+
+/**
+ * Event fired by {@link DistanceMeasurementsPlugin} when the mouse leaves a {@link DistanceMeasurement}.
+ *
+ * @typedef {Object} DistanceMeasurementMouseLeaveEvent
+ * @property {DistanceMeasurementsPlugin} plugin The plugin.
+ * @property {DistanceMeasurement} distanceMeasurement The measurement.
+ * @property {DistanceMeasurement} measurement The measurement.
+ * @property {MouseEvent} event The original mouse event.
+ */
+
+/**
+ * Event fired by {@link DistanceMeasurementsPlugin} when the context menu is shown on a {@link DistanceMeasurement}.
+ *
+ * @typedef {Object} DistanceMeasurementMouseContextMenuEvent
+ * @property {DistanceMeasurementsPlugin} plugin The plugin.
+ * @property {DistanceMeasurement} distanceMeasurement The measurement.
+ * @property {DistanceMeasurement} measurement The measurement.
+ * @property {MouseEvent} event The original mouse event.
+ */
+
 /**
  * @typedef {Object} DistanceMeasurementsPluginConfiguration
  * @property {String} [id="DistanceMeasurements"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
@@ -287,7 +319,7 @@ import { DistanceMeasurementsMouseControl } from "./DistanceMeasurementsMouseCon
  * @property {string} [defaultColor=#00BBFF] The default color of the length dots, wire and label.
  * @property {number} [zIndex] If set, the wires, dots and labels will have this zIndex (+1 for dots and +2 for labels).
  * @property {boolean} [defaultLabelsOnWires=true] The default value of the DistanceMeasurements `labelsOnWires` property.
- * @property {PointerCircle} [pointerLens] A PointerLens to help the user position the pointer. This can be shared with other plugins.
+ * @property {PointerLens} [pointerLens] A PointerLens to help the user position the pointer. This can be shared with other plugins.
  */
 class DistanceMeasurementsPlugin extends Plugin {
   /**
@@ -355,7 +387,7 @@ class DistanceMeasurementsPlugin extends Plugin {
 
   /**
    * Gets the plugin's HTML container element, if any.
-   * @returns {*|HTMLElement|HTMLElement}
+   * @returns {HTMLElement}
    */
   getContainerElement() {
     return this._container;
@@ -368,7 +400,7 @@ class DistanceMeasurementsPlugin extends Plugin {
 
   /**
    * Gets the PointerLens attached to this DistanceMeasurementsPlugin.
-   * @returns {PointerCircle}
+   * @returns {PointerLens}
    */
   get pointerLens() {
     return this._pointerLens;
@@ -390,7 +422,7 @@ class DistanceMeasurementsPlugin extends Plugin {
   /**
    * Gets the existing {@link DistanceMeasurement}s, each mapped to its {@link DistanceMeasurement#id}.
    *
-   * @type {{String:DistanceMeasurement}}
+   * @type {{[key: string]: DistanceMeasurement}}
    */
   get measurements() {
     return this._measurements;
@@ -435,7 +467,7 @@ class DistanceMeasurementsPlugin extends Plugin {
 
   /**
    * Gets whether the measurement added is rotation adjusted or not.
-   * @returns {number}
+   * @returns {boolean}
    */
   get useRotationAdjustment(){
     return this._useRotationAdjustment;
@@ -447,8 +479,10 @@ class DistanceMeasurementsPlugin extends Plugin {
    *
    * @param {Object} params {@link DistanceMeasurement} configuration.
    * @param {String} params.id Unique ID to assign to {@link DistanceMeasurement#id}. The DistanceMeasurement will be registered by this in {@link DistanceMeasurementsPlugin#measurements} and {@link Scene.components}. Must be unique among all components in the {@link Viewer}.
+   * @param {Object} params.origin Origin.
    * @param {Number[]} params.origin.worldPos Origin World-space 3D position.
    * @param {Entity} params.origin.entity Origin Entity.
+   * @param {Object} params.target Target.
    * @param {Number[]} params.target.worldPos Target World-space 3D position.
    * @param {Entity} params.target.entity Target Entity.
    * @param {Boolean} [params.visible=true] Whether to initially show the {@link DistanceMeasurement}.
@@ -464,7 +498,6 @@ class DistanceMeasurementsPlugin extends Plugin {
    * @param {Boolean} [params.zLabelEnabled=true] Whether to initially show the z label.
    * @param {Boolean} [params.lengthLabelEnabled=true] Whether to initially show the length label.
    * @param {Boolean} [params.labelsVisible=true] Whether to initially show the labels.
-   * @param {Boolean} [params.lengthLabelVisible=true] Whether to initially show the labels.
    * @param {string} [params.color] The color of the length dot, wire and label.
    * @param {Boolean} [params.labelsOnWires=true] Determines if labels will be set on wires or one below the other.
    * @returns {DistanceMeasurement} The new {@link DistanceMeasurement}.
@@ -548,7 +581,7 @@ class DistanceMeasurementsPlugin extends Plugin {
   /**
    * Shows all or hides the axis wires of each {@link DistanceMeasurement}.
    *
-   * @param {Boolean} labelsShown Whether or not to show the axis wires.
+   * @param {Boolean} axisVisible Whether or not to show the axis wires.
    */
   setAxisVisible(axisVisible) {
     for (const [key, measurement] of Object.entries(this.measurements)) {

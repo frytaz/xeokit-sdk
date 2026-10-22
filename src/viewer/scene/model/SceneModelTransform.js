@@ -1,4 +1,5 @@
 import {math} from "../math/index.js";
+/** @import { SceneModelMesh } from './SceneModelMesh.js' */
 
 const angleAxis = math.vec4(4);
 const q1 = math.vec4();
@@ -33,6 +34,8 @@ export class SceneModelTransform {
          * Unique ID of this SceneModelTransform.
          *
          * The SceneModelTransform is registered against this ID in {@link SceneModel#transforms}.
+         *
+         * @type {String|Number}
          */
         this.id = cfg.id;
 
@@ -80,7 +83,7 @@ export class SceneModelTransform {
     /**
      * The optional parent SceneModelTransform.
      *
-     * @type {SceneModelTransform}
+     * @type {SceneModelTransform|null}
      */
     get parentTransform() {
         return this._parentTransform;
@@ -89,7 +92,7 @@ export class SceneModelTransform {
     /**
      * The {@link SceneModelMesh}es transformed by this SceneModelTransform.
      *
-     * @returns {[]}
+     * @type {SceneModelMesh[]}
      */
     get meshes() {
         return this._meshes;
@@ -104,7 +107,7 @@ export class SceneModelTransform {
      */
     set position(value) {
         this._position.set(value || [0, 0, 0]);
-        this._setLocalMatrixDirty();
+        this.#setLocalMatrixDirty();
         this._model.glRedraw();
     }
 
@@ -129,7 +132,7 @@ export class SceneModelTransform {
     set rotation(value) {
         this._rotation.set(value || [0, 0, 0]);
         math.eulerToQuaternion(this._rotation, "XYZ", this._quaternion);
-        this._setLocalMatrixDirty();
+        this.#setLocalMatrixDirty();
         this._model.glRedraw();
     }
 
@@ -154,7 +157,7 @@ export class SceneModelTransform {
     set quaternion(value) {
         this._quaternion.set(value || [0, 0, 0, 1]);
         math.quaternionToEuler(this._quaternion, "XYZ", this._rotation);
-        this._setLocalMatrixDirty();
+        this.#setLocalMatrixDirty();
         this._model.glRedraw();
     }
 
@@ -178,7 +181,7 @@ export class SceneModelTransform {
      */
     set scale(value) {
         this._scale.set(value || [1, 1, 1]);
-        this._setLocalMatrixDirty();
+        this.#setLocalMatrixDirty();
         this._model.glRedraw();
     }
 
@@ -237,7 +240,7 @@ export class SceneModelTransform {
      */
     get worldMatrix() {
         if (this._worldMatrixDirty) {
-            this._buildWorldMatrix();
+            this.#buildWorldMatrix();
         }
         return this._worldMatrix;
     }
@@ -256,7 +259,7 @@ export class SceneModelTransform {
         math.angleAxisToQuaternion(angleAxis, q1);
         math.mulQuaternions(this.quaternion, q1, q2);
         this.quaternion = q2;
-        this._setLocalMatrixDirty();
+        this.#setLocalMatrixDirty();
         this._model.glRedraw();
         return this;
     }
@@ -315,7 +318,7 @@ export class SceneModelTransform {
         this._position[0] += axis[0];
         this._position[1] += axis[1];
         this._position[2] += axis[2];
-        this._setLocalMatrixDirty();
+        this.#setLocalMatrixDirty();
         this._model.glRedraw();
         return this;
     }
@@ -327,7 +330,7 @@ export class SceneModelTransform {
      */
     translateX(distance) {
         this._position[0] += distance;
-        this._setLocalMatrixDirty();
+        this.#setLocalMatrixDirty();
         this._model.glRedraw();
         return this;
     }
@@ -339,7 +342,7 @@ export class SceneModelTransform {
      */
     translateY(distance) {
         this._position[1] += distance;
-        this._setLocalMatrixDirty();
+        this.#setLocalMatrixDirty();
         this._model.glRedraw();
         return this;
     }
@@ -351,12 +354,12 @@ export class SceneModelTransform {
      */
     translateZ(distance) {
         this._position[2] += distance;
-        this._setLocalMatrixDirty();
+        this.#setLocalMatrixDirty();
         this._model.glRedraw();
         return this;
     }
 
-    _setLocalMatrixDirty() {
+    #setLocalMatrixDirty() {
         this._localMatrixDirty = true;
         this._transformDirty();
     }
@@ -381,7 +384,7 @@ export class SceneModelTransform {
         }
     }
 
-    _buildWorldMatrix() {
+    #buildWorldMatrix() {
         const localMatrix = this.matrix;
         if (!this._parentTransform) {
             for (let i = 0, len = localMatrix.length; i < len; i++) {

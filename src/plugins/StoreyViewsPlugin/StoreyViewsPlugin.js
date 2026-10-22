@@ -6,6 +6,7 @@ import {ObjectsMemento} from "../../viewer/scene/mementos/ObjectsMemento.js";
 import {CameraMemento} from "../../viewer/scene/mementos/CameraMemento.js";
 import {StoreyMap} from "./StoreyMap.js";
 import {utils} from "../../viewer/scene/utils.js";
+/** @import { PickResult } from "../../viewer/scene/webgl/PickResult.js" */
 
 const tempVec3a = math.vec3();
 const tempMat4 = math.mat4();
@@ -259,7 +260,7 @@ class StoreyViewsPlugin extends Plugin {
          *
          * These are created and destroyed automatically as models are loaded and destroyed.
          *
-         * @type {{String:Storey}}
+         * @type {{[key: string]: Storey}}
          */
         this.storeys = {};
 
@@ -270,19 +271,19 @@ class StoreyViewsPlugin extends Plugin {
          *
          * These are created and destroyed automatically as models are loaded and destroyed.
          *
-         * @type {{String: {String:Storey}}}
+         * @type {{[key: string]: {[key: string]: Storey}}}
          */
         this.modelStoreys = {};
 
         this._fitStoreyMaps = (!!cfg.fitStoreyMaps);
 
         this._onModelLoaded = this.viewer.scene.on("modelLoaded", (modelId) => {
-            this._registerModelStoreys(modelId);
+            this.#registerModelStoreys(modelId);
             this.fire("storeys", this.storeys);
         });
     }
 
-    _registerModelStoreys(modelId) {
+    #registerModelStoreys(modelId) {
         const viewer = this.viewer;
         const scene = viewer.scene;
         const metaScene = viewer.metaScene;
@@ -302,7 +303,7 @@ class StoreyViewsPlugin extends Plugin {
                 const numObjects = (Math.random() > 0.5) ? childObjectIds.length : 0;
                 const storey = new Storey(this, model.aabb, storeyAABB, modelId, storeyId, numObjects);
                 storey._onModelDestroyed = model.once("destroyed", () => {
-                    this._deregisterModelStoreys(modelId);
+                    this.#deregisterModelStoreys(modelId);
                     this.fire("storeys", this.storeys);
                 });
                 this.storeys[storeyId] = storey;
@@ -313,10 +314,10 @@ class StoreyViewsPlugin extends Plugin {
                 this.modelStoreys[modelId][storeyId] = storey;
             }
         }
-        this._clipBoundingBoxes();
+        this.#clipBoundingBoxes();
     }
 
-    _clipBoundingBoxes() {
+    #clipBoundingBoxes() {
         const storeysList = this.storeysList;
         const metaScene = this.viewer.metaScene;
         const camera = this.viewer.camera;
@@ -352,7 +353,7 @@ class StoreyViewsPlugin extends Plugin {
 
     }
 
-    _deregisterModelStoreys(modelId) {
+    #deregisterModelStoreys(modelId) {
         const storeys = this.modelStoreys[modelId];
         if (storeys) {
             const scene = this.viewer.scene;
@@ -374,7 +375,7 @@ class StoreyViewsPlugin extends Plugin {
     /**
      * When true, the elements of each floor map image will be proportionally resized to encompass the entire image. This leads to varying scales among different
      * floor map images. If false, each floor map image will display the model's extents, ensuring a consistent scale across all images.
-     * @returns {*|boolean}
+     * @type {Boolean}
      */
     get fitStoreyMaps() {
         return this._fitStoreyMaps;
@@ -386,7 +387,7 @@ class StoreyViewsPlugin extends Plugin {
      * See also: {@link CameraMemento}, which saves and restores the state of the {@link Scene}'s {@link Camera}
      *
      * @param {String} storeyId ID of the ````IfcBuildingStorey```` object.
-     * @param {*} [options] Options for arranging the Camera.
+     * @param {Object} [options] Options for arranging the Camera.
      * @param {String} [options.projection] Projection type to transition the Camera to. Accepted values are "perspective" and "ortho".
      * @param {Function} [options.done] Callback to fire when the Camera has arrived. When provided, causes an animated flight to the saved state. Otherwise jumps to the saved state.
      */
@@ -467,7 +468,7 @@ class StoreyViewsPlugin extends Plugin {
      * of the {@link Entity}'s that represent objects within a {@link Scene}.
      *
      * @param {String} storeyId ID of the ````IfcBuildingStorey```` object.
-     * @param {*} [options] Options for showing the Entitys within the storey.
+     * @param {Object} [options] Options for showing the Entitys within the storey.
      * @param {Boolean} [options.hideOthers=false] When ````true````, hide all other {@link Entity}s.
      */
     showStoreyObjects(storeyId, options = {}) {
@@ -542,10 +543,10 @@ class StoreyViewsPlugin extends Plugin {
      * Creates a 2D map of the given storey.
      *
      * @param {String} storeyId ID of the ````IfcBuildingStorey```` object.
-     * @param {*} [options] Options for creating the image.
+     * @param {Object} [options] Options for creating the image.
      * @param {Number} [options.width=300] Image width in pixels. Height will be automatically determined from this, if not given.
      * @param {Number} [options.height=300] Image height in pixels, as an alternative to width. Width will be automatically determined from this, if not given.
-     * @param {String} [options.format="png"] Image format. Accepted values are "png" and "jpeg".
+     * @param {"png" | "jpeg"} [options.format="png"] Image format. Accepted values are "png" and "jpeg".
      * @param {Boolean} [options.captureSectionPlanes=false] Whether the storey map is sliced or not.
      * @returns {StoreyMap} The StoreyMap.
      */
@@ -597,9 +598,9 @@ class StoreyViewsPlugin extends Plugin {
         }));
         
         if (captureSectionPlanes)
-            this._toggleSectionPlanes(false);
+            this.#toggleSectionPlanes(false);
 
-        this._arrangeStoreyMapCamera(storey);
+        this.#arrangeStoreyMapCamera(storey);
 
         const src = viewer.getSnapshot({
             width: width,
@@ -610,19 +611,19 @@ class StoreyViewsPlugin extends Plugin {
         this._objectsMemento.restoreObjects(scene, mask);
         this._cameraMemento.restoreCamera(scene);
         if (captureSectionPlanes)
-            this._toggleSectionPlanes(true);
+            this.#toggleSectionPlanes(true);
 
         return new StoreyMap(storeyId, src, format, width, height, padding);
     }
 
-    _toggleSectionPlanes(visible) {
+    #toggleSectionPlanes(visible) {
         const planes = this.viewer.scene.sectionPlanes;
         for (const key in planes) {
             planes[key].active = visible;
         }
     }
 
-    _arrangeStoreyMapCamera(storey) {
+    #arrangeStoreyMapCamera(storey) {
         const viewer = this.viewer;
         const scene = viewer.scene;
         const camera = scene.camera;
@@ -653,7 +654,7 @@ class StoreyViewsPlugin extends Plugin {
      *
      * @param {StoreyMap} storeyMap The StoreyMap.
      * @param {Number[]} imagePos 2D pixel coordinates within the bounds of {@link StoreyMap#imageData}.
-     * @param {*} [options] Picking options.
+     * @param {Object} [options] Picking options.
      * @param {Boolean} [options.pickSurface=false] Whether to return the picked position on the surface of the Entity.
      * @returns {PickResult} The pick result, if an Entity was successfully picked, else null.
      */
@@ -698,6 +699,14 @@ class StoreyViewsPlugin extends Plugin {
         return pickResult;
     }
 
+    /**
+     * Converts a 2D position within a StoreyMap image to a 3D World-space position.
+     *
+     * @param {StoreyMap} storeyMap The StoreyMap.
+     * @param {Number[]} imagePos 2D pixel position within the {@link StoreyMap#imageData}.
+     * @param {Object} [options] Unused.
+     * @returns {Number[]|null} 3D World-space position, or null if the StoreyMap's storey is not found.
+     */
     storeyMapToWorldPos(storeyMap, imagePos, options = {}) {
 
         const storeyId = storeyMap.storeyId;
@@ -734,10 +743,11 @@ class StoreyViewsPlugin extends Plugin {
      * Gets the ID of the storey that contains the given 3D World-space position.
      *.
      * @param {Number[]} worldPos 3D World-space position.
+     * @param {String|null} [modelId=null] When given, only considers the storeys of the model with this ID.
      * @returns {String} ID of the storey containing the position, or null if the position falls outside all the storeys.
      */
     getStoreyContainingWorldPos(worldPos, modelId = null) {
-        const storeys = modelId ? this._filterStoreys(modelId) : this.storeys;
+        const storeys = modelId ? this.#filterStoreys(modelId) : this.storeys;
         for (let storeyId in storeys) {
             const storey = storeys[storeyId];
             if (math.point3AABB3AbsoluteIntersect(storey.storeyAABB, worldPos)) {
@@ -751,10 +761,11 @@ class StoreyViewsPlugin extends Plugin {
      * Gets the ID of the storey which's bounding box contains the y point of the world position
      *
      * @param {Number[]} worldPos 3D World-space position.
+     * @param {String|null} [modelId=null] When given, only considers the storeys of the model with this ID.
      * @returns {String} ID of the storey containing the position, or null if the position falls outside all the storeys.
      */
     getStoreyInVerticalRange(worldPos, modelId = null) {
-        const storeys = modelId ? this._filterStoreys(modelId) : this.storeys;
+        const storeys = modelId ? this.#filterStoreys(modelId) : this.storeys;
         for (let storeyId in storeys) {
             const storey = storeys[storeyId];
             const aabb = [0, 0, 0, 0, 0, 0], pos = [0, 0, 0];
@@ -772,10 +783,11 @@ class StoreyViewsPlugin extends Plugin {
      * Returns whether a position is above or below a building
      *
      * @param {Number[]} worldPos 3D World-space position.
+     * @param {String|null} [modelId=null] When given, only considers the storeys of the model with this ID.
      * @returns {String} ID of the lowest/highest story or null.
      */
     isPositionAboveOrBelowBuilding(worldPos, modelId = null) {
-        const storeys = modelId ? this._filterStoreys(modelId) : this.storeys;
+        const storeys = modelId ? this.#filterStoreys(modelId) : this.storeys;
         const keys = Object.keys(storeys);
         if(keys.length <= 0) return null;
         const ids = [keys[0], keys[keys.length - 1]];
@@ -876,17 +888,17 @@ class StoreyViewsPlugin extends Plugin {
     /**
      * Gets Storeys in a list, spatially sorted on the vertical World axis, the lowest Storey first.
      *
-     * @returns {null}
+     * @type {Storey[]}
      */
     get storeysList() {
         if (!this._storeysList) {
             this._storeysList = Object.values(this.storeys);
-            this._storeysList.sort(this._getSpatialSortFunc());
+            this._storeysList.sort(this.#getSpatialSortFunc());
         }
         return this._storeysList;
     }
 
-    _getSpatialSortFunc() {
+    #getSpatialSortFunc() {
         const viewer = this.viewer;
         const scene = viewer.scene;
         const camera = scene.camera;
@@ -926,7 +938,7 @@ class StoreyViewsPlugin extends Plugin {
         });
     }
 
-    _filterStoreys(modelId) {
+    #filterStoreys(modelId) {
         return Object.fromEntries(
             Object.entries(this.storeys).filter(([_, value]) => value.modelId === modelId)
         );

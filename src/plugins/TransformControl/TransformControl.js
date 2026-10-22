@@ -15,6 +15,15 @@ import {transformToNode} from "../lib/ui/index.js";
 const zeroVec = new Float64Array([0, 0, 1]);
 const quat = new Float64Array(4);
 
+/** @import { Viewer } from "../../viewer/Viewer.js" */
+
+/**
+ * @typedef {Object} TransformControlHandlers
+ * @property {(position: Number[]) => void} [onPosition] Optional callback for translation change.
+ * @property {(quaternion: Number[]) => void} [onQuaternion] Optional callback for rotation change.
+ * @property {(scale: Number[]) => void} [onScreenScale] Optional callback for screen scale change.
+ */
+
 /**
  * Controls a transformation with mouse and touch input.
  *
@@ -22,7 +31,9 @@ const quat = new Float64Array(4);
  */
 class TransformControl {
 
-    /** @private */
+    /**
+     * @param {Viewer} viewer The Viewer.
+     */
     constructor(viewer) {
         const cameraControl = viewer.cameraControl;
         const scene = viewer.scene;
@@ -557,6 +568,9 @@ class TransformControl {
         };
     }
 
+    /**
+     * Destroys this TransformControl.
+     */
     destroy() {
         this.__destroy();
     }
@@ -564,7 +578,8 @@ class TransformControl {
     /**
      * Called to assign this Control to Handlers.
      * Call with a null or undefined value to disconnect the Control from whatever Handlers it was assigned to.
-     * @private
+     * @param {TransformControlHandlers} [handlers] Transformation handlers.
+     * @returns {void}
      */
     setHandlers(handlers) {
         Object.values(this._displayMeshes).forEach(m => m.visible = !!handlers);
@@ -580,7 +595,8 @@ class TransformControl {
     /**
      * Sets the World-space position of this Control.
      *
-     * @param {Number[]} value New position.
+     * @param {Number[]} p New position.
+     * @returns {void}
      */
     setPosition(p) {
         this._setPosition(p);
@@ -589,7 +605,8 @@ class TransformControl {
     /**
      * Sets the quaternion of this Control.
      *
-     * @param {Number[]} value New quaternion.
+     * @param {Number[]} q New quaternion.
+     * @returns {void}
      */
     setQuaternion(q) {
         this._setQuaternion(q);

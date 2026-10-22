@@ -18,14 +18,20 @@ import {math} from "../math/math.js";
 /**
  * @typedef {Object} SplineCurveConfiguration
  * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @property {Array} [points=[]] Control points on this SplineCurve.
+ * @property {Number[][]} [points=[]] Control points on this SplineCurve.
  * @property {Number} [t=0] Current position on this SplineCurve, in range between 0..1.
+ */
+
+/**
+ * @typedef {Object} SpliceCurveJSON
+ * @property {Number[][]} points Control points.
+ * @property {Number} t Current position on the SplineCurve.
  */
 class SplineCurve extends Curve {
 
     /**
      * @constructor
-     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this SplineCurve as well.
+     * @param {Component} owner Owner component. When destroyed, the owner will destroy this SplineCurve as well.
      * @param {SplineCurveConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
@@ -39,7 +45,7 @@ class SplineCurve extends Curve {
      *
      * Default value is ````[]````.
      *
-     * @param {Number[]} value New control points.
+     * @param {Number[][]} value New control points.
      */
     set points(value) {
         this._points = value || [];
@@ -50,7 +56,7 @@ class SplineCurve extends Curve {
      *
      * Default value is ````[]````.
      *
-     * @returns {Number[]} The control points.
+     * @returns {Number[][]} The control points.
      */
     get points() {
         return this._points;
@@ -126,6 +132,11 @@ class SplineCurve extends Curve {
         return vector;
     }
 
+    /**
+     * Gets a JSON representation of this SplineCurve.
+     *
+     * @returns {SpliceCurveJSON}
+     */
     getJSON() {
         return {
             points: points,

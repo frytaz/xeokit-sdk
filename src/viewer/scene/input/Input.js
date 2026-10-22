@@ -1038,10 +1038,10 @@ class Input extends Component {
 
         this._keyboardEventsElement = cfg.keyboardEventsElement || document;
 
-        this._bindEvents();
+        this.#bindEvents();
     }
 
-    _bindEvents() {
+    #bindEvents() {
 
         if (this._eventsBound) {
             return;
@@ -1086,7 +1086,7 @@ class Input extends Component {
                 return;
             }
             this.mouseover = true;
-            this._getMouseCanvasPos(e);
+            this.#getMouseCanvasPos(e);
             this.fire("mouseenter", this.mouseCanvasPos, true);
         });
 
@@ -1095,7 +1095,7 @@ class Input extends Component {
                 return;
             }
             this.mouseover = false;
-            this._getMouseCanvasPos(e);
+            this.#getMouseCanvasPos(e);
             this.fire("mouseleave", this.mouseCanvasPos, true);
         });
 
@@ -1116,7 +1116,7 @@ class Input extends Component {
                 default:
                     break;
             }
-            this._getMouseCanvasPos(e);
+            this.#getMouseCanvasPos(e);
             this.element.focus();
             this.fire("mousedown", this.mouseCanvasPos, true);
             if (this.mouseover) {
@@ -1166,7 +1166,7 @@ class Input extends Component {
                 default:
                     break;
             }
-            this._getMouseCanvasPos(e);
+            this.#getMouseCanvasPos(e);
             this.fire("click", this.mouseCanvasPos, true);
             if (this.mouseover) {
                 e.preventDefault();
@@ -1192,7 +1192,7 @@ class Input extends Component {
                 default:
                     break;
             }
-            this._getMouseCanvasPos(e);
+            this.#getMouseCanvasPos(e);
             this.fire("dblclick", this.mouseCanvasPos, true);
             if (this.mouseover) {
                 e.preventDefault();
@@ -1207,7 +1207,7 @@ class Input extends Component {
             if (!this.enabled) {
                 return;
             }
-            this._getMouseCanvasPos(e);
+            this.#getMouseCanvasPos(e);
             tickifedMouseMoveFn();  
             if (this.mouseover) {
                 e.preventDefault();
@@ -1218,7 +1218,7 @@ class Input extends Component {
             if (!this.enabled) {
                 return;
             }
-            this._getMouseCanvasPos(e);
+            this.#getMouseCanvasPos(e);
             this.fire("contextmenu", this.mouseCanvasPos, true);
         });
 
@@ -1260,7 +1260,7 @@ class Input extends Component {
                 return;
             }
             [...e.changedTouches].forEach(e => {
-                this.fire("touchstart", [ e.identifier, this._getTouchCanvasPos(e) ], true);
+                this.fire("touchstart", [ e.identifier, this.#getTouchCanvasPos(e) ], true);
             });
         });
 
@@ -1269,14 +1269,14 @@ class Input extends Component {
                 return;
             }
             [...e.changedTouches].forEach(e => {
-                this.fire("touchend", [ e.identifier, this._getTouchCanvasPos(e) ], true);
+                this.fire("touchend", [ e.identifier, this.#getTouchCanvasPos(e) ], true);
             });
         });
 
         this._eventsBound = true;
     }
 
-    _unbindEvents() {
+    #unbindEvents() {
         if (!this._eventsBound) {
             return;
         }
@@ -1305,7 +1305,7 @@ class Input extends Component {
         this._eventsBound = false;
     }
 
-    _getTouchCanvasPos(event) {
+    #getTouchCanvasPos(event) {
         let element = event.target;
         let totalOffsetLeft = 0;
         let totalOffsetTop = 0;
@@ -1317,7 +1317,7 @@ class Input extends Component {
         return [ event.pageX - totalOffsetLeft, event.pageY - totalOffsetTop ];
     }
 
-    _getMouseCanvasPos(event) {
+    #getMouseCanvasPos(event) {
         if (!event) {
             event = window.event;
             this.mouseCanvasPos[0] = event.x;
@@ -1387,7 +1387,7 @@ class Input extends Component {
      */
     destroy() {
         super.destroy();
-        this._unbindEvents();
+        this.#unbindEvents();
     }
 }
 

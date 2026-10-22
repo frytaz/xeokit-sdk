@@ -1,6 +1,9 @@
 import {math} from "../../viewer/scene/math/math.js";
 import {transformToNode} from "../lib/ui/index.js";
 import {DistanceMeasurementsControl} from "./DistanceMeasurementsControl.js";
+/** @import { PointerLens } from "../../extras/PointerLens/PointerLens.js" */
+/** @import { DistanceMeasurementsPlugin } from "./DistanceMeasurementsPlugin.js" */
+/** @import { DistanceMeasurement } from "./DistanceMeasurement.js" */
 
 const MOUSE_FIRST_CLICK_EXPECTED = 0;
 const MOUSE_SECOND_CLICK_EXPECTED = 1;
@@ -47,8 +50,8 @@ export class DistanceMeasurementsMouseControl extends DistanceMeasurementsContro
      * Creates a DistanceMeasurementsMouseControl bound to the given DistanceMeasurementsPlugin.
      *
      * @param {DistanceMeasurementsPlugin} distanceMeasurementsPlugin The AngleMeasurementsPlugin to control.
-     * @param [cfg] Configuration
-     * @param {function} [cfg.canvasToPagePos] Optional function to map canvas-space coordinates to page coordinates.
+     * @param {Object} [cfg] Configuration
+     * @param {Function} [cfg.canvasToPagePos] Optional function to map canvas-space coordinates to page coordinates.
      * @param {PointerLens} [cfg.pointerLens] A PointerLens to use to provide a magnified view of the cursor when snapping is enabled.
      * @param {boolean} [cfg.snapping=true] Whether to initially enable snap-to-vertex and snap-to-edge for this DistanceMeasurementsMouseControl.
      */
@@ -58,6 +61,10 @@ export class DistanceMeasurementsMouseControl extends DistanceMeasurementsContro
 
         this._canvasToPagePos = cfg.canvasToPagePos;
 
+        /**
+         * The PointerLens used to provide a magnified view of the cursor when snapping is enabled, if any.
+         * @type {PointerLens}
+         */
         this.pointerLens = cfg.pointerLens;
 
         this._active = false;
@@ -73,15 +80,15 @@ export class DistanceMeasurementsMouseControl extends DistanceMeasurementsContro
             targetVisible: null,
         }
 
-        this._initMarkerDiv()
+        this.#initMarkerDiv()
 
         this._snapping = cfg.snapping !== false;
         this._mouseState = MOUSE_FIRST_CLICK_EXPECTED;
 
-        this._attachPlugin(distanceMeasurementsPlugin, cfg);
+        this.#attachPlugin(distanceMeasurementsPlugin, cfg);
     }
 
-    _initMarkerDiv() {
+    #initMarkerDiv() {
         const markerDiv = document.createElement('div');
         const canvas = this.scene.canvas.canvas;
         canvas.parentNode.insertBefore(markerDiv, canvas);
@@ -100,14 +107,14 @@ export class DistanceMeasurementsMouseControl extends DistanceMeasurementsContro
         this._markerDiv = markerDiv;
     }
 
-    _destroyMarkerDiv() {
+    #destroyMarkerDiv() {
         if (this._markerDiv) {
             this._markerDiv.parentNode.removeChild(this._markerDiv);
             this._markerDiv = null;
         }
     }
 
-    _attachPlugin(distanceMeasurementsPlugin, cfg = {}) {
+    #attachPlugin(distanceMeasurementsPlugin, cfg = {}) {
 
         /**
          * The {@link DistanceMeasurementsPlugin} that owns this DistanceMeasurementsMouseControl.
@@ -136,7 +143,7 @@ export class DistanceMeasurementsMouseControl extends DistanceMeasurementsContro
      *
      * This is `true` by default.
      *
-     * @param snapping
+     * @param {boolean} snapping Whether to enable snap-to-vertex and snap-edge.
      */
     set snapping(snapping) {
         this._snapping = snapping;
@@ -146,7 +153,7 @@ export class DistanceMeasurementsMouseControl extends DistanceMeasurementsContro
      * Gets whether snap-to-vertex and snap-to-edge are enabled for this DistanceMeasurementsMouseControl.
      *
      * This is `true` by default.
-     * @returns {*}
+     * @returns {boolean}
      */
     get snapping() {
         return this._snapping;
@@ -162,7 +169,7 @@ export class DistanceMeasurementsMouseControl extends DistanceMeasurementsContro
         }
 
         if (!this._markerDiv) {
-            this._initMarkerDiv()
+            this.#initMarkerDiv()
         }
 
         this.fire("activated", true);
@@ -366,8 +373,8 @@ export class DistanceMeasurementsMouseControl extends DistanceMeasurementsContro
             return;
         }
 
-        this._destroyMarkerDiv()
-        this._initMarkerDiv()
+        this.#destroyMarkerDiv()
+        this.#initMarkerDiv()
 
         if (this._currentDistanceMeasurement) {
             this.distanceMeasurementsPlugin.fire("measurementCancel", this._currentDistanceMeasurement);

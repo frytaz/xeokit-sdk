@@ -1,4 +1,5 @@
 import {Property} from "./Property.js";
+/** @import { MetaModel } from "./MetaModel.js" */
 
 /**
  * @desc A set of properties associated with one or more {@link MetaObject}s.

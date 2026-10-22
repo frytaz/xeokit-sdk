@@ -106,7 +106,7 @@ import {math} from '../math/math.js';
  * @property {Number} [constantAttenuation=0] Constant attenuation factor.
  * @property {Number} [linearAttenuation=0] Linear attenuation factor.
  * @property {Number} [quadraticAttenuation=0] Quadratic attenuation factor.
- * @property {String} [space="view"] The coordinate system this PointLight is defined in - "view" or "world".
+ * @property {"view" | "world"} [space="view"] The coordinate system this PointLight is defined in - "view" or "world".
  * @property {Boolean} [castsShadow=false] Flag which indicates if this PointLight casts a castsShadow.
  */
 class PointLight extends Light {

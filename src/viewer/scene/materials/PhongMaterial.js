@@ -115,10 +115,10 @@ const alphaModeNames = ["opaque", "mask", "blend"];
  * @property {Fresnel} [emissiveFresnel=undefined] An emissive {@link Fresnel}. Must be within the same {@link Scene} as this PhongMaterial.
  * @property {Fresnel} [alphaFresnel=undefined] An alpha {@link Fresnel}. Must be within the same {@link Scene} as this PhongMaterial.
  * @property {Fresnel} [reflectivityFresnel=undefined] A reflectivity {@link Fresnel}. Must be within the same {@link Scene} as this PhongMaterial.
- * @property {String} [alphaMode="opaque"] The alpha blend mode - accepted values are "opaque", "blend" and "mask". See the {@link PhongMaterial#alphaMode} property for more info.
+ * @property {"opaque" | "blend" | "mask"} [alphaMode="opaque"] The alpha blend mode - accepted values are "opaque", "blend" and "mask". See the {@link PhongMaterial#alphaMode} property for more info.
  * @property {Number} [alphaCutoff=0.5] The alpha cutoff value. See the {@link PhongMaterial#alphaCutoff} property for more info.
  * @property {Boolean} [backfaces=false] Whether to render geometry backfaces.
- * @property {Boolean} [frontface="ccw"] The winding order for geometry front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
+ * @property {"cw" | "ccw"} [frontface="ccw"] The winding order for geometry front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
  */
 class PhongMaterial extends Material {
 
@@ -745,7 +745,7 @@ class PhongMaterial extends Material {
      * * "mask" - The rendered output is either fully opaque or fully transparent depending on the alpha value and the specified alpha cutoff value.
      * * "blend" - The alpha value is used to composite the source and destination areas. The rendered output is combined with the background using the normal painting operation (i.e. the Porter and Duff over operator).
      *
-     *@type {String}
+     *@type {"opaque" | "blend" | "mask"}
      */
     set alphaMode(alphaMode) {
         alphaMode = alphaMode || "opaque";
@@ -764,7 +764,7 @@ class PhongMaterial extends Material {
     /**
      * Gets the PhongMaterial's alpha rendering mode.
      *
-     *@type {String}
+     *@type {"opaque" | "blend" | "mask"}
      */
     get alphaMode() {
         return alphaModeNames[this._state.alphaMode];
@@ -834,7 +834,7 @@ class PhongMaterial extends Material {
      * Sets the winding direction of geometry front faces.
      *
      * Default is ````"ccw"````.
-     * @type {String}
+     * @type {"cw" | "ccw"}
      */
     set frontface(value) {
         value = value !== "cw";
@@ -849,7 +849,7 @@ class PhongMaterial extends Material {
      * Gets the winding direction of front faces on attached {@link Mesh}es.
      *
      * Default is ````"ccw"````.
-     * @type {String}
+     * @type {"cw" | "ccw"}
      */
     get frontface() {
         return this._state.frontface ? "ccw" : "cw";

@@ -1,6 +1,7 @@
 import {utils} from '../utils.js';
 import {Component} from '../Component.js';
 import {math} from '../math/math.js';
+/** @import { Mesh } from '../mesh/Mesh.js' */
 
 const angleAxis = math.vec4(4);
 const q1 = math.vec4();
@@ -169,7 +170,7 @@ const identityMat = math.identityMat4();
  * @property {Boolean} [edges=false] Indicates if the Node's edges are initially emphasized.
  * @property {Number[]} [colorize=[1.0,1.0,1.0]] Node's initial RGB colorize color, multiplies by the rendered fragment colors.
  * @property {Number} [opacity=1.0] Node's initial opacity factor, multiplies by the rendered fragment alpha.
- * @property {Array} [children] Child Nodes or {@link Mesh}es to add initially. Children must be in the same {@link Scene} and will be removed first from whatever parents they may already have.
+ * @property {(Node|Mesh)[]} [children] Child Nodes or {@link Mesh}es to add initially. Children must be in the same {@link Scene} and will be removed first from whatever parents they may already have.
  * @property {Boolean} [inheritStates=true] Indicates if children given to this constructor should inherit rendering state from this parent as they are added. Rendering state includes {@link Node#visible}, {@link Node#culled}, {@link Node#pickable}, {@link Node#clippable}, {@link Node#castsShadow}, {@link Node#receivesShadow}, {@link Node#selected}, {@link Node#highlighted}, {@link Node#colorize} and {@link Node#opacity}.
  */
 class Node extends Component {
@@ -1021,7 +1022,7 @@ class Node extends Component {
     /**
      * Array of child Nodes or {@link Mesh}es.
      *
-     * @type {Array}
+     * @type {(Node|Mesh)[]}
      */
     get children() {
         return this._children;
@@ -1224,6 +1225,7 @@ class Node extends Component {
      *
      * @param {Number[]} axis Local axis about which to rotate.
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Node} this
      */
     rotate(axis, angle) {
         angleAxis[0] = axis[0];
@@ -1244,6 +1246,7 @@ class Node extends Component {
      *
      * @param {Number[]} axis Local axis about which to rotate.
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Node} this
      */
     rotateOnWorldAxis(axis, angle) {
         angleAxis[0] = axis[0];
@@ -1260,6 +1263,7 @@ class Node extends Component {
      * Rotates the Node about the local X-axis by the given increment.
      *
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Node} this
      */
     rotateX(angle) {
         return this.rotate(xAxis, angle);
@@ -1269,6 +1273,7 @@ class Node extends Component {
      * Rotates the Node about the local Y-axis by the given increment.
      *
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Node} this
      */
     rotateY(angle) {
         return this.rotate(yAxis, angle);
@@ -1278,6 +1283,7 @@ class Node extends Component {
      * Rotates the Node about the local Z-axis by the given increment.
      *
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Node} this
      */
     rotateZ(angle) {
         return this.rotate(zAxis, angle);
@@ -1288,6 +1294,7 @@ class Node extends Component {
      *
      * @param {Number[]} axis Normalized local space 3D vector along which to translate.
      * @param {Number} distance Distance to translate along  the vector.
+     * @returns {Node} this
      */
     translate(axis, distance) {
         math.vec3ApplyQuaternion(this.quaternion, axis, veca);
@@ -1303,6 +1310,7 @@ class Node extends Component {
      * Translates the Node along the local X-axis by the given increment.
      *
      * @param {Number} distance Distance to translate along  the X-axis.
+     * @returns {Node} this
      */
     translateX(distance) {
         return this.translate(xAxis, distance);
@@ -1312,6 +1320,7 @@ class Node extends Component {
      * Translates the Node along the local Y-axis by the given increment.
      *
      * @param {Number} distance Distance to translate along  the Y-axis.
+     * @returns {Node} this
      */
     translateY(distance) {
         return this.translate(yAxis, distance);
@@ -1321,6 +1330,7 @@ class Node extends Component {
      * Translates the Node along the local Z-axis by the given increment.
      *
      * @param {Number} distance Distance to translate along  the Z-axis.
+     * @returns {Node} this
      */
     translateZ(distance) {
         return this.translate(zAxis, distance);

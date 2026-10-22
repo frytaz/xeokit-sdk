@@ -247,6 +247,26 @@ import {AngleMeasurementsMouseControl} from "./AngleMeasurementsMouseControl.js"
  */
 
 /**
+ * Event fired by {@link AngleMeasurementsPlugin} when the mouse enters over an {@link AngleMeasurement}.
+ *
+ * @typedef {Object} AngleMeasurementMouseOverEvent
+ * @property {AngleMeasurementsPlugin} plugin The plugin.
+ * @property {AngleMeasurement} angleMeasurement The measurement.
+ * @property {AngleMeasurement} measurement The measurement.
+ * @property {MouseEvent} event The original mouse event.
+ */
+
+/**
+ * Event fired by {@link AngleMeasurementsPlugin} when the mouse leaves an {@link AngleMeasurement}.
+ *
+ * @typedef {Object} AngleMeasurementMouseLeaveEvent
+ * @property {AngleMeasurementsPlugin} plugin The plugin.
+ * @property {AngleMeasurement} angleMeasurement The measurement.
+ * @property {AngleMeasurement} measurement The measurement.
+ * @property {MouseEvent} event The original mouse event.
+ */
+
+/**
  * @typedef {Object} AngleMeasurementsPluginConfiguration
  * @property {String} [id="AngleMeasurements"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
  * @property {HTMLElement} [container] Container DOM element for markers and labels. Defaults to ````document.body````, but different element should be specified to capture it with {@link Viewer.getSnapshotWithPlugins}.
@@ -305,7 +325,7 @@ export class AngleMeasurementsPlugin extends Plugin {
 
     /**
      * Gets the plugin's HTML container element, if any.
-     * @returns {*|HTMLElement|HTMLElement}
+     * @returns {HTMLElement}
      */
     getContainerElement() {
         return this._container;
@@ -335,7 +355,7 @@ export class AngleMeasurementsPlugin extends Plugin {
     /**
      * Gets the existing {@link AngleMeasurement}s, each mapped to its {@link AngleMeasurement#id}.
      *
-     * @type {{String:AngleMeasurement}}
+     * @type {{[key: string]: AngleMeasurement}}
      */
     get measurements() {
         return this._measurements;
@@ -348,10 +368,13 @@ export class AngleMeasurementsPlugin extends Plugin {
      *
      * @param {Object} params {@link AngleMeasurement} configuration.
      * @param {String} params.id Unique ID to assign to {@link AngleMeasurement#id}. The AngleMeasurement will be registered by this in {@link AngleMeasurementsPlugin#measurements} and {@link Scene.components}. Must be unique among all components in the {@link Viewer}.
+     * @param {Object} params.origin Origin.
      * @param {Number[]} params.origin.worldPos Origin World-space 3D position.
      * @param {Entity} params.origin.entity Origin Entity.
+     * @param {Object} params.corner Corner.
      * @param {Number[]} params.corner.worldPos Corner World-space 3D position.
      * @param {Entity} params.corner.entity Corner Entity.
+     * @param {Object} params.target Target.
      * @param {Number[]} params.target.worldPos Target World-space 3D position.
      * @param {Entity} params.target.entity Target Entity.
      * @param {Boolean} [params.visible=true] Whether to initially show the {@link AngleMeasurement}.

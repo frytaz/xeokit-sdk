@@ -7,6 +7,7 @@ import {math} from "../../viewer/index.js";
 import {parse} from "../../external.js";
 import {LASLoader} from "../../external.js";
 import {loadLASHeader} from "./loadLASHeader.js";
+/** @import { ModelStats } from "../index.js" */
 
 const MAX_VERTICES = 500000; // TODO: Rough estimate
 
@@ -203,12 +204,42 @@ const MAX_VERTICES = 500000; // TODO: Rough estimate
  */
 
 /**
+ * A data source through which a {@link LASLoaderPlugin} loads LAS files.
+ *
+ * * ````getLAS```` - Gets the contents of the given LAS file in an arraybuffer.
+ * * ````cacheBuster```` - Whether cache-busting is enabled.
+ *
+ * @typedef {{
+ *     getLAS(src: string | number, ok: (LAS: ArrayBuffer) => void, error: (e: Error) => void): void;
+ *     cacheBuster: boolean;
+ * }} ILASDefaultDataSource
+ */
+
+/**
+ * @typedef {Object} LoadLASModel
+ * @property {String} [id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
+ * @property {String} [src] Path to a LAS file, as an alternative to the ````las```` parameter.
+ * @property {ArrayBuffer} [las] The LAS file data, as an alternative to the ````src```` parameter.
+ * @property {String} [manifestSrc] Path or URL to a JSON manifest file that provides paths to ````.laz```` || ````.las```` files to load as parts of the model. Use this option to load models that have been split into
+ * @property {Object} [manifest] A JSON manifest object (as an alternative to a path or URL) that provides paths to ````.laz```` || ````.las```` files to load as parts of the model. Use this option to load models that have been split into
+ * @property {String} [entityId] ID to assign to the {@link Entity} that represents the point cloud, generated automatically by default.
+ * @property {Object} [metaModelJSON] JSON model metadata to create a {@link MetaModel} for the point cloud.
+ * @property {Boolean} [loadMetadata=true] Whether to load metadata for the LAS model.
+ * @property {Number[]} [origin=[0,0,0]] The model's World-space double-precision 3D origin. Use this to position the model within xeokit's World coordinate system, using double-precision coordinates.
+ * @property {Number[]} [position=[0,0,0]] The model single-precision 3D position, relative to the ````origin```` parameter.
+ * @property {Number[]} [scale=[1,1,1]] The model's scale.
+ * @property {Number[]} [rotation=[0,0,0]] The model's orientation, given as Euler angles in degrees, for each of the X, Y and Z axis.
+ * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
+ * @property {ModelStats} [stats] Collects model statistics.
+ */
+
+/**
  * @typedef {Object} LASLoaderPluginConfiguration
  * @property {String} [id="lasLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
- * @property {Object} [dataSource] A custom data source through which the LASLoaderPlugin can load model and metadata files. Defaults to an instance of {@link LASDefaultDataSource}, which loads over HTTP.
+ * @property {ILASDefaultDataSource} [dataSource] A custom data source through which the LASLoaderPlugin can load model and metadata files. Defaults to an instance of {@link LASDefaultDataSource}, which loads over HTTP.
  * @property {Number} [skip=1] Configures LASLoaderPlugin to load every **n** points.
- * @property {Number} [fp64=false] Configures if LASLoaderPlugin assumes that LAS positions are stored in 64-bit floats instead of 32-bit.
- * @property {Number} [colorDepth=8] Configures whether LASLoaderPlugin assumes that LAS colors are encoded using 8 or 16 bits. Accepted values are 8, 16 an "auto".
+ * @property {Boolean} [fp64=false] Configures if LASLoaderPlugin assumes that LAS positions are stored in 64-bit floats instead of 32-bit.
+ * @property {8 | 16 | "auto"} [colorDepth=8] Configures whether LASLoaderPlugin assumes that LAS colors are encoded using 8 or 16 bits. Accepted values are 8, 16 an "auto".
  * @property {Boolean} [center=false] Whether to center the LAS points.  Applied before "rotateX", "rotate" and "transform".
  * @property {Boolean} [rotateX=false] Whether to rotate the LAS point positions 90 degrees. Applied after "center".
  * @property {Number[]} [rotate=[0,0,0]] Rotations to immediately apply to the LAS points, given as Euler angles in degrees, for each of the X, Y and Z axis. Rotation is applied after "center" and "rotateX".
@@ -241,7 +272,7 @@ class LASLoaderPlugin extends Plugin {
      *
      * Default value is {@link LASDefaultDataSource}, which loads via HTTP.
      *
-     * @type {Object}
+     * @type {ILASDefaultDataSource}
      */
     get dataSource() {
         return this._dataSource;
@@ -252,7 +283,7 @@ class LASLoaderPlugin extends Plugin {
      *
      * Default value is {@link LASDefaultDataSource}, which loads via HTTP.
      *
-     * @type {Object}
+     * @type {ILASDefaultDataSource}
      */
     set dataSource(value) {
         this._dataSource = value || new LASDefaultDataSource();
@@ -309,7 +340,7 @@ class LASLoaderPlugin extends Plugin {
      *
      * Note: LAS specification recommends 16 bits.
      *
-     * @returns {Number|String} Possible returned values are 8, 16 and "auto".
+     * @returns {8 | 16 | "auto"} Possible returned values are 8, 16 and "auto".
      */
     get colorDepth() {
         return this._colorDepth;
@@ -322,7 +353,7 @@ class LASLoaderPlugin extends Plugin {
      *
      * Note: LAS specification recommends 16 bits.
      *
-     * @param {Number|String} value Valid values are 8, 16 and "auto".
+     * @param {8 | 16 | "auto"} value Valid values are 8, 16 and "auto".
      */
     set colorDepth(value) {
         this._colorDepth = value || "auto";
@@ -411,7 +442,7 @@ class LASLoaderPlugin extends Plugin {
      *
      * Default value is ````false````.
      *
-     * @returns {*}
+     * @returns {Boolean}
      */
     get rotateX() {
         return this._rotateX;
@@ -422,7 +453,7 @@ class LASLoaderPlugin extends Plugin {
      *
      * Default value is ````false````.
      *
-     * @param rotateX
+     * @param {Boolean} rotateX
      */
     set rotateX(rotateX) {
         this._rotateX = rotateX;
@@ -431,20 +462,8 @@ class LASLoaderPlugin extends Plugin {
     /**
      * Loads an ````LAS```` model into this LASLoaderPlugin's {@link Viewer}.
      *
-     * @param {Object} params Loading parameters.
-     * @param {String} [params.id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
-     * @param {String} [params.src] Path to a LAS file, as an alternative to the ````las```` parameter.
-     * @param {ArrayBuffer} [params.las] The LAS file data, as an alternative to the ````src```` parameter.
-     *  @param {String} [params.manifestSrc] Path or URL to a JSON manifest file that provides paths to ````.laz```` || ````.las```` files to load as parts of the model. Use this option to load models that have been split into
-     * @param {Object} [params.manifest] A JSON manifest object (as an alternative to a path or URL) that provides paths to ````.laz```` || ````.las```` files to load as parts of the model. Use this option to load models that have been split into
-     * @param {Boolean} [params.loadMetadata=true] Whether to load metadata for the LAS model.
-     * @param {Number[]} [params.origin=[0,0,0]] The model's World-space double-precision 3D origin. Use this to position the model within xeokit's World coordinate system, using double-precision coordinates.
-     * @param {Number[]} [params.position=[0,0,0]] The model single-precision 3D position, relative to the ````origin```` parameter.
-     * @param {Number[]} [params.scale=[1,1,1]] The model's scale.
-     * @param {Number[]} [params.rotation=[0,0,0]] The model's orientation, given as Euler angles in degrees, for each of the X, Y and Z axis.
-     * @param {Number[]} [params.matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
-     * @param {Object} [params.stats] Collects model statistics.
-     * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}.
+     * @param {LoadLASModel} params Loading parameters.
+     * @returns {SceneModel} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}.
      */
     load(params = {}) {
 
@@ -489,10 +508,10 @@ class LASLoaderPlugin extends Plugin {
         }
 
         if (params.src) {
-            this._loadModel(params.src, params, options, sceneModel);
+            this.#loadModel(params.src, params, options, sceneModel);
         } else if(params.las) {
             spinner.processes++;
-            this._parseModel(params.las, params, options, sceneModel).then(done, error);
+            this.#parseModel(params.las, params, options, sceneModel).then(done, error);
         } else if (params.manifest || params.manifestSrc) {
             const baseDir = params.manifestSrc ? getBaseDirectory(params.manifestSrc) : "";
             const loadAllFiles = (lasFiles) => { 
@@ -507,7 +526,7 @@ class LASLoaderPlugin extends Plugin {
                         modelsLoaded[i] = false;
                         this._dataSource.getLAS(`${baseDir}${lasFiles[i]}`, (arrayBuffer) => {
                             const modelParams = utils.apply(params, {isManifest: true, index: i});
-                            this._parseModel(arrayBuffer, modelParams, options, sceneModel).then(() => {
+                            this.#parseModel(arrayBuffer, modelParams, options, sceneModel).then(() => {
                                 modelsLoaded[modelParams.index] = true;
                                 let allLoaded = true;
                                 modelsLoaded.forEach((loaded) => {
@@ -547,11 +566,11 @@ class LASLoaderPlugin extends Plugin {
         return sceneModel;
     }
 
-    _loadModel(src, params, options, sceneModel) {
+    #loadModel(src, params, options, sceneModel) {
         const spinner = this.viewer.scene.canvas.spinner;
         spinner.processes++;
         this._dataSource.getLAS(params.src, (arrayBuffer) => {
-                this._parseModel(arrayBuffer, params, options, sceneModel).then(() => {
+                this.#parseModel(arrayBuffer, params, options, sceneModel).then(() => {
                     sceneModel.scene.once("tick", () => {
                         if (sceneModel.destroyed) {
                             return;
@@ -573,7 +592,7 @@ class LASLoaderPlugin extends Plugin {
             });
     }
 
-    _parseModel(arrayBuffer, params, options, sceneModel) {
+    #parseModel(arrayBuffer, params, options, sceneModel) {
 
         const readPositions = (attributesPosition) => {
             const positionsValue = attributesPosition.value;

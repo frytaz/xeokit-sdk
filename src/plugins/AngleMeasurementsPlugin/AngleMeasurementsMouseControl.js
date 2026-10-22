@@ -1,6 +1,9 @@
 import {math} from "../../viewer/scene/math/math.js";
 import {transformToNode} from "../lib/ui/index.js";
 import {AngleMeasurementsControl} from "./AngleMeasurementsControl.js";
+/** @import { PointerLens } from "../../extras/PointerLens/PointerLens.js" */
+/** @import { AngleMeasurementsPlugin } from "./AngleMeasurementsPlugin.js" */
+/** @import { AngleMeasurement } from "./AngleMeasurement.js" */
 
 const MOUSE_FINDING_ORIGIN = 0;
 const MOUSE_FINDING_CORNER = 1;
@@ -49,7 +52,7 @@ export class AngleMeasurementsMouseControl extends AngleMeasurementsControl {
      *
      * @param {AngleMeasurementsPlugin} angleMeasurementsPlugin The AngleMeasurementsPlugin to control.
      * @param {Object} [cfg] Configuration
-     * @param {function} [cfg.canvasToPagePos] Optional function to map canvas-space coordinates to page coordinates.
+     * @param {Function} [cfg.canvasToPagePos] Optional function to map canvas-space coordinates to page coordinates.
      * @param {PointerLens} [cfg.pointerLens] A PointerLens to use to provide a magnified view of the cursor when snapping is enabled.
      * @param {boolean} [cfg.snapping=true] Whether to initially enable snap-to-vertex and snap-to-edge for this AngleMeasurementsMouseControl.
      */
@@ -59,21 +62,25 @@ export class AngleMeasurementsMouseControl extends AngleMeasurementsControl {
 
         this._canvasToPagePos = cfg.canvasToPagePos;
 
+        /**
+         * The PointerLens used to provide a magnified view of the cursor when snapping is enabled, if any.
+         * @type {PointerLens}
+         */
         this.pointerLens = cfg.pointerLens;
 
         this._active = false;
 
         this._currentAngleMeasurement = null;
 
-        this._initMarkerDiv()
+        this.#initMarkerDiv()
 
         this._snapping = cfg.snapping !== false;
         this._mouseState = MOUSE_FINDING_ORIGIN;
 
-        this._attachPlugin(angleMeasurementsPlugin, cfg);
+        this.#attachPlugin(angleMeasurementsPlugin, cfg);
     }
 
-    _initMarkerDiv() {
+    #initMarkerDiv() {
         const markerDiv = document.createElement('div');
         const canvas = this.scene.canvas.canvas;
         canvas.parentNode.insertBefore(markerDiv, canvas);
@@ -93,14 +100,14 @@ export class AngleMeasurementsMouseControl extends AngleMeasurementsControl {
         this.markerDiv = markerDiv;
     }
 
-    _destroyMarkerDiv() {
+    #destroyMarkerDiv() {
         if (this.markerDiv) {
             this.markerDiv.parentNode.removeChild(this.markerDiv);
             this.markerDiv = null;
         }
     }
 
-    _attachPlugin(angleMeasurementsPlugin, cfg = {}) {
+    #attachPlugin(angleMeasurementsPlugin, cfg = {}) {
 
         /**
          * The {@link AngleMeasurementsPlugin} that owns this AngleMeasurementsMouseControl.
@@ -156,7 +163,7 @@ export class AngleMeasurementsMouseControl extends AngleMeasurementsControl {
             return;
         }
         if (!this.markerDiv) {
-            this._initMarkerDiv() // if the marker is destroyed after deactivation, we recreate it
+            this.#initMarkerDiv() // if the marker is destroyed after deactivation, we recreate it
         }
         const angleMeasurementsPlugin = this.angleMeasurementsPlugin;
         const scene = this.scene;
@@ -408,8 +415,8 @@ export class AngleMeasurementsMouseControl extends AngleMeasurementsControl {
             return;
         }
 
-        this._destroyMarkerDiv()
-        this._initMarkerDiv()
+        this.#destroyMarkerDiv()
+        this.#initMarkerDiv()
 
         if (this._currentAngleMeasurement) {
             this._currentAngleMeasurement.destroy();

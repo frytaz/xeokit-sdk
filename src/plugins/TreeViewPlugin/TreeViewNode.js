@@ -58,7 +58,7 @@ class TreeViewNode {
 
     /** The parent TreeViewNode.
      *
-     * @type {TreeViewNode}
+     * @type {TreeViewNode|null}
      * @abstract
      */
     get parent() {

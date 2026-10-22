@@ -1,6 +1,9 @@
 import {ENTITY_FLAGS} from './ENTITY_FLAGS.js';
 import {math} from "../math/math.js";
 import { Material } from '../materials/Material.js';
+/** @import { SceneModel } from './SceneModel.js' */
+/** @import { SceneModelMesh } from './SceneModelMesh.js' */
+/** @import { Scene } from '../scene/Scene.js' */
 
 const tempFloatRGB = new Float32Array([0, 0, 0]);
 const tempIntRGB = new Uint16Array([0, 0, 0]);
@@ -27,16 +30,19 @@ export class SceneModelEntity {
 
         /**
          * The {@link Scene} to which this SceneModelEntity belongs.
+         * @type {Scene}
          */
         this.scene = model.scene;
 
         /**
          * The {@link SceneModel} to which this SceneModelEntity belongs.
+         * @type {SceneModel}
          */
         this.model = model;
 
         /**
          * Identifies if it's a SceneModelEntity
+         * @type {Boolean}
          */
         this.isSceneModelEntity = true;
 
@@ -45,6 +51,7 @@ export class SceneModelEntity {
          *
          * * These are created with {@link SceneModel#createMesh} and registered in {@ilnk SceneModel#meshes}
          * * Each SceneModelMesh belongs to one SceneModelEntity
+         * @type {SceneModelMesh[]}
          */
         this.meshes = meshes;
 
@@ -60,11 +67,13 @@ export class SceneModelEntity {
 
         /**
          * The unique ID of this SceneModelEntity.
+         * @type {String}
          */
         this.id = id;
 
         /**
          * The original system ID of this SceneModelEntity.
+         * @type {String}
          */
         this.originalSystemId = math.unglobalizeObjectId(model.id, id);
 
@@ -105,7 +114,7 @@ export class SceneModelEntity {
      * Represented by a six-element Float64Array containing the min/max extents of the
      * axis-aligned volume, ie. ````[xmin, ymin, zmin, xmax, ymax, zmax]````.
      *
-     * @type {Float64Array}
+     * @type {Number[]}
      */
     get aabb() {
         if (this._aabbDirty) {
@@ -180,7 +189,7 @@ export class SceneModelEntity {
      * @type {Boolean}
      */
     get visible() {
-        return this._getFlag(ENTITY_FLAGS.VISIBLE);
+        return this.#getFlag(ENTITY_FLAGS.VISIBLE);
     }
 
     /**
@@ -221,7 +230,7 @@ export class SceneModelEntity {
      * @type {Boolean}
      */
     get highlighted() {
-        return this._getFlag(ENTITY_FLAGS.HIGHLIGHTED);
+        return this.#getFlag(ENTITY_FLAGS.HIGHLIGHTED);
     }
 
     /**
@@ -260,7 +269,7 @@ export class SceneModelEntity {
      * @type {Boolean}
      */
     get xrayed() {
-        return this._getFlag(ENTITY_FLAGS.XRAYED);
+        return this.#getFlag(ENTITY_FLAGS.XRAYED);
     }
 
     /**
@@ -298,7 +307,7 @@ export class SceneModelEntity {
      * @type {Boolean}
      */
     get selected() {
-        return this._getFlag(ENTITY_FLAGS.SELECTED);
+        return this.#getFlag(ENTITY_FLAGS.SELECTED);
     }
 
     /**
@@ -333,7 +342,7 @@ export class SceneModelEntity {
      * @type {Boolean}
      */
     get edges() {
-        return this._getFlag(ENTITY_FLAGS.EDGES);
+        return this.#getFlag(ENTITY_FLAGS.EDGES);
     }
 
     /**
@@ -363,7 +372,7 @@ export class SceneModelEntity {
 
     set culledVFC(culled) {
         this._culledVFC = culled;
-        this._setCulled();
+        this.#setCulled();
     }
 
     get culledLOD() {
@@ -372,7 +381,7 @@ export class SceneModelEntity {
 
     set culledLOD(culled) {
         this._culledLOD = culled;
-        this._setCulled();
+        this.#setCulled();
     }
 
     /**
@@ -384,7 +393,7 @@ export class SceneModelEntity {
      */
     get culled() {
         return !!(this._culled);
-        // return this._getFlag(ENTITY_FLAGS.CULLED);
+        // return this.#getFlag(ENTITY_FLAGS.CULLED);
     }
 
     /**
@@ -396,10 +405,10 @@ export class SceneModelEntity {
      */
     set culled(culled) {
         this._culled = culled;
-        this._setCulled();
+        this.#setCulled();
     }
 
-    _setCulled() {
+    #setCulled() {
         let culled = !!(this._culled) || !!(this._culledLOD && this._lodCullable) || !!(this._culledVFC);
         if (!!(this._flags & ENTITY_FLAGS.CULLED) === culled) {
             return; // Redundant update
@@ -423,7 +432,7 @@ export class SceneModelEntity {
      * @type {Boolean}
      */
     get clippable() {
-        return this._getFlag(ENTITY_FLAGS.CLIPPABLE);
+        return this.#getFlag(ENTITY_FLAGS.CLIPPABLE);
     }
 
     /**
@@ -454,7 +463,7 @@ export class SceneModelEntity {
      * @type {Boolean}
      */
     get collidable() {
-        return this._getFlag(ENTITY_FLAGS.COLLIDABLE);
+        return this.#getFlag(ENTITY_FLAGS.COLLIDABLE);
     }
 
     /**
@@ -484,7 +493,7 @@ export class SceneModelEntity {
      * @type {Boolean}
      */
     get pickable() {
-        return this._getFlag(ENTITY_FLAGS.PICKABLE);
+        return this.#getFlag(ENTITY_FLAGS.PICKABLE);
     }
 
     /**
@@ -647,6 +656,11 @@ export class SceneModelEntity {
         this.model.glRedraw();
     }
 
+    /**
+     * Gets if Scalable Ambient Obscurance (SAO) will apply to this SceneModelEntity, as configured on its {@link SceneModel}.
+     *
+     * @type {Boolean}
+     */
     get saoEnabled() {
         return this.model.saoEnabled;
     }
@@ -690,6 +704,11 @@ export class SceneModelEntity {
         }
     }
 
+    /**
+     * Gets the positions and indices of this SceneModelEntity's geometry, concatenated from all its meshes.
+     *
+     * @returns {{indices: Number[], positions: Number[]}}
+     */
     getGeometryData() {
         let positionsBase = 0;
         const positions = [];
@@ -755,7 +774,7 @@ export class SceneModelEntity {
         return surfaceArea > 0 ? surfaceArea : -1;
     }
 
-    _getFlag(flag) {
+    #getFlag(flag) {
         return !!(this._flags & flag);
     }
 

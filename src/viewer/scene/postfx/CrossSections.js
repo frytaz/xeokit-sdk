@@ -168,7 +168,7 @@ class CrossSections extends Component {
      *
      * Default value is ````[0.0, 0.0, 0.0, 1.0]````.
      *
-     * @type {Number}
+     * @type {Number[]}
      */
     set sliceColor(value) {
         if (value === undefined || value === null) {
@@ -186,7 +186,7 @@ class CrossSections extends Component {
      *
      * Default value is ````[0.0, 0.0, 0.0, 1.0]````.
      *
-     * @type {Number}
+     * @type {Number[]}
      */
     get sliceColor() {
         return this._sliceColor;

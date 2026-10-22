@@ -17,6 +17,8 @@ export class SceneModelTexture {
          * Unique ID of this SceneModelTexture.
          *
          * The SceneModelTexture is registered against this ID in {@link SceneModel#textures}.
+         *
+         * @type {String|Number}
          */
         this.id = cfg.id;
 

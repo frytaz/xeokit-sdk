@@ -6,6 +6,8 @@ import {PhongMaterial} from "../../viewer/scene/materials/PhongMaterial.js";
 import {math} from "../../viewer/scene/math/math.js";
 import {Mesh} from "../../viewer/scene/mesh/Mesh.js";
 import {activateDraggableDots, Dot3D, marker3D, wire3D, touchPointSelector, transformToNode, triangulateEarClipping} from "../lib/ui/index.js";
+/** @import { Viewer } from "../../viewer/Viewer.js" */
+/** @import { PointerLens } from "../../extras/PointerLens/PointerLens.js" */
 
 const hex2rgb = function(color) {
     const rgb = idx => parseInt(color.substr(idx + 1, 2), 16) / 255;
@@ -747,8 +749,9 @@ class ZonesAAZoneControl extends Component {
      * Creates a ZonesMouseControl bound to the given ZonesPlugin.
      *
      * @param {ZonesPlugin} zonesPlugin The ZonesPlugin to control.
-     * @param [cfg] Configuration
+     * @param {Object} cfg Configuration
      * @param {PointerLens} [cfg.pointerLens] A PointerLens to use to provide a magnified view of the cursor when snapping is enabled.
+     * @param {Function} createSelect3dPoint Creates the point selector used to pick zone corners.
      */
     constructor(zonesPlugin, cfg, createSelect3dPoint) {
         super(zonesPlugin.viewer.scene);

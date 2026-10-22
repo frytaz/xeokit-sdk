@@ -49,8 +49,8 @@ const tempAABB = math.AABB3();
 /**
  * @typedef {Object} VBOGeometryConfiguration
  * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @property {Object.<string, Object>} [meta] Optional map of user-defined metadata to attach to this Geometry.
- * @property {String} [primitive="triangles"] The primitive type. Accepted values are 'points', 'lines', 'line-loop', 'line-strip', 'triangles', 'triangle-strip' and 'triangle-fan'.
+ * @property {Object.<string, *>} [meta] Optional map of user-defined metadata to attach to this Geometry.
+ * @property {"points" | "lines" | "line-loop" | "line-strip" | "triangles" | "triangle-strip" | "triangle-fan"} [primitive="triangles"] The primitive type. Accepted values are 'points', 'lines', 'line-loop', 'line-strip', 'triangles', 'triangle-strip' and 'triangle-fan'.
  * @property {Number[]} [positions] Positions array.
  * @property {Number[]} [normals] Vertex normal vectors array.
  * @property {Number[]} [uv] UVs array.
@@ -69,7 +69,7 @@ class VBOGeometry extends Geometry {
 
     /**
      * @private
-     * @returns {Boolean}
+     * @type {Boolean}
      */
     get isVBOGeometry() {
         return true;
@@ -249,7 +249,7 @@ class VBOGeometry extends Geometry {
      *
      * Possible types are: 'points', 'lines', 'line-loop', 'line-strip', 'triangles', 'triangle-strip' and 'triangle-fan'.
      *
-     * @type {String}
+     * @type {"points" | "lines" | "line-loop" | "line-strip" | "triangles" | "triangle-strip" | "triangle-fan"}
      */
     get primitive() {
         return this._state.primitiveName;

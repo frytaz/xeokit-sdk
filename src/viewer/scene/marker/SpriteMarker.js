@@ -166,7 +166,7 @@ class SpriteMarker extends Marker {
         if (this._image) {
             this._imageSize[0] = this._image.width;
             this._imageSize[1] = this._image.height;
-            this._updatePlaneSizeFromImage();
+            this.#updatePlaneSizeFromImage();
             this._src = null;
             this._texture.image = this._image;
         }
@@ -201,7 +201,7 @@ class SpriteMarker extends Marker {
                 this._texture.image = image;
                 this._imageSize[0] = image.width;
                 this._imageSize[1] = image.height;
-                this._updatePlaneSizeFromImage();
+                this.#updatePlaneSizeFromImage();
             };
             image.src = this._src;
         }
@@ -231,7 +231,7 @@ class SpriteMarker extends Marker {
     set size(size) {
         this._size = (size === undefined || size === null) ? 1.0 : size;
         if (this._image) {
-            this._updatePlaneSizeFromImage()
+            this.#updatePlaneSizeFromImage()
         }
     }
 
@@ -336,7 +336,7 @@ class SpriteMarker extends Marker {
         return this._mesh.opacity;
     }
 
-    _updatePlaneSizeFromImage() {
+    #updatePlaneSizeFromImage() {
         const halfSize = this._size * 0.5;
         const width = this._imageSize[0];
         const height = this._imageSize[1];

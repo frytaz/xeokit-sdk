@@ -20,6 +20,15 @@ import {CrossSections} from "../postfx/CrossSections.js";
 import {PointsMaterial} from "../materials/PointsMaterial.js";
 import {LinesMaterial} from "../materials/LinesMaterial.js";
 import {SectionCaps} from '../sectionCaps/SectionCaps.js';
+/** @import { Viewer } from '../../Viewer.js' */
+/** @import { Entity } from '../Entity.js' */
+/** @import { SectionPlane } from '../sectionPlane/SectionPlane.js' */
+/** @import { Light } from '../lights/Light.js' */
+/** @import { LightMap } from '../lights/LightMap.js' */
+/** @import { ReflectionMap } from '../lights/ReflectionMap.js' */
+/** @import { Bitmap } from '../Bitmap/Bitmap.js' */
+/** @import { LineSet } from '../LineSet/LineSet.js' */
+/** @import { PickResult } from '../webgl/PickResult.js' */
 
 // Enables runtime check for redundant calls to object state update methods, eg. Scene#_objectVisibilityUpdated
 const ASSERT_OBJECT_STATE_UPDATE = false;
@@ -62,6 +71,15 @@ function getEntityIDMap(scene, entityIds) {
  * Fired whenever a warning is logged on a component within this Scene.
  * @event warn
  * @param {String} value The warning message
+ */
+
+/**
+ * @typedef {Object} TickEvent
+ * @property {String} sceneId The ID of this Scene.
+ * @property {Number} startTime The time in seconds since 1970 that this Scene was instantiated.
+ * @property {Number} time The time in seconds since 1970 of this "tick" event.
+ * @property {Number} prevTime The time of the previous "tick" event from this Scene.
+ * @property {Number} deltaTime The time in seconds since the previous "tick" event from this Scene.
  */
 
 /**
@@ -407,7 +425,7 @@ class Scene extends Component {
          *
          * @property models
          * @final
-         * @type {{String:Entity}}
+         * @type {{[key: string]: Entity}}
          */
         this.models = {};
 
@@ -418,7 +436,7 @@ class Scene extends Component {
          *
          * @property objects
          * @final
-         * @type {{String:Entity}}
+         * @type {{[key: string]: Entity}}
          */
         this.objects = {};
         this._numObjects = 0;
@@ -430,7 +448,7 @@ class Scene extends Component {
          *
          * @property visibleObjects
          * @final
-         * @type {{String:Object}}
+         * @type {{[key: string]: Entity}}
          */
         this.visibleObjects = {};
         this._numVisibleObjects = 0;
@@ -444,7 +462,7 @@ class Scene extends Component {
          *
          * @property xrayedObjects
          * @final
-         * @type {{String:Object}}
+         * @type {{[key: string]: Entity}}
          */
         this.xrayedObjects = {};
         this._numXRayedObjects = 0;
@@ -458,7 +476,7 @@ class Scene extends Component {
          *
          * @property highlightedObjects
          * @final
-         * @type {{String:Object}}
+         * @type {{[key: string]: Entity}}
          */
         this.highlightedObjects = {};
         this._numHighlightedObjects = 0;
@@ -472,7 +490,7 @@ class Scene extends Component {
          *
          * @property selectedObjects
          * @final
-         * @type {{String:Object}}
+         * @type {{[key: string]: Entity}}
          */
         this.selectedObjects = {};
         this._numSelectedObjects = 0;
@@ -486,7 +504,7 @@ class Scene extends Component {
          *
          * @property colorizedObjects
          * @final
-         * @type {{String:Object}}
+         * @type {{[key: string]: Entity}}
          */
         this.colorizedObjects = {};
         this._numColorizedObjects = 0;
@@ -500,7 +518,7 @@ class Scene extends Component {
          *
          * @property opacityObjects
          * @final
-         * @type {{String:Object}}
+         * @type {{[key: string]: Entity}}
          */
         this.opacityObjects = {};
         this._numOpacityObjects = 0;
@@ -514,7 +532,7 @@ class Scene extends Component {
          *
          * @property offsetObjects
          * @final
-         * @type {{String:Object}}
+         * @type {{[key: string]: Entity}}
          */
         this.offsetObjects = {};
         this._numOffsetObjects = 0;
@@ -542,56 +560,56 @@ class Scene extends Component {
         /**
          * For each {@link Component} type, a map of IDs to {@link Component} instances of that type.
          *
-         * @type {{String:{String:Component}}}
+         * @type {{[key: string]: {[key: string]: Component}}}
          */
         this.types = {};
 
         /**
          * The {@link Component}s within this Scene, each mapped to its {@link Component#id}.
          *
-         * *@type {{String:Component}}
+         * @type {{[key: string]: Component}}
          */
         this.components = {};
 
         /**
          * The {@link SectionPlane}s in this Scene, each mapped to its {@link SectionPlane#id}.
          *
-         * @type {{String:SectionPlane}}
+         * @type {{[key: string]: SectionPlane}}
          */
         this.sectionPlanes = {};
 
         /**
          * The {@link Light}s in this Scene, each mapped to its {@link Light#id}.
          *
-         * @type {{String:Light}}
+         * @type {{[key: string]: Light}}
          */
         this.lights = {};
 
         /**
          * The {@link LightMap}s in this Scene, each mapped to its {@link LightMap#id}.
          *
-         * @type {{String:LightMap}}
+         * @type {{[key: string]: LightMap}}
          */
         this.lightMaps = {};
 
         /**
          * The {@link ReflectionMap}s in this Scene, each mapped to its {@link ReflectionMap#id}.
          *
-         * @type {{String:ReflectionMap}}
+         * @type {{[key: string]: ReflectionMap}}
          */
         this.reflectionMaps = {};
 
         /**
          * The {@link Bitmap}s in this Scene, each mapped to its {@link Bitmap#id}.
          *
-         * @type {{String:Bitmap}}
+         * @type {{[key: string]: Bitmap}}
          */
         this.bitmaps = {};
 
         /**
          * The {@link LineSet}s in this Scene, each mapped to its {@link LineSet#id}.
          *
-         * @type {{String:LineSet}}
+         * @type {{[key: string]: LineSet}}
          */
         this.lineSets = {};
 
@@ -887,7 +905,7 @@ class Scene extends Component {
         // Do this BEFORE we add components below
         core._addScene(this);
 
-        this._initDefaults();
+        this.#initDefaults();
 
         // Global components
 
@@ -930,7 +948,7 @@ class Scene extends Component {
         });
     }
 
-    _initDefaults() {
+    #initDefaults() {
 
         // Call this Scene's property accessors to lazy-init their properties
 
@@ -1299,7 +1317,7 @@ class Scene extends Component {
     /**
      * Whether precision surface picking is enabled.
      * @deprecated
-     * @returns {*|boolean}
+     * @returns {Boolean}
      */
     get pickSurfacePrecisionEnabled() {
         return this._readableGeometry;
@@ -1451,7 +1469,7 @@ class Scene extends Component {
      */
     doOcclusionTest() {
         if (this._needRecompile) {
-            this._recompile();
+            this.#recompile();
             this._needRecompile = false;
         }
         this._renderer.doOcclusionTest();
@@ -1478,7 +1496,7 @@ class Scene extends Component {
         };
 
         if (this._needRecompile) {
-            this._recompile();
+            this.#recompile();
             this._renderer.imageDirty();
             this._needRecompile = false;
         }
@@ -1517,7 +1535,7 @@ class Scene extends Component {
             this.fire("rendered", renderEvent, true);
         }
 
-        this._saveAmbientColor();
+        this.#saveAmbientColor();
     }
 
 
@@ -1526,13 +1544,13 @@ class Scene extends Component {
      */
     compile() {
         if (this._needRecompile) {
-            this._recompile();
+            this.#recompile();
             this._renderer.imageDirty();
             this._needRecompile = false;
         }
     }
 
-    _recompile() {
+    #recompile() {
         for (const id in this._compilables) {
             if (this._compilables.hasOwnProperty(id)) {
                 this._compilables[id].compile();
@@ -1542,7 +1560,7 @@ class Scene extends Component {
         this.fire("compile", this, true);
     }
 
-    _saveAmbientColor() {
+    #saveAmbientColor() {
         const canvas = this.canvas;
         if (!canvas.transparent && !canvas.backgroundImage && !canvas.backgroundColor) {
             const ambientColorIntensity = this._lightsState.getAmbientColorAndIntensity();
@@ -2321,8 +2339,10 @@ class Scene extends Component {
      * @param {Number} [params.snapRadius=30] The snap radius, in canvas pixels.
      * @param {boolean} [params.snapToVertex=true] Whether to snap to vertex. Only works when `canvasPos` given.
      * @param {boolean} [params.snapToEdge=true] Whether to snap to edge. Only works when `canvasPos` given.
+     * @param {String[]} [params.includeEntities] IDs of {@link Entity}s to restrict picking to. When given, ignores {@link Entity}s whose IDs are not in this list.
+     * @param {String[]} [params.excludeEntities] IDs of {@link Entity}s to ignore. When given, will pick *through* these {@link Entity}s, as if they were not there.
      * @param {PickResult} [pickResult] Holds the results of the pick attempt. Will use the Scene's singleton PickResult if you don't supply your own.
-     * @returns {PickResult} Holds results of the pick attempt, returned when an {@link Entity} is picked, else null. See method comments for description.
+     * @returns {PickResult|null} Holds results of the pick attempt, returned when an {@link Entity} is picked, else null. See method comments for description.
      */
     pick(params, pickResult) {
 
@@ -2355,7 +2375,7 @@ class Scene extends Component {
         }
 
         if (this._needRecompile) {
-            this._recompile();
+            this.#recompile();
             this._renderer.imageDirty();
             this._needRecompile = false;
         }
@@ -2381,6 +2401,7 @@ class Scene extends Component {
      * @param {Number} [params.snapRadius=30] The snap radius, in canvas pixels
      * @param {boolean} [params.snapToVertex=true] Whether to snap to vertex.
      * @param {boolean} [params.snapToEdge=true] Whether to snap to edge.
+     * @returns {PickResult|null|undefined}
      * @deprecated
      */
     snapPick(params) {
@@ -2465,7 +2486,7 @@ class Scene extends Component {
      * Each {@link Entity} is only included in the AABB when {@link Entity#collidable} is ````true````.
      *
      * @param {String[]} ids Array of {@link Entity#id} values.
-     * @returns {[Number, Number, Number, Number, Number, Number]} An axis-aligned World-space bounding box, given as elements ````[xmin, ymin, zmin, xmax, ymax, zmax]````.
+     * @returns {Number[]} An axis-aligned World-space bounding box, given as elements ````[xmin, ymin, zmin, xmax, ymax, zmax]````.
      */
     getAABB(ids) {
         if (ids === undefined) {
@@ -2760,8 +2781,9 @@ class Scene extends Component {
      * - it runs time-aligned to scene ticks
      * - it runs maximum once per scene-tick
      *
-     * @param {Function} cb The function to tickify
-     * @returns {Function}
+     * @template {(...args: any[]) => any} T
+     * @param {T} cb The function to tickify
+     * @returns {(...args: Parameters<T>) => void}
      */
     tickify(cb) {
         const cbString = cb.toString();

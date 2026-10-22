@@ -384,7 +384,7 @@ class Camera extends Component {
     /**
      * Pans the Camera along its local X, Y and Z axis.
      *
-     * @param pan The pan vector
+     * @param {Number[]} pan The pan vector
      */
     pan(pan) {
         const eye2 = math.subVec3(this._eye, this._look, tempVec3);
@@ -819,7 +819,7 @@ class Camera extends Component {
      *
      * Default value is ````"perspective"````.
      *
-     * @param {String} value Identifies the active projection type.
+     * @param {"perspective" | "ortho" | "frustum" | "customProjection"} value Identifies the active projection type.
      */
     set projection(value) {
         value = value || "perspective";
@@ -855,7 +855,7 @@ class Camera extends Component {
      *
      * Default value is ````"perspective"````.
      *
-     * @returns {String} Identifies the active projection type.
+     * @returns {"perspective" | "ortho" | "frustum" | "customProjection"} Identifies the active projection type.
      */
     get projection() {
         return this._projectionType;
@@ -876,6 +876,8 @@ class Camera extends Component {
      * Gets whether to offset the ortho camera's effective eye from its look
      *
      * Default value for legacy reasons is ````true````.
+     *
+     * @type {Boolean}
      */
     get offsetEyeFromLook() {
         return this._state.offsetEyeFromLook;
@@ -885,6 +887,8 @@ class Camera extends Component {
      * Offsets the ortho camera's effective eye from its look
      *
      * Default value for legacy reasons is ````true````.
+     *
+     * @type {Boolean}
      */
     set offsetEyeFromLook(v) {
         this._state.offsetEyeFromLook = v;

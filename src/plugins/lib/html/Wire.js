@@ -127,14 +127,14 @@ class Wire {
         this._x2 = 0;
         this._y2 = 0;
 
-        this._update();
+        this.#update();
     }
 
     get visible() {
         return this._wire.style.visibility === "visible";
     }
 
-    _update() {
+    #update() {
 
         var length = Math.abs(Math.sqrt((this._x1 - this._x2) * (this._x1 - this._x2) + (this._y1 - this._y2) * (this._y1 - this._y2)));
         var angle = Math.atan2(this._y2 - this._y1, this._x2 - this._x1) * 180.0 / Math.PI;
@@ -165,7 +165,7 @@ class Wire {
         this._y1 = y1;
         this._x2 = x2;
         this._y2 = y2;
-        this._update();
+        this.#update();
     }
 
     setColor(color) {
@@ -177,7 +177,7 @@ class Wire {
         this._wire.style.opacity = opacity;
     }
 
-    _updateVisibility() {
+    #updateVisibility() {
         this._wire.style.visibility = this._wireClickable.style.visibility = this._visible && !this._culled ? "visible" : "hidden";
     }
 
@@ -186,7 +186,7 @@ class Wire {
             return;
         }
         this._visible = !!visible;
-        this._updateVisibility();
+        this.#updateVisibility();
     }
 
     setCulled(culled) {
@@ -194,7 +194,7 @@ class Wire {
             return;
         }
         this._culled = !!culled;
-        this._updateVisibility();
+        this.#updateVisibility();
     }
 
     setClickable(clickable) {

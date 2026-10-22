@@ -162,7 +162,7 @@ class SectionPlane extends Component {
         const angle = Math.acos(Math.min(1, math.dotVec3(quatUp, dirOnlyUp)));
         const sign = Math.sign(math.dotVec3(this._state.dir, math.cross3Vec3(quatUp, dirOnlyUp, tempVec3b)));
         this._state.roll = sign * angle;
-        this._onDirUpdated();
+        this.#onDirUpdated();
     }
 
     /**
@@ -185,7 +185,7 @@ class SectionPlane extends Component {
      */
     set roll(value) {
         this._state.roll = value || 0;
-        this._onDirRollUpdated();
+        this.#onDirRollUpdated();
     }
 
     /**
@@ -208,10 +208,10 @@ class SectionPlane extends Component {
      */
     set dir(value) {
         this._state.dir.set(value || front);
-        this._onDirRollUpdated();
+        this.#onDirRollUpdated();
     }
 
-    _onDirRollUpdated() {
+    #onDirRollUpdated() {
         math.vec3PairToQuaternion(back, this._state.dir, this._state.quaternion);
 
         tempVec4a[0] = 0;
@@ -222,10 +222,10 @@ class SectionPlane extends Component {
 
         math.mulQuaternions(this._state.quaternion, tempVec4a, this._state.quaternion);
 
-        this._onDirUpdated();
+        this.#onDirUpdated();
     }
 
-    _onDirUpdated() {
+    #onDirUpdated() {
         this._state.dist = (-math.dotVec3(this._state.pos, this._state.dir));
         this.glRedraw();
         this.fire("dir", this._state.dir);

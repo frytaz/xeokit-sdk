@@ -34,30 +34,30 @@ class ObjectCullStates {
         this._onModelLoaded = scene.on("modelLoaded", (modelId) => {
             const model = scene.models[modelId];
             if (model) {
-                this._addModel(model);
+                this.#addModel(model);
             }
         });
 
         this._onTick = scene.on("tick", () => {
             if (this._dirty) {
-                this._build();
+                this.#build();
             }
-            this._applyChanges();
+            this.#applyChanges();
         });
     }
 
-    _addModel(model) {
+    #addModel(model) {
         const modelInfo = {
             model: model,
             onDestroyed: model.on("destroyed", () => {
-                this._removeModel(model);
+                this.#removeModel(model);
             })
         };
         this._modelInfos[model.id] = modelInfo;
         this._dirty = true;
     }
 
-    _removeModel(model) {
+    #removeModel(model) {
         const modelInfo = this._modelInfos[model.id];
         if (modelInfo) {
             modelInfo.model.off(modelInfo.onDestroyed);
@@ -66,11 +66,11 @@ class ObjectCullStates {
         }
     }
 
-    _build() {
+    #build() {
         if (!this._dirty) {
             return;
         }
-        this._applyChanges();
+        this.#applyChanges();
         const objects = this._scene.objects;
         for (let i = 0; i < this._numObjects; i++) {
             this._objects[i] = null;
@@ -84,7 +84,7 @@ class ObjectCullStates {
         this._dirty = false;
     }
 
-    _applyChanges() {
+    #applyChanges() {
         if (this._lenObjectsChangedList > 0) {
             for (let i = 0; i < this._lenObjectsChangedList; i++) {
                 const objectIdx = this._objectsChangedList[i];
@@ -108,7 +108,7 @@ class ObjectCullStates {
      */
     get objects() {
         if (this._dirty) {
-            this._build();
+            this.#build();
         }
         return this._objects;
     }
@@ -122,7 +122,7 @@ class ObjectCullStates {
      */
     get numObjects() {
         if (this._dirty) {
-            this._build();
+            this.#build();
         }
         return this._numObjects;
     }
@@ -135,7 +135,7 @@ class ObjectCullStates {
      */
     setObjectViewCulled(objectIdx, culled) {
         if (this._dirty) {
-            this._build();
+            this.#build();
         }
         if (this._objectsViewCulled[objectIdx] === culled) {
             return;
@@ -155,7 +155,7 @@ class ObjectCullStates {
      */
     setObjectDetailCulled(objectIdx, culled) {
         if (this._dirty) {
-            this._build();
+            this.#build();
         }
         if (this._objectsDetailCulled[objectIdx] === culled) {
             return;
@@ -171,12 +171,12 @@ class ObjectCullStates {
      * Destroys this ObjectCullStAtes.
      */
     _destroy() {
-        this._clear();
+        this.#clear();
         this._scene.off(this._onModelLoaded);
         this._scene.off(this._onTick);
     }
 
-    _clear() {
+    #clear() {
         for (let modelId in this._modelInfos) {
             const modelInfo = this._modelInfos[modelId];
             modelInfo.model.off(modelInfo.onDestroyed);

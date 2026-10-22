@@ -232,10 +232,10 @@ const modeNames = ["opaque", "mask", "blend"];
  * @property {Texture} [emissiveMap=undefined] RGB {@link Texture} containing the emissive color of this MetallicMaterial. Multiplies by the {@link MetallicMaterial#emissive} property. Must be within the same {@link Scene} as this MetallicMaterial.
  * @property {Texture} [occlusionMap=undefined] RGB ambient occlusion {@link Texture}. Within shaders, multiplies by the specular and diffuse light reflected by surfaces. Must be within the same {@link Scene} as this MetallicMaterial.
  * @property {Texture} [normalMap=undefined] RGB tangent-space normal {@link Texture}. Must be within the same {@link Scene} as this MetallicMaterial.
- * @property {String} [alphaMode="opaque"] The alpha blend mode, which specifies how alpha is to be interpreted. Accepted values are "opaque", "blend" and "mask". See the {@link MetallicMaterial#alphaMode} property for more info.
+ * @property {"opaque" | "blend" | "mask"} [alphaMode="opaque"] The alpha blend mode, which specifies how alpha is to be interpreted. Accepted values are "opaque", "blend" and "mask". See the {@link MetallicMaterial#alphaMode} property for more info.
  * @property {Number} [alphaCutoff=0.5] The alpha cutoff value. See the {@link MetallicMaterial#alphaCutoff} property for more info.
  * @property {Boolean} [backfaces=false] Whether to render {@link ReadableGeometry} backfaces.
- * @property {Boolean} [frontface="ccw"] The winding order for {@link ReadableGeometry} front faces - ````"cw"```` for clockwise, or ````"ccw"```` for counter-clockwise.
+ * @property {"cw" | "ccw"} [frontface="ccw"] The winding order for {@link ReadableGeometry} front faces - ````"cw"```` for clockwise, or ````"ccw"```` for counter-clockwise.
  * @property {Number} [lineWidth=1] Scalar that controls the width of lines for {@link ReadableGeometry} with {@link ReadableGeometry#primitive} set to "lines".
  * @property {Number} [pointSize=1] Scalar that controls the size of points for {@link ReadableGeometry} with {@link ReadableGeometry#primitive} set to "points".
  */
@@ -662,7 +662,7 @@ class MetallicMaterial extends Material {
      * * "mask" - The rendered output is either fully opaque or fully transparent depending on the alpha and {@link MetallicMaterial#alphaCutoff}.
      * * "blend" - The alpha value is used to composite the source and destination areas. The rendered output is combined with the background using the normal painting operation (i.e. the Porter and Duff over operator).
      *
-     * @type {String}
+     * @type {"opaque" | "blend" | "mask"}
      */
     set alphaMode(alphaMode) {
         alphaMode = alphaMode || "opaque";
@@ -681,7 +681,7 @@ class MetallicMaterial extends Material {
     /**
      * Gets the alpha rendering mode.
      *
-     * @type {String}
+     * @type {"opaque" | "blend" | "mask"}
      */
     get alphaMode() {
         return modeNames[this._state.alphaMode];
@@ -750,7 +750,7 @@ class MetallicMaterial extends Material {
      *
      * Default value is ````"ccw"````.
      *
-     * @type {String}
+     * @type {"cw" | "ccw"}
      */
     set frontface(value) {
         value = value !== "cw";
@@ -764,7 +764,7 @@ class MetallicMaterial extends Material {
     /**
      * Gets the winding direction of front faces of {@link Geometry} of attached {@link Mesh}es.
 *
-     * @type {String}
+     * @type {"cw" | "ccw"}
      */
     get frontface() {
         return this._state.frontface ? "ccw" : "cw";

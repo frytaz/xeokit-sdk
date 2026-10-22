@@ -1,6 +1,15 @@
 import {utils} from '../../utils.js';
 
 /**
+ * @typedef {Object} buildBoxLinesGeometryConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [center]  3D point indicating the center position.
+ * @property {Number} [xSize=1.0]  Half-size on the X-axis.
+ * @property {Number} [ySize=1.0]  Half-size on the Y-axis.
+ * @property {Number} [zSize=1.0]  Half-size on the Z-axis.
+ */
+
+/**
  * @desc Creates a box-shaped lines {@link Geometry}.
  *
  * ## Usage
@@ -34,12 +43,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildBoxLinesGeometry
- * @param {Object} [cfg] Configs
- * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Number[]} [cfg.center]  3D point indicating the center position.
- * @param {Number} [cfg.xSize=1.0]  Half-size on the X-axis.
- * @param {Number} [cfg.ySize=1.0]  Half-size on the Y-axis.
- * @param {Number} [cfg.zSize=1.0]  Half-size on the Z-axis.
+ * @param {buildBoxLinesGeometryConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildBoxLinesGeometry(cfg = {}) {
@@ -102,6 +106,12 @@ function buildBoxLinesGeometry(cfg = {}) {
         ]
     });
 }
+
+/**
+ * @typedef {Object} buildBoxLinesGeometryFromAABBConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [aabb]  AABB for which box will be created.
+ */
 
 /**
  * @desc Creates a box-shaped lines {@link Geometry} from AABB.
@@ -216,9 +226,7 @@ function buildBoxLinesGeometry(cfg = {}) {
  * ````
  *
  * @function buildBoxLinesGeometryFromAABB
- * @param {Object} [cfg] Configs
- * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Number[]} [cfg.aabb]  AABB for which box will be created.
+ * @param {buildBoxLinesGeometryFromAABBConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildBoxLinesGeometryFromAABB(cfg = {}){

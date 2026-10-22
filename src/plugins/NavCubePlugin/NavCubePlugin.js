@@ -83,9 +83,9 @@ const tempMat4a = math.mat4();
  * @property {HTMLCanvasElement} [canvasElement] Reference of an existing HTML canvas to display the NavCube - either this or canvasId is mandatory. When both values are given, the element reference is always preferred to the ID.
  * @property {Boolean} [visible=true] Initial visibility.
  * @property {Boolean} [shadowVisible=true] Whether the shadow of the cube is visible.
- * @property {String} [cameraFly=true] Whether the {@link Camera} flies or jumps to each selected axis or diagonal.
- * @property {String} [cameraFitFOV=45] How much of the field-of-view, in degrees, that the 3D scene should fill the {@link Canvas} when the {@link Camera} moves to an axis or diagonal.
- * @property {String} [cameraFlyDuration=0.5] When flying the {@link Camera} to each new axis or diagonal, how long, in seconds, that the Camera takes to get there.
+ * @property {Boolean} [cameraFly=true] Whether the {@link Camera} flies or jumps to each selected axis or diagonal.
+ * @property {Number} [cameraFitFOV=45] How much of the field-of-view, in degrees, that the 3D scene should fill the {@link Canvas} when the {@link Camera} moves to an axis or diagonal.
+ * @property {Number} [cameraFlyDuration=0.5] When flying the {@link Camera} to each new axis or diagonal, how long, in seconds, that the Camera takes to get there.
  * @property {String} [color="lightgrey"] Custom uniform color for the faces of the NavCube.
  * @property {String} [frontColor="#55FF55"] Custom color for the front face of the NavCube. Overrides ````color````.
  * @property {String} [backColor="#55FF55"] Custom color for the back face of the NavCube. Overrides ````color````.
@@ -674,7 +674,7 @@ class NavCubePlugin extends Plugin {
      *
      * Default is ````0.5````.
      *
-     * @param {Boolean} cameraFlyDuration Camera flight duration in seconds.
+     * @param {Number} cameraFlyDuration Camera flight duration in seconds.
      */
     setCameraFlyDuration(cameraFlyDuration = 0.5) {
         this._cameraFlyDuration = cameraFlyDuration;
@@ -685,7 +685,7 @@ class NavCubePlugin extends Plugin {
      *
      * Default is ````0.5````.
      *
-     * @returns {Boolean} Camera flight duration in seconds.
+     * @returns {Number} Camera flight duration in seconds.
      */
     getCameraFlyDuration() {
         return this._cameraFlyDuration;

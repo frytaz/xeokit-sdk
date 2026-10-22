@@ -1,5 +1,7 @@
 import { Plugin } from "../../viewer/Plugin.js";
 import { GLTFLoaderPlugin } from "../GLTFLoaderPlugin/GLTFLoaderPlugin.js";
+/** @import { SceneModel } from "../../viewer/scene/model/SceneModel.js" */
+/** @import { Viewer } from "../../viewer/Viewer.js" */
 
 /**
  * Fetches a file from the given URL and returns its contents as text.
@@ -66,8 +68,8 @@ class CxConverterIFCLoaderPlugin extends Plugin {
      *
      * @param {Object} [params={}] Loading parameters.
      * @param {string} params.src Path to an IFC file.
-     * @param {Function} [params.progressCallback] Callback to track loading progress.
-     * @param {Function} [params.progressTextCallback] Callback to track loading progress with text updates.
+     * @param {(progress: number) => void} [params.progressCallback] Callback to track loading progress.
+     * @param {(text: string) => void} [params.progressTextCallback] Callback to track loading progress with text updates.
      * @returns {Promise<SceneModel>} A promise that resolves to the loaded SceneModel.
      */
     async load(params = {}) {

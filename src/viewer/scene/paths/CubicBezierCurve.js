@@ -25,11 +25,20 @@ import {math} from "../math/math.js";
  * @property {Number[]} [v3=[0,0,0]] The ending point.
  * @property {Number} [t=0] Current position on this CubicBezierCurve, in range between 0..1.
  */
+
+/**
+ * @typedef {Object} CubicBezierCurveJson
+ * @property {Number[]} v0 The starting point.
+ * @property {Number[]} v1 The first control point.
+ * @property {Number[]} v2 The middle control point.
+ * @property {Number[]} v3 The ending point.
+ * @property {Number} t Current position on the CubicBezierCurve.
+ */
 class CubicBezierCurve extends Curve {
 
     /**
      * @constructor
-     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this CubicBezierCurve as well.
+     * @param {Component} owner Owner component. When destroyed, the owner will destroy this CubicBezierCurve as well.
      * @param {CubicBezierCurveConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
@@ -185,6 +194,11 @@ class CubicBezierCurve extends Curve {
         return vector;
     }
 
+    /**
+     * Gets a JSON representation of this CubicBezierCurve.
+     *
+     * @returns {CubicBezierCurveJson}
+     */
     getJSON() {
         return {
             v0: this._v0,

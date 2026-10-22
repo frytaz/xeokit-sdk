@@ -120,7 +120,6 @@ class ObjectsMemento {
      * @param {Scene} scene The scene.
      * @param {Object} [mask] Masks what state gets saved. Saves all state when not supplied.
      * @param {boolean} [mask.visible] Saves {@link Entity#visible} values when ````true````.
-     * @param {boolean} [mask.visible] Saves {@link Entity#visible} values when ````true````.
      * @param {boolean} [mask.edges] Saves {@link Entity#edges} values when ````true````.
      * @param {boolean} [mask.xrayed] Saves {@link Entity#xrayed} values when ````true````.
      * @param {boolean} [mask.highlighted] Saves {@link Entity#highlighted} values when ````true````.

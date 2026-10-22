@@ -61,7 +61,7 @@ class LineSet extends Component {
      * Registers the LineSet in {@link Scene#lineSets}; causes Scene to fire a "lineSetCreated" event.
      *
      * @constructor
-     * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this ````LineSet```` as well.
+     * @param {Component} owner  Owner component. When destroyed, the owner will destroy this ````LineSet```` as well.
      * @param {Object} [cfg]  ````LineSet```` configuration
      * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
      * @param {Number[]} cfg.positions World-space 3D vertex positions.

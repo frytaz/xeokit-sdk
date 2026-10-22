@@ -124,7 +124,6 @@ class ModelMemento {
      * @param {MetaModel} metaModel Represents the model. Corresponds with an {@link Entity} that represents the model in the scene.
      * @param {Object} [mask] Masks what state gets saved. Saves all state when not supplied.
      * @param {boolean} [mask.visible] Saves {@link Entity#visible} values when ````true````.
-     * @param {boolean} [mask.visible] Saves {@link Entity#visible} values when ````true````.
      * @param {boolean} [mask.edges] Saves {@link Entity#edges} values when ````true````.
      * @param {boolean} [mask.xrayed] Saves {@link Entity#xrayed} values when ````true````.
      * @param {boolean} [mask.highlighted] Saves {@link Entity#highlighted} values when ````true````.

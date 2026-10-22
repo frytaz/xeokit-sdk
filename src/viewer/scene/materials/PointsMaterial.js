@@ -389,7 +389,7 @@ class PointsMaterial extends Material {
 
     /**
      * @private
-     * @return {string}
+     * @type {String}
      */
     get hash() {
         return [

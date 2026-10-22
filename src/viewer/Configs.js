@@ -82,6 +82,8 @@ export class Configs {
      * Sets the maximum data texture height.
      *
      * Should be a multiple of 1024. Default is 4096, which is the maximum allowed value.
+     *
+     * @type {number}
      */
     set maxDataTextureHeight(value) {
         value = Math.ceil(value / 1024) * 1024;
@@ -94,8 +96,8 @@ export class Configs {
     }
 
     /**
-     * Sets maximum data texture height.
-     * @returns {*|number}
+     * Gets the maximum data texture height.
+     * @type {number}
      */
     get maxDataTextureHeight() {
         return maxDataTextureHeight;

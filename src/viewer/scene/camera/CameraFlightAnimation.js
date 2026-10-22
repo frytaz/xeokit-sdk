@@ -147,7 +147,7 @@ class CameraFlightAnimation extends Component {
      *  * When the target is a boundary, the {@link Camera} will fly towards the target and stop when the target fills most of the canvas.
      *  * When the target is an explicit {@link Camera} position, given as ````eye````, ````look```` and ````up````, then CameraFlightAnimation will interpolate the {@link Camera} to that target and stop there.
      *
-     * @param {Object|Component} [params=Scene] Either a parameters object or a {@link Component} subtype that has
+     * @param {{arc?: Number, component?: Number|String|Component, aabb?: Number[], eye?: Number[], look?: Number[], up?: Number[], projection?: String, fit?: Boolean, fitFOV?: Number, duration?: Number, orthoScale?: Number}|Component} [params=Scene] Either a parameters object or a {@link Component} subtype that has
      * an AABB. Defaults to the {@link Scene}, which causes the {@link Camera} to fit the Scene in view.
      * @param {Number} [params.arc=0] Factor in range ````[0..1]```` indicating how much the {@link Camera#eye} position
      * will swing away from its {@link Camera#look} position as it flies to the target.
@@ -162,7 +162,7 @@ class CameraFlightAnimation extends Component {
      * fill the canvas on arrival. Overrides {@link CameraFlightAnimation#fitFOV}.
      * @param {Number} [params.duration] Flight duration in seconds.  Overrides {@link CameraFlightAnimation#duration}.
      * @param {Number} [params.orthoScale] Animate the Camera's orthographic scale to this target value. See {@link Ortho#scale}.
-     * @param {Function} [callback] Callback fired on arrival.
+     * @param {() => void} [callback] Callback fired on arrival.
      * @param {Object} [scope] Optional scope for callback.
      */
     flyTo(params, callback, scope) {
@@ -343,7 +343,7 @@ class CameraFlightAnimation extends Component {
      * * When the target is a boundary, this CameraFlightAnimation will position the {@link Camera} at where the target fills most of the canvas.
      * * When the target is an explicit {@link Camera} position, given as ````eye````, ````look```` and ````up```` vectors, then this CameraFlightAnimation will jump the {@link Camera} to that target.
      *
-     * @param {*|Component} params  Either a parameters object or a {@link Component} subtype that has a World-space AABB.
+     * @param {{arc?: Number, component?: Number|String|Component, aabb?: Number[], eye?: Number[], look?: Number[], up?: Number[], projection?: "perspective" | "ortho" | "frustum" | "customProjection", fitFOV?: Number, fit?: Boolean}|Component} params  Either a parameters object or a {@link Component} subtype that has a World-space AABB.
      * @param {Number} [params.arc=0]  Factor in range [0..1] indicating how much the {@link Camera#eye} will swing away from its {@link Camera#look} as it flies to the target.
      * @param {Number|String|Component} [params.component] ID or instance of a component to fly to.
      * @param {Number[]} [params.aabb]  World-space axis-aligned bounding box (AABB) target to fly to.
@@ -355,10 +355,10 @@ class CameraFlightAnimation extends Component {
      * @param {Boolean} [params.fit] Whether to fit the target to the view volume. Overrides {@link CameraFlightAnimation#fit}.
      */
     jumpTo(params) {
-        this._jumpTo(params);
+        this.#jumpTo(params);
     }
 
-    _jumpTo(params) {
+    #jumpTo(params) {
 
         if (this._flying) {
             this.stop();

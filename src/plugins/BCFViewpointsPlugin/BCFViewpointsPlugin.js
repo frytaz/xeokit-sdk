@@ -566,16 +566,16 @@ class BCFViewpointsPlugin extends Plugin {
         const selectedObjectIds = scene.selectedObjectIds;
 
         if (options.defaultInvisible || visibleObjectIds.length < invisibleObjectIds.length) {
-            bcfViewpoint.components.visibility.exceptions = this._createBCFComponents(visibleObjectIds);
+            bcfViewpoint.components.visibility.exceptions = this.#createBCFComponents(visibleObjectIds);
             bcfViewpoint.components.visibility.default_visibility = false;
         } else {
-            bcfViewpoint.components.visibility.exceptions = this._createBCFComponents(invisibleObjectIds);
+            bcfViewpoint.components.visibility.exceptions = this.#createBCFComponents(invisibleObjectIds);
             bcfViewpoint.components.visibility.default_visibility = true;
         }
 
-        bcfViewpoint.components.selection = this._createBCFComponents(selectedObjectIds);
+        bcfViewpoint.components.selection = this.#createBCFComponents(selectedObjectIds);
 
-        bcfViewpoint.components.translucency = this._createBCFComponents(scene.xrayedObjectIds);
+        bcfViewpoint.components.translucency = this.#createBCFComponents(scene.xrayedObjectIds);
 
         if (options.snapshot !== false) {
             bcfViewpoint.snapshot = {
@@ -587,7 +587,7 @@ class BCFViewpointsPlugin extends Plugin {
         return bcfViewpoint;
     }
 
-    _createBCFComponents(objectIds) {
+    #createBCFComponents(objectIds) {
         const scene = this.viewer.scene;
         const components = [];
         for (let i = 0, len = objectIds.length; i < len; i++) {
@@ -750,12 +750,12 @@ class BCFViewpointsPlugin extends Plugin {
                 if (!bcfViewpoint.components.visibility.default_visibility) {
                     scene.setObjectsVisible(scene.objectIds, false);
                     if (bcfViewpoint.components.visibility.exceptions) {
-                        bcfViewpoint.components.visibility.exceptions.forEach((component) => this._withBCFComponent(options, component, entity => entity.visible = true));
+                        bcfViewpoint.components.visibility.exceptions.forEach((component) => this.#withBCFComponent(options, component, entity => entity.visible = true));
                     }
                 } else {
                     scene.setObjectsVisible(scene.objectIds, true);
                     if (bcfViewpoint.components.visibility.exceptions) {
-                        bcfViewpoint.components.visibility.exceptions.forEach((component) => this._withBCFComponent(options, component, entity => entity.visible = false));
+                        bcfViewpoint.components.visibility.exceptions.forEach((component) => this.#withBCFComponent(options, component, entity => entity.visible = false));
                     }
                 }
 
@@ -784,13 +784,13 @@ class BCFViewpointsPlugin extends Plugin {
 
             if (bcfViewpoint.components.selection) {
                 scene.setObjectsSelected(scene.selectedObjectIds, false);
-                bcfViewpoint.components.selection.forEach(component => this._withBCFComponent(options, component, entity => entity.selected = true));
+                bcfViewpoint.components.selection.forEach(component => this.#withBCFComponent(options, component, entity => entity.selected = true));
 
             }
 
             if (bcfViewpoint.components.translucency) {
                 scene.setObjectsXRayed(scene.xrayedObjectIds, false);
-                bcfViewpoint.components.translucency.forEach(component => this._withBCFComponent(options, component, entity => entity.xrayed = true));
+                bcfViewpoint.components.translucency.forEach(component => this.#withBCFComponent(options, component, entity => entity.xrayed = true));
             }
 
             if (bcfViewpoint.components.coloring) {
@@ -817,7 +817,7 @@ class BCFViewpointsPlugin extends Plugin {
                     ];
 
                     coloring.components.map(component =>
-                        this._withBCFComponent(options, component, entity => {
+                        this.#withBCFComponent(options, component, entity => {
                             entity.colorize = colorize;
                             if (alphaDefined) {
                                 entity.opacity = alpha;
@@ -881,7 +881,7 @@ class BCFViewpointsPlugin extends Plugin {
         }
     }
 
-    _withBCFComponent(options, component, callback) {
+    #withBCFComponent(options, component, callback) {
 
         const viewer = this.viewer;
         const scene = viewer.scene;

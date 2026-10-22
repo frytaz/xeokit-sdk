@@ -3,6 +3,7 @@ import {Plugin} from "../../viewer/Plugin.js";
 import {SectionPlane} from "../../viewer/scene/sectionPlane/SectionPlane.js";
 import {FaceAlignedSectionPlanesControl} from "./FaceAlignedSectionPlanesControl.js";
 import {Overview} from "./Overview.js";
+/** @import { Viewer } from "../../viewer/Viewer.js" */
 
 const tempAABB = math.AABB3();
 const tempVec3 = math.vec3();

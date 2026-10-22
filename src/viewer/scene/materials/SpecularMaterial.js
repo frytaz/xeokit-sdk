@@ -212,7 +212,7 @@ const alphaModeNames = ["opaque", "mask", "blend"];
  * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
  * @property {Number[]} [diffuse=[1,1,1]] RGB diffuse color of this SpecularMaterial. Multiplies by the RGB components of {@link SpecularMaterial#diffuseMap}.
  * @property {Texture} [diffuseMap=undefined] RGBA {@link Texture} containing the diffuse color of this SpecularMaterial, with optional *A* component for alpha. The RGB components multiply by {@link SpecularMaterial#diffuse}, while the *A* component, if present, multiplies by {@link SpecularMaterial#alpha}.
- * @property {Number} [specular=[1,1,1]] RGB specular color of this SpecularMaterial. Multiplies by the {@link SpecularMaterial#specularMap} and the *RGB* components of {@link SpecularMaterial#specularGlossinessMap}.
+ * @property {Number[]} [specular=[1,1,1]] RGB specular color of this SpecularMaterial. Multiplies by the {@link SpecularMaterial#specularMap} and the *RGB* components of {@link SpecularMaterial#specularGlossinessMap}.
  * @property {Texture} [specularMap=undefined] RGB texture containing the specular color of this SpecularMaterial. Multiplies by the {@link SpecularMaterial#specular} property. Must be within the same {@link Scene} as this SpecularMaterial.
  * @property {Number} [glossiness=1.0] Factor in the range [0..1] indicating how glossy this SpecularMaterial is. 0 is no glossiness, 1 is full glossiness. Multiplies by the *R* component of {@link SpecularMaterial#glossinessMap} and the *A* component of {@link SpecularMaterial#specularGlossinessMap}.
  * @property {Texture} [specularGlossinessMap=undefined] RGBA {@link Texture} containing this SpecularMaterial's specular color in its *RGB* component and glossiness in its *A* component. Its *RGB* components multiply by {@link SpecularMaterial#specular}, while its *A* component multiplies by {@link SpecularMaterial#glossiness}. Must be within the same {@link Scene} as this SpecularMaterial.
@@ -223,10 +223,10 @@ const alphaModeNames = ["opaque", "mask", "blend"];
  * @property {Texture} [normalMap=undefined] RGB tangent-space normal {@link Texture}. Must be within the same {@link Scene} as this SpecularMaterial.
  * @property {Number} [alpha=1.0] Factor in the range 0..1 indicating how transparent this SpecularMaterial is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque. Multiplies by the *R* component of {@link SpecularMaterial#alphaMap} and the *A* component, if present, of {@link SpecularMaterial#diffuseMap}.
  * @property {Texture} [alphaMap=undefined] RGB {@link Texture} containing this SpecularMaterial's alpha in its *R* component. The *R* component multiplies by the {@link SpecularMaterial#alpha} property. Must be within the same {@link Scene} as this SpecularMaterial.
- * @property {String} [alphaMode="opaque"] The alpha blend mode - accepted values are "opaque", "blend" and "mask". See the {@link SpecularMaterial#alphaMode} property for more info.
+ * @property {"opaque" | "blend" | "mask"} [alphaMode="opaque"] The alpha blend mode - accepted values are "opaque", "blend" and "mask". See the {@link SpecularMaterial#alphaMode} property for more info.
  * @property {Number} [alphaCutoff=0.5] The alpha cutoff value. See the {@link SpecularMaterial#alphaCutoff} property for more info.
  * @property {Boolean} [backfaces=false] Whether to render {@link Geometry} backfaces.
- * @property {Boolean} [frontface="ccw"] The winding order for {@link Geometry} front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
+ * @property {"cw" | "ccw"} [frontface="ccw"] The winding order for {@link Geometry} front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
  * @property {Number} [lineWidth=1] Scalar that controls the width of {@link Geometry} lines.
  * @property {Number} [pointSize=1] Scalar that controls the size of {@link Geometry} points.
  */
@@ -654,7 +654,7 @@ class SpecularMaterial extends Material {
      * * "mask" - The rendered output is either fully opaque or fully transparent depending on the alpha value and the specified alpha cutoff value.
      * * "blend" - The alpha value is used to composite the source and destination areas. The rendered output is combined with the background using the normal painting operation (i.e. the Porter and Duff over operator)
      *
-     * @type {String}
+     * @type {"opaque" | "blend" | "mask"}
      */
     set alphaMode(alphaMode) {
         alphaMode = alphaMode || "opaque";
@@ -670,6 +670,11 @@ class SpecularMaterial extends Material {
         this.glRedraw();
     }
 
+    /**
+     * Gets the alpha rendering mode.
+     *
+     * @type {"opaque" | "blend" | "mask"}
+     */
     get alphaMode() {
         return alphaModeNames[this._state.alphaMode];
     }
@@ -736,7 +741,7 @@ class SpecularMaterial extends Material {
      *
      * Default value is ````"ccw"````.
      *
-     * @type {String}
+     * @type {"cw" | "ccw"}
      */
     set frontface(value) {
         value = value !== "cw";
@@ -750,7 +755,7 @@ class SpecularMaterial extends Material {
     /**
      * Gets the winding direction of front faces of {@link Geometry} of attached {@link Mesh}es.
      *
-     * @type {String}
+     * @type {"cw" | "ccw"}
      */
     get frontface() {
         return this._state.frontface ? "ccw" : "cw";

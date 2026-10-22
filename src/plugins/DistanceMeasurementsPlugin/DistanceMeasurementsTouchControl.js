@@ -2,6 +2,9 @@ import {math} from "../../viewer/scene/math/math.js";
 import {PointerCircle} from "../../extras/PointerCircle/PointerCircle.js";
 import {DistanceMeasurementsControl} from "./DistanceMeasurementsControl.js";
 import {transformToNode} from "../lib/ui/index.js";
+/** @import { PointerLens } from "../../extras/PointerLens/PointerLens.js" */
+/** @import { DistanceMeasurementsPlugin } from "./DistanceMeasurementsPlugin.js" */
+/** @import { DistanceMeasurement } from "./DistanceMeasurement.js" */
 
 const WAITING_FOR_ORIGIN_TOUCH_START = 0;
 const WAITING_FOR_ORIGIN_QUICK_TOUCH_END = 1;
@@ -25,11 +28,20 @@ export class DistanceMeasurementsTouchControl extends DistanceMeasurementsContro
 
     /**
      * Creates a DistanceMeasurementsTouchControl bound to the given DistanceMeasurementsPlugin.
+     *
+     * @param {DistanceMeasurementsPlugin} distanceMeasurementsPlugin The DistanceMeasurementsPlugin to control.
+     * @param {Object} [cfg] Configuration
+     * @param {PointerLens} [cfg.pointerLens] A PointerLens to use to provide a magnified view of the cursor when snapping is enabled.
+     * @param {boolean} [cfg.snapping=true] Whether to initially enable snap-to-vertex and snap-to-edge for this DistanceMeasurementsTouchControl.
      */
     constructor(distanceMeasurementsPlugin, cfg = {}) {
 
         super(distanceMeasurementsPlugin.viewer.scene);
 
+        /**
+         * The PointerLens used to provide a magnified view of the cursor when snapping is enabled, if any.
+         * @type {PointerLens}
+         */
         this.pointerLens = cfg.pointerLens;
         this.pointerCircle = new PointerCircle(distanceMeasurementsPlugin.viewer);
 
@@ -65,10 +77,10 @@ export class DistanceMeasurementsTouchControl extends DistanceMeasurementsContro
         this._longTouchTimeoutMs = 300;
         this._snapping = cfg.snapping !== false;
 
-        this._attachPlugin(distanceMeasurementsPlugin, cfg);
+        this.#attachPlugin(distanceMeasurementsPlugin, cfg);
     }
 
-    _attachPlugin(distanceMeasurementsPlugin) {
+    #attachPlugin(distanceMeasurementsPlugin) {
 
         /**
          * The {@link DistanceMeasurementsPlugin} that owns this DistanceMeasurementsTouchControl.

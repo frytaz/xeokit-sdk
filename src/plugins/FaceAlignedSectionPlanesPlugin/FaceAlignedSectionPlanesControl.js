@@ -10,6 +10,7 @@ import {Node} from "../../viewer/scene/nodes/Node.js";
 import {Mesh} from "../../viewer/scene/mesh/Mesh.js";
 import {buildSphereGeometry} from "../../viewer/scene/geometry/builders/buildSphereGeometry.js";
 import {worldToRTCPos} from "../../viewer/scene/math/rtcCoords.js";
+/** @import { SectionPlane } from "../../viewer/scene/sectionPlane/SectionPlane.js" */
 
 const zeroVec = new Float64Array([0, 0, 1]);
 const quat = new Float64Array(4);

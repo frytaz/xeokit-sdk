@@ -374,7 +374,7 @@ import {math} from "../../viewer/scene/math/math.js";
  * @property {String} [markerHTML] HTML text template for Annotation markers. Defaults to ````<div></div>````. Ignored on {@link Annotation}s configured with a ````markerElementId````.
  * @property {String} [labelHTML] HTML text template for Annotation labels. Defaults to ````<div></div>````.  Ignored on {@link Annotation}s configured with a ````labelElementId````.
  * @property {HTMLElement} [container] Container DOM element for markers and labels. Defaults to ````document.body````, but different element should be specified to capture it with {@link Viewer.getSnapshotWithPlugins}.
- * @property {Object.<string, (string|number)>} [values={}] Map of default values to insert into the HTML templates for the marker and label.
+ * @property {{[key: string]: string | number}} [values={}] Map of default values to insert into the HTML templates for the marker and label.
  * @property {Number} [surfaceOffset=0.3] The amount by which each {@link Annotation} is offset from the surface of
  * its {@link Entity} when we create the Annotation by supplying a {@link PickResult} to {@link AnnotationsPlugin#createAnnotation}.
  */
@@ -396,7 +396,7 @@ class AnnotationsPlugin extends Plugin {
 
         /**
          * The {@link Annotation}s created by {@link AnnotationsPlugin#createAnnotation}, each mapped to its {@link Annotation#id}.
-         * @type {{String:Annotation}}
+         * @type {{[key: string]: Annotation}}
          */
         this.annotations = {};
 
@@ -405,7 +405,7 @@ class AnnotationsPlugin extends Plugin {
 
     /**
      * Gets the plugin's HTML container element, if any.
-     * @returns {*|HTMLElement|HTMLElement}
+     * @returns {HTMLElement}
      */
     getContainerElement() {
         return this._container;
@@ -468,7 +468,7 @@ class AnnotationsPlugin extends Plugin {
      * @param {PickResult} [params.pickResult] Sets the Annotation's World-space position and direction vector from the given {@link PickResult}'s {@link PickResult#worldPos} and {@link PickResult#worldNormal}, and the Annotation's Entity from {@link PickResult#entity}. Causes ````worldPos```` and ````entity```` parameters to be ignored, if they are also given.
      * @param {Boolean} [params.occludable=false] Indicates whether or not the {@link Annotation} marker and label are hidden whenever the marker occluded by {@link Entity}s in the {@link Scene}. The
      * {@link Scene} periodically occlusion-tests all Annotations on every 20th "tick" (which represents a rendered frame). We can adjust that frequency via property {@link Scene#ticksPerOcclusionTest}.
-     * @param  {{String:(String|Number)}} [params.values={}] Map of values to insert into the HTML templates for the marker and label. These will be inserted in addition to any values given to the AnnotationsPlugin constructor.
+     * @param  {{[key: string]: string | number}} [params.values={}] Map of values to insert into the HTML templates for the marker and label. These will be inserted in addition to any values given to the AnnotationsPlugin constructor.
      * @param {Boolean} [params.markerShown=true] Whether to initially show the {@link Annotation} marker.
      * @param {Boolean} [params.labelShown=false] Whether to initially show the {@link Annotation} label.
      * @param {Number[]} [params.eye] Optional World-space position for {@link Camera#eye}, used when this Annotation is associated with a {@link Camera} position.

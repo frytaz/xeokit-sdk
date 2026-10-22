@@ -16,6 +16,7 @@ class Light extends Component {
 
     /**
      * @private
+     * @type {Boolean}
      */
     get isLight() {
         return true;

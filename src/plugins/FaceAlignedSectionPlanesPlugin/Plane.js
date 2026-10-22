@@ -5,6 +5,7 @@ import {PhongMaterial} from "../../viewer/scene/materials/PhongMaterial.js";
 import {buildBoxGeometry} from "../../viewer/scene/geometry/builders/buildBoxGeometry.js";
 import {EdgeMaterial} from "../../viewer/scene/materials/EdgeMaterial.js";
 import {EmphasisMaterial} from "../../viewer/scene/materials/EmphasisMaterial.js";
+/** @import { SectionPlane } from "../../viewer/scene/sectionPlane/SectionPlane.js" */
 
 
 /**

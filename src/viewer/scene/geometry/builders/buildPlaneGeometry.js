@@ -1,6 +1,16 @@
 import {utils} from '../../utils.js';
 
 /**
+ * @typedef {Object} buildPlaneGeometryConfiguration
+ * @property {Number[]} [center]  3D point indicating the center position.
+ * @property {String} [id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number} [xSize=1] Dimension on the X-axis.
+ * @property {Number} [zSize=1] Dimension on the Z-axis.
+ * @property {Number} [xSegments=1] Number of segments on the X-axis.
+ * @property {Number} [zSegments=1] Number of segments on the Z-axis.
+ */
+
+/**
  * @desc Creates a plane-shaped {@link Geometry}.
  *
  * ## Usage
@@ -37,13 +47,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildPlaneGeometry
- * @param {Object} [cfg] Configs
- * @param {Number[]} [cfg.center]  3D point indicating the center position.
- * @param {String} [cfg.id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Number} [cfg.xSize=1] Dimension on the X-axis.
- * @param {Number} [cfg.zSize=1] Dimension on the Z-axis.
- * @param {Number} [cfg.xSegments=1] Number of segments on the X-axis.
- * @param {Number} [cfg.zSegments=1] Number of segments on the Z-axis.
+ * @param {buildPlaneGeometryConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildPlaneGeometry(cfg = {}) {

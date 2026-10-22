@@ -83,18 +83,18 @@ class Annotation extends Marker {
         this._visibilityDirty = true;
         this._labelPosition = 24;
 
-        this._buildHTML();
+        this.#buildHTML();
 
         this._onTick = this.scene.on("tick", () => {
             if (this._htmlDirty) {
-                this._buildHTML();
+                this.#buildHTML();
                 this._htmlDirty = false;
                 this._layoutDirty = true;
                 this._visibilityDirty = true;
             }
             if (this._layoutDirty || this._visibilityDirty) {
                 if (this._markerShown || this._labelShown) {
-                    this._updatePosition();
+                    this.#updatePosition();
                     this._layoutDirty = false;
                 }
             }
@@ -156,7 +156,7 @@ class Annotation extends Marker {
     /**
      * @private
      */
-    _buildHTML() {
+    #buildHTML() {
         if (!this._markerExternal) {
             if (this._marker) {
                 this._container.removeChild(this._marker);
@@ -166,7 +166,7 @@ class Annotation extends Marker {
             if (utils.isArray(markerHTML)) {
                 markerHTML = markerHTML.join("");
             }
-            markerHTML = this._renderTemplate(markerHTML.trim());
+            markerHTML = this.#renderTemplate(markerHTML.trim());
             const markerFragment = document.createRange().createContextualFragment(markerHTML);
             this._marker = markerFragment.firstChild;
             this._container.appendChild(this._marker);
@@ -200,7 +200,7 @@ class Annotation extends Marker {
             if (utils.isArray(labelHTML)) {
                 labelHTML = labelHTML.join("");
             }
-            labelHTML = this._renderTemplate(labelHTML.trim());
+            labelHTML = this.#renderTemplate(labelHTML.trim());
             const labelFragment = document.createRange().createContextualFragment(labelHTML);
             this._label = labelFragment.firstChild;
             this._container.appendChild(this._label);
@@ -214,7 +214,7 @@ class Annotation extends Marker {
     /**
      * @private
      */
-    _updateWithCurWidths() {
+    #updateWithCurWidths() {
         const boundary = this.scene.canvas.boundary;
         const left = boundary[0] + this.canvasPos[0];
         const top  = boundary[1] + this.canvasPos[1];
@@ -243,7 +243,7 @@ class Annotation extends Marker {
     /**
      * @private
      */
-    _updateIfWidthsChanged() {
+    #updateIfWidthsChanged() {
         let needsUpdate = false;
         const markerWidth = this._marker.getBoundingClientRect().width;
         if (this._curMarkerWidth !== markerWidth) {
@@ -260,25 +260,25 @@ class Annotation extends Marker {
             }
         }
         if (needsUpdate) {
-            this._updateWithCurWidths();
+            this.#updateWithCurWidths();
         }
     }
 
     /**
      * @private
      */
-    _updatePosition() {
+    #updatePosition() {
         const isLegacy = this._markerAlign === "legacy";
         if ((! isLegacy) && (this._curMarkerWidth === undefined)) {
-            this._updateIfWidthsChanged();
+            this.#updateIfWidthsChanged();
         } else {
             // Update position with cached width values
             // and postpone expensive Annotation's getBoundingClientRect calls
             // so they don't interfere with e.g. interactive scene manipulation
-            this._updateWithCurWidths();
+            this.#updateWithCurWidths();
             window.clearTimeout(this._widthTimeout);
             if (! isLegacy) {
-                this._widthTimeout = window.setTimeout(() => this._updateIfWidthsChanged(), 500);
+                this._widthTimeout = window.setTimeout(() => this.#updateIfWidthsChanged(), 500);
             }
         }
     }
@@ -286,7 +286,7 @@ class Annotation extends Marker {
     /**
      * @private
      */
-    _renderTemplate(template) {
+    #renderTemplate(template) {
         for (var key in this._values) {
             if (this._values.hasOwnProperty(key)) {
                 const value = this._values[key];
@@ -325,7 +325,7 @@ class Annotation extends Marker {
             this.error("Param 'align' should be one of: " + JSON.stringify(valid));
         } else {
             this._markerAlign = align;
-            this._updatePosition();
+            this.#updatePosition();
         }
     }
 
@@ -341,7 +341,7 @@ class Annotation extends Marker {
             this.error("Param 'position' is zero");
         } else {
             this._labelPosition = position;
-            this._updatePosition();
+            this.#updatePosition();
         }
     }
 
@@ -441,7 +441,7 @@ class Annotation extends Marker {
      *
      * See {@link AnnotationsPlugin} for more info.
      *
-     * @param {{String:(String|Number)}} values Map of field values.
+     * @param {{[key: string]: string | number}} values Map of field values.
      */
     setValues(values) {
         for (var key in values) {
@@ -457,7 +457,7 @@ class Annotation extends Marker {
      *
      * See {@link AnnotationsPlugin} for more info.
      *
-     * @RETURNS {{String:(String|Number)}} Map of field values.
+     * @returns {{[key: string]: string | number}} Map of field values.
      */
     getValues() {
         return this._values;

@@ -1,6 +1,18 @@
 import {utils} from '../../utils.js';
 
 /**
+ * @typedef {Object} buildCylinderGeometryConfiguration
+ * @property {String} [id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [center]  3D point indicating the center position.
+ * @property {Number} [radiusTop=1]  Radius of top.
+ * @property {Number} [radiusBottom=1]  Radius of bottom.
+ * @property {Number} [height=1] Height.
+ * @property {Number} [radialSegments=60]  Number of horizontal segments.
+ * @property {Number} [heightSegments=1]  Number of vertical segments.
+ * @property {Boolean} [openEnded=false]  Whether or not the cylinder has solid caps on the ends.
+ */
+
+/**
  * @desc Creates a cylinder-shaped {@link Geometry}.
  *
  * ## Usage
@@ -40,15 +52,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildCylinderGeometry
- * @param {Object} [cfg] Configs
- * @param {String} [cfg.id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Number[]} [cfg.center]  3D point indicating the center position.
- * @param {Number} [cfg.radiusTop=1]  Radius of top.
- * @param {Number} [cfg.radiusBottom=1]  Radius of bottom.
- * @param {Number} [cfg.height=1] Height.
- * @param {Number} [cfg.radialSegments=60]  Number of horizontal segments.
- * @param {Number} [cfg.heightSegments=1]  Number of vertical segments.
- * @param {Boolean} [cfg.openEnded=false]  Whether or not the cylinder has solid caps on the ends.
+ * @param {buildCylinderGeometryConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildCylinderGeometry(cfg = {}) {

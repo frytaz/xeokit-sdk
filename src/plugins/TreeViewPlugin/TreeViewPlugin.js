@@ -1,6 +1,8 @@
 import { Plugin } from "../../viewer/Plugin.js";
 import { Viewer } from "../../viewer/Viewer.js";
 import { RenderService } from "./RenderService.js";
+/** @import { ITreeViewRenderService } from "./RenderService.js" */
+/** @import { TreeViewNode } from "./TreeViewNode.js" */
 
 const treeViews = [];
 
@@ -349,19 +351,19 @@ const treeViews = [];
 /**
  * @typedef {Object} TreeViewPluginConfiguration
  * @property {String} [containerElementId] ID of an existing HTML element to contain the TreeViewPlugin - either this or containerElement is mandatory. When both values are given, the element reference is always preferred to the ID.
- * @property {HTMLElement} containerElement DOM element to contain the TreeViewPlugin.
+ * @property {HTMLElement} [containerElement] DOM element to contain the TreeViewPlugin.
  * @property {Boolean} [autoAddModels=true] When ````true```` (default), will automatically add each model as it's created. Set this ````false```` if you want to manually add models using {@link TreeViewPlugin#addModel} instead.
  * @property {Number} [autoExpandDepth] Optional depth to which to initially expand the tree.
- * @property {String} [hierarchy="containment"] How to organize the tree nodes: "containment", "storeys" or "types". See the class documentation for details.
+ * @property {"containment" | "storeys" | "types"} [hierarchy="containment"] How to organize the tree nodes: "containment", "storeys" or "types". See the class documentation for details.
  * @property {Boolean} [sortNodes=true] When true, will sort the children of each node. For a "storeys" hierarchy, the
  * ````IfcBuildingStorey```` nodes will be ordered spatially, from the highest storey down to the lowest, on the
  * vertical World axis. For all hierarchy types, other node types will be ordered in the ascending alphanumeric order of their titles.
  * @property {Boolean} [pruneEmptyNodes=true] When true, will not contain nodes that don't have content in the {@link Scene}. These are nodes whose {@link MetaObject}s don't have {@link Entity}s.
- * @property {RenderService} [renderService] Optional {@link RenderService} to use. Defaults to the {@link TreeViewPlugin}'s default {@link RenderService}.
+ * @property {ITreeViewRenderService} [renderService] Optional {@link RenderService} to use. Defaults to the {@link TreeViewPlugin}'s default {@link RenderService}.
  * @property {Boolean} [showIndeterminate=false] When true, will show indeterminate state for checkboxes when some but not all child nodes are checked
  * @property {Boolean} [showProjectNode=false] When true, will show top level project node when hierarchy is set to "storeys"
- * @property {Function} [elevationSortFunction] Optional function to replace the default elevation sort function. The function should take two nodes and return -1, 0 or 1.
- * @property {Function} [defaultSortFunction] Optional function to replace the default sort function. The function should take two nodes and return -1, 0 or 1.
+ * @property {(node1: TreeViewNode, node2: TreeViewNode) => number} [elevationSortFunction] Optional function to replace the default elevation sort function. The function should take two nodes and return -1, 0 or 1.
+ * @property {(node1: TreeViewNode, node2: TreeViewNode) => number} [defaultSortFunction] Optional function to replace the default sort function. The function should take two nodes and return -1, 0 or 1.
  */
 export class TreeViewPlugin extends Plugin {
 
@@ -371,7 +373,7 @@ export class TreeViewPlugin extends Plugin {
      * @param {Viewer} viewer The Viewer.
      * @param {TreeViewPluginConfiguration} cfg Plugin configuration.
      */
-    constructor(viewer, cfg = {}) {
+    constructor(viewer, cfg) {
 
         super("TreeViewPlugin", viewer);
 
@@ -503,14 +505,14 @@ export class TreeViewPlugin extends Plugin {
             event.preventDefault();
             event.stopPropagation();
             const switchElement = event.target;
-            this._expandSwitchElement(switchElement);
+            this.#expandSwitchElement(switchElement);
         };
 
         this._switchCollapseHandler = (event) => {
             event.preventDefault();
             event.stopPropagation();
             const switchElement = event.target;
-            this._collapseSwitchElement(switchElement);
+            this.#collapseSwitchElement(switchElement);
         };
 
         this._checkboxChangeHandler = (event) => {
@@ -526,7 +528,7 @@ export class TreeViewPlugin extends Plugin {
             const objects = this._viewer.scene.objects;
             let numUpdated = 0;
             
-            this._withNodeTree(checkedNode, (node) => {
+            this.#withNodeTree(checkedNode, (node) => {
                 const objectId = node.objectId;
                 const entity = objects[objectId];
                 const isLeaf = (node.children.length === 0);
@@ -598,7 +600,7 @@ export class TreeViewPlugin extends Plugin {
      *
      * Default value is "containment".
      *
-     * @type {String}
+     * @type {"containment" | "storeys" | "types"}
      */
     set hierarchy(hierarchy) {
         hierarchy = hierarchy || "containment";
@@ -610,13 +612,13 @@ export class TreeViewPlugin extends Plugin {
             return;
         }
         this._hierarchy = hierarchy;
-        this._createNodes();
+        this.#createNodes();
     }
 
     /**
      * Gets how the nodes are organized within this tree view.
      *
-     * @type {String}
+     * @type {"containment" | "storeys" | "types"}
      */
     get hierarchy() {
         return this._hierarchy;
@@ -662,7 +664,7 @@ export class TreeViewPlugin extends Plugin {
         model.on("destroyed", () => {
             this.removeModel(model.id);
         });
-        this._createNodes();
+        this.#createNodes();
     }
 
     /**
@@ -686,7 +688,7 @@ export class TreeViewPlugin extends Plugin {
         }
 
         delete this._metaModels[modelId];
-        this._createNodes();
+        this.#createNodes();
     }
 
     /**
@@ -719,7 +721,7 @@ export class TreeViewPlugin extends Plugin {
 
         const switchElement = this._renderService.getSwitchElement(nodeId);
         if (switchElement) {
-            this._expandSwitchElement(switchElement);
+            this.#expandSwitchElement(switchElement);
             switchElement.scrollIntoView();
             return true;
         }
@@ -735,7 +737,7 @@ export class TreeViewPlugin extends Plugin {
         for (let i = 0, len = path.length; i < len; i++) {
             const switchElement = this._renderService.getSwitchElement(path[i].nodeId);
             if (switchElement) {
-                this._expandSwitchElement(switchElement);
+                this.#expandSwitchElement(switchElement);
             }
         }
 
@@ -777,7 +779,7 @@ export class TreeViewPlugin extends Plugin {
 
             const switchElement = this._renderService.getSwitchElement(node.nodeId);
             if (switchElement) {
-                this._expandSwitchElement(switchElement);
+                this.#expandSwitchElement(switchElement);
                 const childNodes = node.children;
                 for (var i = 0, len = childNodes.length; i < len; i++) {
                     const childNode = childNodes[i];
@@ -798,7 +800,7 @@ export class TreeViewPlugin extends Plugin {
         for (let i = 0, len = this._rootNodes.length; i < len; i++) {
             const rootNode = this._rootNodes[i];
             const nodeId = rootNode.nodeId;
-            this._collapseNode(nodeId);
+            this.#collapseNode(nodeId);
         }
     }
 
@@ -807,7 +809,7 @@ export class TreeViewPlugin extends Plugin {
      * node in depth-first pre-order.
      *
      * @param {TreeViewNode} node Root of the subtree.
-     * @param {Function} callback Callback called at each {@link TreeViewNode}, with the TreeViewNode given as the argument.
+     * @param {(node: TreeViewNode) => void} callback Callback called at each {@link TreeViewNode}, with the TreeViewNode given as the argument.
      */
     withNodeTree(node, callback) {
         callback(node);
@@ -837,7 +839,7 @@ export class TreeViewPlugin extends Plugin {
         super.destroy();
     }
 
-    _createNodes() {
+    #createNodes() {
         if (this._rootElement) {
             this._rootElement.parentNode.removeChild(this._rootElement);
             this._rootElement = null;
@@ -846,19 +848,19 @@ export class TreeViewPlugin extends Plugin {
         this._rootNodes = [];
         this._objectNodes = {};
         this._nodeNodes = {};
-        this._validate();
+        this.#validate();
         if (this.valid || (this._hierarchy !== "storeys")) {
-            this._createEnabledNodes();
+            this.#createEnabledNodes();
         } else {
-            this._createDisabledNodes();
+            this.#createDisabledNodes();
         }
     }
 
-    _validate() {
+    #validate() {
         this.errors = [];
         switch (this._hierarchy) {
             case "storeys":
-                this.valid = this._validateMetaModelForStoreysHierarchy();
+                this.valid = this.#validateMetaModelForStoreysHierarchy();
                 break;
             case "types":
                 this.valid = (this._rootNodes.length > 0);
@@ -871,7 +873,7 @@ export class TreeViewPlugin extends Plugin {
         return this.valid;
     }
 
-    _validateMetaModelForStoreysHierarchy(level = 0, ctx, buildingNode) {
+    #validateMetaModelForStoreysHierarchy(level = 0, ctx, buildingNode) {
         // ctx = ctx || {
         //     foundIFCBuildingStoreys: false
         // };
@@ -889,7 +891,7 @@ export class TreeViewPlugin extends Plugin {
         // if (children) {
         //     for (let i = 0, len = children.length; i < len; i++) {
         //         const childMetaObject = children[i];
-        //         if (!this._validateMetaModelForStoreysHierarchy(childMetaObject, errors, level + 1, ctx, buildingNode)) {
+        //         if (!this.#validateMetaModelForStoreysHierarchy(childMetaObject, errors, level + 1, ctx, buildingNode)) {
         //             return false;
         //         }
         //     }
@@ -902,33 +904,33 @@ export class TreeViewPlugin extends Plugin {
         return true;
     }
 
-    _createEnabledNodes() {
+    #createEnabledNodes() {
         if (this._pruneEmptyNodes) {
-            this._findEmptyNodes();
+            this.#findEmptyNodes();
         }
         switch (this._hierarchy) {
             case "storeys":
-                this._createStoreysNodes();
+                this.#createStoreysNodes();
                 if (this._rootNodes.length === 0) {
                     this.error("Failed to build storeys hierarchy");
                 }
                 break;
             case "types":
-                this._createTypesNodes();
+                this.#createTypesNodes();
                 break;
             case "containment":
             default:
-                this._createContainmentNodes();
+                this.#createContainmentNodes();
         }
         if (this._sortNodes) {
-            this._doSortNodes();
+            this.#doSortNodes();
         }
-        this._synchNodesToEntities();
-        this._createTrees();
+        this.#synchNodesToEntities();
+        this.#createTrees();
         this.expandToDepth(this._autoExpandDepth);
     }
 
-    _createDisabledNodes() {
+    #createDisabledNodes() {
 
         const rootNode = this._renderService.createRootNode();
         this._rootElement = rootNode;
@@ -950,14 +952,14 @@ export class TreeViewPlugin extends Plugin {
     }
 
 
-    _findEmptyNodes() {
+    #findEmptyNodes() {
         const rootMetaObjects = this._viewer.metaScene.rootMetaObjects;
         for (let objectId in rootMetaObjects) {
-            this._findEmptyNodes2(rootMetaObjects[objectId]);
+            this.#findEmptyNodes2(rootMetaObjects[objectId]);
         }
     }
 
-    _findEmptyNodes2(metaObject, countEntities = 0) {
+    #findEmptyNodes2(metaObject, countEntities = 0) {
         const viewer = this.viewer;
         const scene = viewer.scene;
         const children = metaObject.children;
@@ -970,21 +972,21 @@ export class TreeViewPlugin extends Plugin {
         if (children) {
             for (let i = 0, len = children.length; i < len; i++) {
                 const childMetaObject = children[i];
-                childMetaObject._countEntities = this._findEmptyNodes2(childMetaObject);
+                childMetaObject._countEntities = this.#findEmptyNodes2(childMetaObject);
                 metaObject._countEntities += childMetaObject._countEntities;
             }
         }
         return metaObject._countEntities;
     }
 
-    _createStoreysNodes() {
+    #createStoreysNodes() {
         const rootMetaObjects = this._viewer.metaScene.rootMetaObjects;
         for (let id in rootMetaObjects) {
-            this._createStoreysNodes2(rootMetaObjects[id], null, null, null, null);
+            this.#createStoreysNodes2(rootMetaObjects[id], null, null, null, null);
         }
     }
 
-    _createStoreysNodes2(metaObject, projectNode, buildingNode, storeyNode, typeNodes) {
+    #createStoreysNodes2(metaObject, projectNode, buildingNode, storeyNode, typeNodes) {
         if (this._pruneEmptyNodes && (metaObject._countEntities === 0)) {
             return;
         }
@@ -1096,19 +1098,19 @@ export class TreeViewPlugin extends Plugin {
         if (children) {
             for (let i = 0, len = children.length; i < len; i++) {
                 const childMetaObject = children[i];
-                this._createStoreysNodes2(childMetaObject, projectNode, buildingNode, storeyNode, typeNodes);
+                this.#createStoreysNodes2(childMetaObject, projectNode, buildingNode, storeyNode, typeNodes);
             }
         }
     }
 
-    _createTypesNodes() {
+    #createTypesNodes() {
         const rootMetaObjects = this._viewer.metaScene.rootMetaObjects;
         for (let id in rootMetaObjects) {
-            this._createTypesNodes2(rootMetaObjects[id], null, null);
+            this.#createTypesNodes2(rootMetaObjects[id], null, null);
         }
     }
 
-    _createTypesNodes2(metaObject, rootNode, typeNodes) {
+    #createTypesNodes2(metaObject, rootNode, typeNodes) {
         if (this._pruneEmptyNodes && (metaObject._countEntities === 0)) {
             return;
         }
@@ -1178,19 +1180,19 @@ export class TreeViewPlugin extends Plugin {
         if (children) {
             for (let i = 0, len = children.length; i < len; i++) {
                 const childMetaObject = children[i];
-                this._createTypesNodes2(childMetaObject, rootNode, typeNodes);
+                this.#createTypesNodes2(childMetaObject, rootNode, typeNodes);
             }
         }
     }
 
-    _createContainmentNodes() {
+    #createContainmentNodes() {
         const rootMetaObjects = this._viewer.metaScene.rootMetaObjects;
         for (let id in rootMetaObjects) {
-            this._createContainmentNodes2(rootMetaObjects[id], null);
+            this.#createContainmentNodes2(rootMetaObjects[id], null);
         }
     }
 
-    _createContainmentNodes2(metaObject, parent) {
+    #createContainmentNodes2(metaObject, parent) {
         if (this._pruneEmptyNodes && (metaObject._countEntities === 0)) {
             return;
         }
@@ -1220,19 +1222,19 @@ export class TreeViewPlugin extends Plugin {
         if (children) {
             for (let i = 0, len = children.length; i < len; i++) {
                 const childMetaObject = children[i];
-                this._createContainmentNodes2(childMetaObject, node);
+                this.#createContainmentNodes2(childMetaObject, node);
             }
         }
     }
 
-    _doSortNodes() {
+    #doSortNodes() {
         for (let i = 0, len = this._rootNodes.length; i < len; i++) {
             const rootNode = this._rootNodes[i];
-            this._sortChildren(rootNode);
+            this.#sortChildren(rootNode);
         }
     }
 
-    _sortChildren(node) {
+    #sortChildren(node) {
         const children = node.children;
         if (!children || children.length === 0) {
             return;
@@ -1240,18 +1242,18 @@ export class TreeViewPlugin extends Plugin {
         const firstChild = children[0];
         if ((this._hierarchy === "storeys" || this._hierarchy === "containment") &&  firstChild.type === "IfcBuildingStorey") {
             if (this._elevationSortFunction) children.sort(this._elevationSortFunction);
-            else children.sort(this._getSpatialSortFunc());
+            else children.sort(this.#getSpatialSortFunc());
         } else {
             if (this._defaultSortFunction) children.sort(this._defaultSortFunction)
-            else children.sort(this._alphaSortFunc);
+            else children.sort(this.#alphaSortFunc);
         }
         for (let i = 0, len = children.length; i < len; i++) {
             const node = children[i];
-            this._sortChildren(node);
+            this.#sortChildren(node);
         }
     }
 
-    _getSpatialSortFunc() {
+    #getSpatialSortFunc() {
         const viewer = this.viewer;
         const scene = viewer.scene;
         const camera = scene.camera;
@@ -1285,7 +1287,7 @@ export class TreeViewPlugin extends Plugin {
         });
     }
 
-    _alphaSortFunc(node1, node2) {
+    #alphaSortFunc(node1, node2) {
         const title1 = node1.title.toUpperCase(); // FIXME: Should be case sensitive?
         const title2 = node2.title.toUpperCase();
         if (title1 < title2) {
@@ -1297,7 +1299,7 @@ export class TreeViewPlugin extends Plugin {
         return 0;
     }
 
-    _synchNodesToEntities() {
+    #synchNodesToEntities() {
         const objectIds = Object.keys(this.viewer.metaScene.metaObjects);
         const metaObjects = this._viewer.metaScene.metaObjects;
         const objects = this._viewer.scene.objects;
@@ -1334,23 +1336,23 @@ export class TreeViewPlugin extends Plugin {
         }
     }
 
-    _withNodeTree(node, callback) {
+    #withNodeTree(node, callback) {
         callback(node);
         const children = node.children;
         if (!children) {
             return;
         }
         for (let i = 0, len = children.length; i < len; i++) {
-            this._withNodeTree(children[i], callback);
+            this.#withNodeTree(children[i], callback);
         }
     }
 
-    _createTrees() {
+    #createTrees() {
         if (this._rootNodes.length === 0) {
             return;
         }
         const rootNodeElements = this._rootNodes.map((rootNode) => {
-            return this._createNodeElement(rootNode);
+            return this.#createNodeElement(rootNode);
         });
 
         const rootNode = this._renderService.createRootNode();
@@ -1362,7 +1364,7 @@ export class TreeViewPlugin extends Plugin {
         this._rootElement = rootNode;
     }
 
-    _createNodeElement(node) {
+    #createNodeElement(node) {
         const contextmenuHandler = (event) =>{
                 this.fire("contextmenu", {
                 event: event,
@@ -1385,7 +1387,7 @@ export class TreeViewPlugin extends Plugin {
         return this._renderService.createNodeElement(node, this._switchExpandHandler, this._checkboxChangeHandler, contextmenuHandler, onclickHandler);
     }
 
-    _expandSwitchElement(switchElement) {
+    #expandSwitchElement(switchElement) {
         const expanded = this._renderService.isExpanded(switchElement); 
         if (expanded) {
             return;
@@ -1394,7 +1396,7 @@ export class TreeViewPlugin extends Plugin {
         const nodeId = this._renderService.getId(switchElement);
 
         const nodeElements = this._nodeNodes[nodeId].children.map((node) => {
-            return this._createNodeElement(node);
+            return this.#createNodeElement(node);
         });
 
         this._renderService.addChildren(switchElement, nodeElements)
@@ -1402,12 +1404,12 @@ export class TreeViewPlugin extends Plugin {
         this._renderService.expand(switchElement, this._switchExpandHandler, this._switchCollapseHandler);
     }
 
-    _collapseNode(nodeId) {
+    #collapseNode(nodeId) {
         const switchElement = this._renderService.getSwitchElement(nodeId);
-        this._collapseSwitchElement(switchElement);
+        this.#collapseSwitchElement(switchElement);
     }
 
-    _collapseSwitchElement(switchElement) {
+    #collapseSwitchElement(switchElement) {
         this._renderService.collapse(switchElement, this._switchExpandHandler, this._switchCollapseHandler);
     }
 }

@@ -199,7 +199,7 @@ class Marker extends Component {
         if (this._entity === entity) {
             return;
         }
-        this._cleanupDestroyedHandlers();
+        this.#cleanupDestroyedHandlers();
         this._entity = entity;
         if (this._entity) {
             if (this._entity.isSceneModelEntity) {
@@ -364,12 +364,12 @@ class Marker extends Component {
         this.fire("destroyed", true);
         this.scene.camera.off(this._onCameraViewMatrix);
         this.scene.camera.off(this._onCameraProjMatrix);
-        this._cleanupDestroyedHandlers();
+        this.#cleanupDestroyedHandlers();
         this._renderer.removeMarker(this);
         super.destroy();
     }
 
-    _cleanupDestroyedHandlers() {
+    #cleanupDestroyedHandlers() {
         if (this._entity) {
             if (this._onEntityDestroyed !== null) {
                 if (this._entity.model) {

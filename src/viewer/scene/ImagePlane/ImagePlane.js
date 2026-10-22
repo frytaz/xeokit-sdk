@@ -134,13 +134,13 @@ class ImagePlane extends Component {
 
     /**
      * @constructor
-     * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this ````ImagePlane```` as well.
+     * @param {Component} owner  Owner component. When destroyed, the owner will destroy this ````ImagePlane```` as well.
      * @param {Object} [cfg]  ````ImagePlane```` configuration
      * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
      * @param {Boolean} [cfg.visible=true] Indicates whether or not this ````ImagePlane```` is visible.
      * @param {Boolean} [cfg.gridVisible=true] Indicates whether or not the grid is visible.  Grid is only visible when ````ImagePlane```` is also visible.
      * @param {Number[]} [cfg.position=[0,0,0]] World-space position of the ````ImagePlane````.
-     * @param {Number[]} [cfg.size=1] World-space size of the longest edge of the ````ImagePlane````. Note that
+     * @param {Number} [cfg.size=1] World-space size of the longest edge of the ````ImagePlane````. Note that
      * ````ImagePlane```` sets its aspect ratio to match its image. If we set a value of ````1000````, and the image
      * has size ````400x300````, then the ````ImagePlane```` will then have size ````1000 x 750````.
      * @param {Number[]} [cfg.rotation=[0,0,0]] Local rotation of the ````ImagePlane````, as Euler angles given in degrees, for each of the X, Y and Z axis.
@@ -151,12 +151,15 @@ class ImagePlane extends Component {
      * @param {Number} [cfg.opacity=1.0] ````ImagePlane````'s initial opacity factor, multiplies by the rendered fragment alpha.
      * @param {String} [cfg.src] URL of image. Accepted file types are PNG and JPEG.
      * @param {HTMLImageElement} [cfg.image] An ````HTMLImageElement```` to source the image from. Overrides ````src````.
+     * @param {Number[]} [cfg.dir=[0,0,-1]] Direction vector of the ````ImagePlane````.
      */
     constructor(owner, cfg = {}) {
 
         super(owner, cfg);
 
+        /** @type {String|null} */
         this._src = null;
+        /** @type {HTMLImageElement|null} */
         this._image = null;
         this._pos = math.vec3();
         this._origin = math.vec3();
@@ -287,14 +290,14 @@ class ImagePlane extends Component {
      *
      * Sets {@link Texture#src} null.
      *
-     * @type {HTMLImageElement}
+     * @type {HTMLImageElement|null}
      */
     set image(image) {
         this._image = image;
         if (this._image) {
             this._imageSize[0] = image.width;
             this._imageSize[1] = image.height;
-            this._updatePlaneSizeFromImage();
+            this.#updatePlaneSizeFromImage();
             this._src = null;
             this._texture.image = this._image;
         }
@@ -305,7 +308,7 @@ class ImagePlane extends Component {
      *
      * Returns null if not set.
      *
-     * @type {HTMLImageElement}
+     * @type {HTMLImageElement|null}
      */
     get image() {
         return this._image;
@@ -318,7 +321,7 @@ class ImagePlane extends Component {
      *
      * Sets {@link Texture#image} null.
      *
-     * @type {String}
+     * @type {String|null}
      */
     set src(src) {
         this._src = src;
@@ -329,7 +332,7 @@ class ImagePlane extends Component {
                 this._texture.image = image;
                 this._imageSize[0] = image.width;
                 this._imageSize[1] = image.height;
-                this._updatePlaneSizeFromImage();
+                this.#updatePlaneSizeFromImage();
             };
             image.src = this._src;
         }
@@ -340,7 +343,7 @@ class ImagePlane extends Component {
      *
      * Returns null if not set.
      *
-     * @type {String}
+     * @type {String|null}
      */
     get src() {
         return this._src;
@@ -404,7 +407,7 @@ class ImagePlane extends Component {
     set size(size) {
         this._size = (size === undefined || size === null) ? 1.0 : size;
         if (this._image) {
-            this._updatePlaneSizeFromImage()
+            this.#updatePlaneSizeFromImage()
         }
     }
 
@@ -553,7 +556,7 @@ class ImagePlane extends Component {
         super.destroy();
     }
 
-    _updatePlaneSizeFromImage() {
+    #updatePlaneSizeFromImage() {
         const size = this._size;
         const width = this._imageSize[0];
         const height = this._imageSize[1];

@@ -1,6 +1,8 @@
 import {MetaModel} from "./MetaModel.js";
 import {MetaObject} from "./MetaObject.js";
 import {PropertySet} from "./PropertySet.js";
+/** @import { Viewer } from "../Viewer.js" */
+/** @import { Scene } from "../scene/scene/Scene.js" */
 
 /**
  * @desc Metadata corresponding to a {@link Scene}.
@@ -33,35 +35,35 @@ class MetaScene {
         /**
          * The {@link MetaModel}s belonging to this MetaScene, each mapped to its {@link MetaModel#modelId}.
          *
-         * @type {{String:MetaModel}}
+         * @type {{[key: string]: MetaModel}}
          */
         this.metaModels = {};
 
         /**
          * The {@link PropertySet}s belonging to this MetaScene, each mapped to its {@link PropertySet#id}.
          *
-         * @type {{String:PropertySet}}
+         * @type {{[key: string]: PropertySet}}
          */
         this.propertySets = {};
 
         /**
          * The {@link MetaObject}s belonging to this MetaScene, each mapped to its {@link MetaObject#id}.
          *
-         * @type {{String:MetaObject}}
+         * @type {{[key: string]: MetaObject}}
          */
         this.metaObjects = {};
 
         /**
          * The {@link MetaObject}s belonging to this MetaScene, each mapped to its {@link MetaObject#type}.
          *
-         * @type {{String:MetaObject}}
+         * @type {{[key: string]: {[key: string]: MetaObject}}}
          */
         this.metaObjectsByType = {};
 
         /**
          * The root {@link MetaObject}s belonging to this MetaScene, each mapped to its {@link MetaObject#id}.
          *
-         * @type {{String:MetaObject}}
+         * @type {{[key: string]: MetaObject}}
          */
         this.rootMetaObjects = {};
 
@@ -76,7 +78,7 @@ class MetaScene {
      * Subscribes to an event fired at this Viewer.
      *
      * @param {String} event The event
-     * @param {Function} callback Callback fired on the event
+     * @param {function(*): void} callback Callback fired on the event
      */
     on(event, callback) {
         let subs = this._eventSubs[event];
@@ -91,7 +93,7 @@ class MetaScene {
      * Fires an event at this Viewer.
      *
      * @param {String} event Event name
-     * @param {Object} value Event parameters
+     * @param {*} value Event parameters
      */
     fire(event, value) {
         const subs = this._eventSubs[event];
@@ -331,7 +333,7 @@ class MetaScene {
      * Iterates over the {@link MetaObject}s within the subtree.
      *
      * @param {String} id ID of root {@link MetaObject}.
-     * @param {Function} callback Callback fired at each {@link MetaObject}.
+     * @param {function(MetaObject): void} callback Callback fired at each {@link MetaObject}.
      */
     withMetaObjectsInSubtree(id, callback) {
         const metaObject = this.metaObjects[id];

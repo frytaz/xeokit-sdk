@@ -1,6 +1,7 @@
 import {PropertySet} from "./PropertySet.js";
 import {MetaObject} from "./MetaObject.js";
 import {math} from "../scene/math/math.js";
+/** @import { MetaScene } from "./MetaScene.js" */
 
 /**
  * @desc Metadata corresponding to an {@link Entity} that represents a model.
@@ -26,6 +27,17 @@ class MetaModel {
      * * The MetaModel then needs to be populated with one or more calls to {@link metaModel#loadData}.
      * * As we populate it, the MetaModel will create {@link MetaObject}s and {@link PropertySet}s in itself, and in the MetaScene.
      * * When populated, call {@link MetaModel#finalize} to finish it off, which causes MetaScene to fire a "metaModelCreated" event.
+     *
+     * @param {Object} params MetaModel configuration.
+     * @param {MetaScene} params.metaScene The MetaScene this MetaModel belongs to.
+     * @param {String|Number} params.id Globally-unique ID.
+     * @param {String|Number} [params.projectId] The project ID.
+     * @param {String|Number} [params.revisionId] The revision ID.
+     * @param {String} [params.author] The model author.
+     * @param {String} [params.createdAt] The date the model was created.
+     * @param {String} [params.creatingApplication] The application that created the model.
+     * @param {String} [params.schema] The model schema version.
+     * @param {Object} [params.graph] Connectivity graph.
      */
     constructor(params) {
 
@@ -162,7 +174,9 @@ class MetaModel {
 
     /**
      * Load metamodel data into this MetaModel.
-     * @param metaModelData
+     * @param {*} metaModelData
+     * @param {Object} [options] Options.
+     * @param {Boolean} [options.globalizeObjectIds=false] Whether to globalize each {@link MetaObject#id}.
      */
     loadData(metaModelData, options = {}) {
 
@@ -170,7 +184,7 @@ class MetaModel {
             throw "MetaScene already finalized - can't add more data";
         }
 
-        this._globalizeIDs(metaModelData, options)
+        this.#globalizeIDs(metaModelData, options)
 
         const metaScene = this.metaScene;
         const propertyLookup = metaModelData.properties;
@@ -237,7 +251,7 @@ class MetaModel {
         }
     }
 
-    _decompressProperties(propertyLookup, properties) {
+    #decompressProperties(propertyLookup, properties) {
         const propsNotFound = [];
         for (let i = 0, len = properties.length; i < len; i++) {
             const property = properties[i];
@@ -325,7 +339,7 @@ class MetaModel {
         if (this.propertySets) {
             for (let i = 0, len = this.propertySets.length; i < len; i++) {
                 const propertySet = this.propertySets[i];
-                this._decompressProperties(this._propertyLookup, propertySet.properties);
+                this.#decompressProperties(this._propertyLookup, propertySet.properties);
             }
         }
 
@@ -400,7 +414,7 @@ class MetaModel {
         return json;
     }
 
-    _globalizeIDs(metaModelData, options) {
+    #globalizeIDs(metaModelData, options) {
 
         const globalize = !!options.globalizeObjectIds;
 

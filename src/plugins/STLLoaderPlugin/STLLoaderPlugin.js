@@ -180,9 +180,21 @@ import {STLDefaultDataSource} from "./STLDefaultDataSource.js";
  */
 
 /**
+ * A data source through which an {@link STLLoaderPlugin} loads STL files.
+ *
+ * * ````getSTL```` - Gets the contents of the given STL file.
+ * * ````cacheBuster```` - Whether cache-busting is enabled.
+ *
+ * @typedef {{
+ *     getSTL(src: string | number, ok: Function, error: Function): void;
+ *     cacheBuster: boolean;
+ * }} ISTLDefaultDataSource
+ */
+
+/**
  * @typedef {Object} STLLoaderPluginCOnfiguration
  * @property {String} [id="STLLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
- * @property {Object} [dataSource] A custom data source through which the STLLoaderPlugin can load STL files. Defaults to an instance of {@link STLDefaultDataSource}, which loads over HTTP.
+ * @property {ISTLDefaultDataSource} [dataSource] A custom data source through which the STLLoaderPlugin can load STL files. Defaults to an instance of {@link STLDefaultDataSource}, which loads over HTTP.
  */
 
 /**
@@ -227,7 +239,7 @@ class STLLoaderPlugin extends Plugin {
      *
      * Default value is {@link STLDefaultDataSource}, which loads via an XMLHttpRequest.
      *
-     * @type {Object}
+     * @type {ISTLDefaultDataSource}
      */
     set dataSource(value) {
         this._dataSource = value || new STLDefaultDataSource();
@@ -238,7 +250,7 @@ class STLLoaderPlugin extends Plugin {
      *
      * Default value is {@link STLDefaultDataSource}, which loads via an XMLHttpRequest.
      *
-     * @type {Object}
+     * @type {ISTLDefaultDataSource}
      */
     get dataSource() {
         return this._dataSource;
@@ -248,7 +260,7 @@ class STLLoaderPlugin extends Plugin {
      * Loads an STL model from a file into this STLLoaderPlugin's {@link Viewer}.
      *
      * @param {LoadSTLModel} params Loading parameters.
-     * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
+     * @returns {Node} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
      */
     load(params) {
 

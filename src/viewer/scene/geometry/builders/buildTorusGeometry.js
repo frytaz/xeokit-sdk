@@ -2,6 +2,17 @@ import {utils} from "../../utils.js";
 import {math} from '../../math/math.js';
 
 /**
+ * @typedef {Object} buildTorusGeometryConfiguration
+ * @property {String} [id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [center] 3D point indicating the center position.
+ * @property {Number} [radius=1] The overall radius.
+ * @property {Number} [tube=0.3] The tube radius.
+ * @property {Number} [radialSegments=32] The number of radial segments.
+ * @property {Number} [tubeSegments=24] The number of tubular segments.
+ * @property {Number} [arc=Math.PI*0.5] The length of the arc in radians, where Math.PI*2 is a closed torus.
+ */
+
+/**
  * @desc Creates a torus-shaped {@link Geometry}.
  *
  * ## Usage
@@ -38,14 +49,7 @@ import {math} from '../../math/math.js';
  * ````
  *
  * @function buildTorusGeometry
- * @param {Object} [cfg] Configs
- * @param {String} [cfg.id] Optional ID for the {@link Geometry}, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Number[]} [cfg.center] 3D point indicating the center position.
- * @param {Number} [cfg.radius=1] The overall radius.
- * @param {Number} [cfg.tube=0.3] The tube radius.
- * @param {Number} [cfg.radialSegments=32] The number of radial segments.
- * @param {Number} [cfg.tubeSegments=24] The number of tubular segments.
- * @param {Number} [cfg.arc=Math.PI*0.5] The length of the arc in radians, where Math.PI*2 is a closed torus.
+ * @param {buildTorusGeometryConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildTorusGeometry(cfg = {}) {

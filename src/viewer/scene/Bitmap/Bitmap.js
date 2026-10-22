@@ -62,7 +62,7 @@ class Bitmap extends Component {
      * Registers the Bitmap in {@link Scene#bitmaps}; causes Scene to fire a "bitmapCreated" event.
      *
      * @constructor
-     * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this ````Bitmap```` as well.
+     * @param {Component} owner  Owner component. When destroyed, the owner will destroy this ````Bitmap```` as well.
      * @param {Object} [cfg]  ````Bitmap```` configuration
      * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
      * @param {Boolean} [cfg.visible=true] Indicates whether or not this ````Bitmap```` is visible.
@@ -188,7 +188,7 @@ class Bitmap extends Component {
             this._texture.image = this._image;
             this._imageSize[0] = this._image.width;
             this._imageSize[1] = this._image.height;
-            this._updateBitmapMeshScale();
+            this.#updateBitmapMeshScale();
         }
     }
 
@@ -218,7 +218,7 @@ class Bitmap extends Component {
                 this._texture.image = this._image;
                 this._imageSize[0] = this._image.width;
                 this._imageSize[1] = this._image.height;
-                this._updateBitmapMeshScale();
+                this.#updateBitmapMeshScale();
             };
             this._image.src = src;
             const ext = src.split('.').pop();
@@ -260,7 +260,7 @@ class Bitmap extends Component {
             this._texture.image = image;
             this._imageSize[0] = image.width;
             this._imageSize[1] = image.height;
-            this._updateBitmapMeshScale();
+            this.#updateBitmapMeshScale();
         };
         this._image.src = imageData;
     }
@@ -349,7 +349,7 @@ class Bitmap extends Component {
     set height(height) {
         this._height = (height === undefined || height === null) ? 1.0 : height;
         if (this._image) {
-            this._updateBitmapMeshScale();
+            this.#updateBitmapMeshScale();
         }
     }
 
@@ -464,7 +464,7 @@ class Bitmap extends Component {
         this.scene._bitmapDestroyed(this);
     }
 
-    _updateBitmapMeshScale() {
+    #updateBitmapMeshScale() {
         const aspect = this._imageSize[1] / this._imageSize[0];
         this._bitmapMesh.scale = [this._height / aspect, 1.0, this._height];
     }

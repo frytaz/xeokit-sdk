@@ -1575,6 +1575,15 @@ const letters = {
 };
 
 /**
+ * @typedef {Object} buildVectorTextGeometryConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [center]  3D point indicating the center position.
+ * @property {Number[]} [origin] 3D point indicating the top left corner.
+ * @property {Number} [size=1] Size of each character.
+ * @property {String} [text=""] The text.
+ */
+
+/**
  * @desc Creates wireframe vector text {@link Geometry}.
  *
  * ## Usage
@@ -1609,12 +1618,7 @@ const letters = {
  * ````
  *
  * @function buildVectorTextGeometry
- * @param {Object} [cfg] Configs
- * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Number[]} [cfg.center]  3D point indicating the center position.
- * @param {Number[]} [cfg.origin] 3D point indicating the top left corner.
- * @param {Number} [cfg.size=1] Size of each character.
- * @param {String} [cfg.text=""] The text.
+ * @param {buildVectorTextGeometryConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildVectorTextGeometry(cfg = {}) {

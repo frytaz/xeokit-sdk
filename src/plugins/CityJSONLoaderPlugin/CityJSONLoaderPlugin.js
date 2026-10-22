@@ -2,6 +2,8 @@ import {math, Plugin, SceneModel, utils, Viewer} from "../../viewer/index.js";
 import {CityJSONDefaultDataSource} from "./CityJSONDefaultDataSource.js";
 
 import earcut from '../../viewer/scene/libs/earcut.js';
+/** @import { ModelStats } from "../index.js" */
+/** @import { Entity } from "../../viewer/scene/Entity.js" */
 
 const tempVec2a = math.vec2();
 const tempVec3a = math.vec3();
@@ -113,9 +115,21 @@ const tempVec3c = math.vec3();
  */
 
 /**
+ * A data source through which a {@link CityJSONLoaderPlugin} loads CityJSON files.
+ *
+ * * ````getCityJSON```` - Gets the contents of the given CityJSON file.
+ * * ````cacheBuster```` - Whether cache-busting is enabled.
+ *
+ * @typedef {{
+ *     getCityJSON(src: string | number, ok: (json: any) => void, error: (e: Error) => void): void;
+ *     cacheBuster: boolean;
+ * }} ICityJSONDefaultDataSource
+ */
+
+/**
  * @typedef {Object} CityJSONLoaderPluginConfiguration
  * @property {String} [id="cityJSONLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
- * @property {Object} [dataSource] A custom data source through which the CityJSONLoaderPlugin can load model and
+ * @property {ICityJSONDefaultDataSource} [dataSource] A custom data source through which the CityJSONLoaderPlugin can load model and
  * metadata files. Defaults to an instance of {@link CityJSONDefaultDataSource}, which loads over HTTP.
  */
 
@@ -130,7 +144,7 @@ const tempVec3c = math.vec3();
  * @property {Number[]} [scale=[1,1,1]] The model's scale.
  * @property {Number[]} [rotation=[0,0,0]] The model's orientation, given as Euler angles in degrees, for each of the X, Y and Z axis.
  * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
- * @property {Object} [stats] Collects model statistics.
+ * @property {ModelStats} [stats] Collects model statistics.
  */
 class CityJSONLoaderPlugin extends Plugin {
 
@@ -152,7 +166,7 @@ class CityJSONLoaderPlugin extends Plugin {
      *
      * Default value is {@link CityJSONDefaultDataSource}, which loads via HTTP.
      *
-     * @type {Object}
+     * @type {ICityJSONDefaultDataSource}
      */
     get dataSource() {
         return this._dataSource;
@@ -163,7 +177,7 @@ class CityJSONLoaderPlugin extends Plugin {
      *
      * Default value is {@link CityJSONDefaultDataSource}, which loads via HTTP.
      *
-     * @type {Object}
+     * @type {ICityJSONDefaultDataSource}
      */
     set dataSource(value) {
         this._dataSource = value || new CityJSONDefaultDataSource();
@@ -175,7 +189,7 @@ class CityJSONLoaderPlugin extends Plugin {
      * @param {LoadCityJSONModel} params Loading parameters.
      * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}.
      */
-    load(params = {}) {
+    load(params) {
 
         if (params.id && this.viewer.scene.components[params.id]) {
             this.error("Component with this ID already exists in viewer: " + params.id + " - will autogenerate this ID");
@@ -195,22 +209,22 @@ class CityJSONLoaderPlugin extends Plugin {
         const options = {};
 
         if (params.src) {
-            this._loadModel(params.src, params, options, sceneModel);
+            this.#loadModel(params.src, params, options, sceneModel);
         } else {
             const spinner = this.viewer.scene.canvas.spinner;
             spinner.processes++;
-            this._parseModel(params.cityJSON, params, options, sceneModel);
+            this.#parseModel(params.cityJSON, params, options, sceneModel);
             spinner.processes--;
         }
 
         return sceneModel;
     }
 
-    _loadModel(src, params, options, sceneModel) {
+    #loadModel(src, params, options, sceneModel) {
         const spinner = this.viewer.scene.canvas.spinner;
         spinner.processes++;
         this._dataSource.getCityJSON(params.src, (data) => {
-                this._parseModel(data, params, options, sceneModel);
+                this.#parseModel(data, params, options, sceneModel);
                 spinner.processes--;
             },
             (errMsg) => {
@@ -220,13 +234,13 @@ class CityJSONLoaderPlugin extends Plugin {
             });
     }
 
-    _parseModel(data, params, options, sceneModel) {
+    #parseModel(data, params, options, sceneModel) {
 
         if (sceneModel.destroyed) {
             return;
         }
 
-        const vertices = data.transform ? this._transformVertices(data.vertices, data.transform, options.rotateX) : data.vertices;
+        const vertices = data.transform ? this.#transformVertices(data.vertices, data.transform, options.rotateX) : data.vertices;
 
         const stats = params.stats || {};
         stats.sourceFormat = data.type || "CityJSON";
@@ -271,7 +285,7 @@ class CityJSONLoaderPlugin extends Plugin {
             stats
         };
 
-        this._parseCityJSON(ctx)
+        this.#parseCityJSON(ctx)
 
         sceneModel.finalize();
 
@@ -289,7 +303,7 @@ class CityJSONLoaderPlugin extends Plugin {
         });
     }
 
-    _transformVertices(vertices, transform, rotateX) {
+    #transformVertices(vertices, transform, rotateX) {
         const transformedVertices = [];
         const scale = transform.scale || math.vec3([1, 1, 1]);
         const translate = transform.translate || math.vec3([0, 0, 0]);
@@ -306,18 +320,18 @@ class CityJSONLoaderPlugin extends Plugin {
         return transformedVertices;
     }
 
-    _parseCityJSON(ctx) {
+    #parseCityJSON(ctx) {
         const data = ctx.data;
         const cityObjects = data.CityObjects;
         for (const objectId in cityObjects) {
             if (cityObjects.hasOwnProperty(objectId)) {
                 const cityObject = cityObjects[objectId];
-                this._parseCityObject(ctx, cityObject, objectId);
+                this.#parseCityObject(ctx, cityObject, objectId);
             }
         }
     }
 
-    _parseCityObject(ctx, cityObject, objectId) {
+    #parseCityObject(ctx, cityObject, objectId) {
 
         const sceneModel = ctx.sceneModel;
         const data = ctx.data;
@@ -381,10 +395,10 @@ class CityJSONLoaderPlugin extends Plugin {
             }
 
             if (surfaceMaterials) {
-                this._parseGeometrySurfacesWithOwnMaterials(ctx, geometry, surfaceMaterials, meshIds);
+                this.#parseGeometrySurfacesWithOwnMaterials(ctx, geometry, surfaceMaterials, meshIds);
 
             } else {
-                this._parseGeometrySurfacesWithSharedMaterial(ctx, geometry, objectMaterial, meshIds);
+                this.#parseGeometrySurfacesWithSharedMaterial(ctx, geometry, objectMaterial, meshIds);
             }
         }
 
@@ -399,7 +413,7 @@ class CityJSONLoaderPlugin extends Plugin {
         }
     }
 
-    _parseGeometrySurfacesWithOwnMaterials(ctx, geometry, surfaceMaterials, meshIds) {
+    #parseGeometrySurfacesWithOwnMaterials(ctx, geometry, surfaceMaterials, meshIds) {
 
         const geomType = geometry.type;
 
@@ -415,14 +429,14 @@ class CityJSONLoaderPlugin extends Plugin {
 
             case "CompositeSurface":
                 const surfaces = geometry.boundaries;
-                this._parseSurfacesWithOwnMaterials(ctx, surfaceMaterials, surfaces, meshIds);
+                this.#parseSurfacesWithOwnMaterials(ctx, surfaceMaterials, surfaces, meshIds);
                 break;
 
             case "Solid":
                 const shells = geometry.boundaries;
                 for (let j = 0; j < shells.length; j++) {
                     const surfaces = shells[j];
-                    this._parseSurfacesWithOwnMaterials(ctx, surfaceMaterials, surfaces, meshIds);
+                    this.#parseSurfacesWithOwnMaterials(ctx, surfaceMaterials, surfaces, meshIds);
                 }
                 break;
 
@@ -433,7 +447,7 @@ class CityJSONLoaderPlugin extends Plugin {
                 for (let j = 0; j < solids.length; j++) {
                     for (let k = 0; k < solids[j].length; k++) {
                         const surfaces = solids[j][k];
-                        this._parseSurfacesWithOwnMaterials(ctx, surfaceMaterials, surfaces, meshIds);
+                        this.#parseSurfacesWithOwnMaterials(ctx, surfaceMaterials, surfaces, meshIds);
                     }
                 }
                 break;
@@ -443,7 +457,7 @@ class CityJSONLoaderPlugin extends Plugin {
         }
     }
 
-    _parseSurfacesWithOwnMaterials(ctx, surfaceMaterials, surfaces, meshIds) {
+    #parseSurfacesWithOwnMaterials(ctx, surfaceMaterials, surfaces, meshIds) {
 
         const vertices = ctx.vertices;
         const sceneModel = ctx.sceneModel;
@@ -469,7 +483,7 @@ class CityJSONLoaderPlugin extends Plugin {
                     holes.push(face.length);
                 }
 
-                const newFace = this._extractLocalIndices(ctx, surface[j], sharedIndices, geometryCfg);
+                const newFace = this.#extractLocalIndices(ctx, surface[j], sharedIndices, geometryCfg);
 
                 face.push(...newFace);
             }
@@ -494,7 +508,7 @@ class CityJSONLoaderPlugin extends Plugin {
                     });
                 }
 
-                const normal = this._getNormalOfPositions(pList, math.vec3());
+                const normal = this.#getNormalOfPositions(pList, math.vec3());
 
                 // Convert to 2D
 
@@ -502,7 +516,7 @@ class CityJSONLoaderPlugin extends Plugin {
 
                 for (let k = 0; k < pList.length; k++) {
 
-                    this._to2D(pList[k], normal, tempVec2a);
+                    this.#to2D(pList[k], normal, tempVec2a);
 
                     pv.unshift(tempVec2a[0]);
                     pv.unshift(tempVec2a[1]);
@@ -540,7 +554,7 @@ class CityJSONLoaderPlugin extends Plugin {
         }
     }
 
-    _parseGeometrySurfacesWithSharedMaterial(ctx, geometry, objectMaterial, meshIds) {
+    #parseGeometrySurfacesWithSharedMaterial(ctx, geometry, objectMaterial, meshIds) {
 
         const sceneModel = ctx.sceneModel;
         const sharedIndices = [];
@@ -561,14 +575,14 @@ class CityJSONLoaderPlugin extends Plugin {
             case "MultiSurface":
             case "CompositeSurface":
                 const surfaces = geometry.boundaries;
-                this._parseSurfacesWithSharedMaterial(ctx, surfaces, sharedIndices, geometryCfg);
+                this.#parseSurfacesWithSharedMaterial(ctx, surfaces, sharedIndices, geometryCfg);
                 break;
 
             case "Solid":
                 const shells = geometry.boundaries;
                 for (let j = 0; j < shells.length; j++) {
                     const surfaces = shells[j];
-                    this._parseSurfacesWithSharedMaterial(ctx, surfaces, sharedIndices, geometryCfg);
+                    this.#parseSurfacesWithSharedMaterial(ctx, surfaces, sharedIndices, geometryCfg);
                 }
                 break;
 
@@ -578,7 +592,7 @@ class CityJSONLoaderPlugin extends Plugin {
                 for (let j = 0; j < solids.length; j++) {
                     for (let k = 0; k < solids[j].length; k++) {
                         const surfaces = solids[j][k];
-                        this._parseSurfacesWithSharedMaterial(ctx, surfaces, sharedIndices, geometryCfg);
+                        this.#parseSurfacesWithSharedMaterial(ctx, surfaces, sharedIndices, geometryCfg);
                     }
                 }
                 break;
@@ -609,7 +623,7 @@ class CityJSONLoaderPlugin extends Plugin {
         }
     }
 
-    _parseSurfacesWithSharedMaterial(ctx, surfaces, sharedIndices, primitiveCfg) {
+    #parseSurfacesWithSharedMaterial(ctx, surfaces, sharedIndices, primitiveCfg) {
 
         const vertices = ctx.vertices;
 
@@ -622,7 +636,7 @@ class CityJSONLoaderPlugin extends Plugin {
                 if (boundary.length > 0) {
                     holes.push(boundary.length);
                 }
-                const newBoundary = this._extractLocalIndices(ctx, surfaces[i][j], sharedIndices, primitiveCfg);
+                const newBoundary = this.#extractLocalIndices(ctx, surfaces[i][j], sharedIndices, primitiveCfg);
                 boundary.push(...newBoundary);
             }
 
@@ -644,11 +658,11 @@ class CityJSONLoaderPlugin extends Plugin {
                     });
                 }
 
-                const normal = this._getNormalOfPositions(pList, math.vec3());
+                const normal = this.#getNormalOfPositions(pList, math.vec3());
                 let pv = [];
 
                 for (let k = 0; k < pList.length; k++) {
-                    this._to2D(pList[k], normal, tempVec2a);
+                    this.#to2D(pList[k], normal, tempVec2a);
                     pv.unshift(tempVec2a[0]);
                     pv.unshift(tempVec2a[1]);
                 }
@@ -664,7 +678,7 @@ class CityJSONLoaderPlugin extends Plugin {
         }
     }
 
-    _extractLocalIndices(ctx, boundary, sharedIndices, geometryCfg) {
+    #extractLocalIndices(ctx, boundary, sharedIndices, geometryCfg) {
 
         const vertices = ctx.vertices;
         const newBoundary = []
@@ -691,7 +705,7 @@ class CityJSONLoaderPlugin extends Plugin {
         return newBoundary
     }
 
-    _getNormalOfPositions(positions, normal) {
+    #getNormalOfPositions(positions, normal) {
 
         for (let i = 0; i < positions.length; i++) {
 
@@ -708,7 +722,7 @@ class CityJSONLoaderPlugin extends Plugin {
         return math.normalizeVec3(normal);
     }
 
-    _to2D(_p, _n, re) {
+    #to2D(_p, _n, re) {
 
         const p = tempVec3a;
         const n = tempVec3b;

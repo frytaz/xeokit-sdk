@@ -196,7 +196,7 @@ class Viewport extends Component {
         return this._autoBoundary;
     }
 
-    _getState() {
+    #getState() {
         return this._state;
     }
 

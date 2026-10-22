@@ -1,3 +1,4 @@
+/** @import { Entity } from '../Entity.js' */
 /**
  * @desc Pick result returned by {@link Scene#pick}.
  *
@@ -13,7 +14,7 @@ class PickResult {
          * Picked entity.
          * Null when no entity was picked.
          * @property entity
-         * @type {Entity|*}
+         * @type {Entity|null}
          */
         this.entity = null;
 

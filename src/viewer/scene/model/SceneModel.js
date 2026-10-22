@@ -31,6 +31,10 @@ import {rebucketPositions} from "./rebucketPositions.js";
 import {SceneModelEntity} from "./SceneModelEntity.js";
 import {geometryCompressionUtils} from "../math/geometryCompressionUtils.js";
 import {SceneModelTransform} from "./SceneModelTransform.js";
+/** @import { TextureTranscoder } from '../utils/textureTranscoders/TextureTranscoder.js' */
+/** @import { Entity } from '../Entity.js' */
+/** @import { EmphasisMaterial } from '../materials/EmphasisMaterial.js' */
+/** @import { EdgeMaterial } from '../materials/EdgeMaterial.js' */
 
 
 const tempVec3a = math.vec3();
@@ -1096,7 +1100,7 @@ export class SceneModel extends Component {
      * @param {Boolean} [cfg.edges=false] Indicates if the SceneModel's edges are initially emphasized.
      * @param {Number[]} [cfg.colorize=[1.0,1.0,1.0]] SceneModel's initial RGB colorize color, multiplies by the rendered fragment colors.
      * @param {Number} [cfg.opacity=1.0] SceneModel's initial opacity factor, multiplies by the rendered fragment alpha.
-     * @param {Number} [cfg.backfaces=false] When we set this ````true````, then we force rendering of backfaces for this SceneModel. When
+     * @param {Boolean} [cfg.backfaces=false] When we set this ````true````, then we force rendering of backfaces for this SceneModel. When
      * we leave this ````false````, then we allow the Viewer to decide when to render backfaces. In that case, the
      * Viewer will hide backfaces on watertight meshes, show backfaces on open meshes, and always show backfaces on meshes when we slice them open with {@link SectionPlane}s.
      * @param {Boolean} [cfg.saoEnabled=true] Indicates if Scalable Ambient Obscurance (SAO) will apply to this SceneModel. SAO is configured by the Scene's {@link SAO} component.
@@ -1247,7 +1251,7 @@ export class SceneModel extends Component {
         this._matrix = math.mat4();
         this._matrixDirty = true;
 
-        this._rebuildMatrices();
+        this.#rebuildMatrices();
 
         this._worldNormalMatrix = math.mat4();
         math.inverseMat4(this._matrix, this._worldNormalMatrix);
@@ -1343,7 +1347,7 @@ export class SceneModel extends Component {
      *
      * Each {#link SceneModelTransform} is stored here against its {@link SceneModelTransform.id}.
      *
-     * @returns {*|{}}
+     * @type {{[key: string]: SceneModelTransform}}
      */
     get transforms() {
         return this._transforms;
@@ -1355,7 +1359,7 @@ export class SceneModel extends Component {
      * * Each {@link SceneModelTexture} is created with {@link SceneModel.createTexture}.
      * * Each {@link SceneModelTexture} is stored here against its {@link SceneModelTexture.id}.
      *
-     * @returns {*|{}}
+     * @type {{[key: string]: SceneModelTexture}}
      */
     get textures() {
         return this._textures;
@@ -1366,7 +1370,7 @@ export class SceneModel extends Component {
      *
      * Each {@link SceneModelTextureSet} is stored here against its {@link SceneModelTextureSet.id}.
      *
-     * @returns {*|{}}
+     * @type {{[key: string]: SceneModelTextureSet}}
      */
     get textureSets() {
         return this._textureSets;
@@ -1377,7 +1381,7 @@ export class SceneModel extends Component {
      *
      * Each {@SceneModelMesh} is stored here against its {@link SceneModelMesh.id}.
      *
-     * @returns {*|{}}
+     * @type {{[key: string]: SceneModelMesh}}
      */
     get meshes() {
         return this._meshes;
@@ -1389,7 +1393,7 @@ export class SceneModel extends Component {
      * Each {#link SceneModelEntity} in this SceneModel that represents an object is
      * stored here against its {@link SceneModelTransform.id}.
      *
-     * @returns {*|{}}
+     * @type {{[key: string]: SceneModelEntity}}
      */
     get objects() {
         return this._entities;
@@ -1402,7 +1406,7 @@ export class SceneModel extends Component {
      *
      * Default value is ````[0,0,0]````.
      *
-     * @type {Float64Array}
+     * @type {Number[]}
      */
     get origin() {
         return this._origin;
@@ -1534,7 +1538,7 @@ export class SceneModel extends Component {
      * @type {Number[]}
      */
     get matrix() {
-        this._rebuildMatrices();
+        this.#rebuildMatrices();
         return this._matrix;
     }
 
@@ -1544,11 +1548,11 @@ export class SceneModel extends Component {
      * @type {Number[]}
      */
     get rotationMatrix() {
-        this._rebuildMatrices();
+        this.#rebuildMatrices();
         return this._worldRotationMatrix;
     }
 
-    _rebuildMatrices() {
+    #rebuildMatrices() {
         if (this._matrixDirty) {
             math.quaternionToRotationMat4(this._quaternion, this._worldRotationMatrix);
             math.conjugateQuaternion(this._quaternion, this._conjugateQuaternion);
@@ -1570,7 +1574,7 @@ export class SceneModel extends Component {
      * @type {Number[]}
      */
     get rotationMatrixConjugate() {
-        this._rebuildMatrices();
+        this.#rebuildMatrices();
         return this._worldRotationMatrixConjugate;
     }
 
@@ -1614,8 +1618,8 @@ export class SceneModel extends Component {
         return this._worldNormalMatrix;
     }
 
-    _rebuildViewMatrices() {
-        this._rebuildMatrices();
+    #rebuildViewMatrices() {
+        this.#rebuildMatrices();
         if (this._viewMatrixDirty) {
             math.mulMat4(this.scene.camera.viewMatrix, this._matrix, this._viewMatrix);
             math.inverseMat4(this._viewMatrix, this._viewNormalMatrix);
@@ -1635,7 +1639,7 @@ export class SceneModel extends Component {
         if (!this._viewMatrix) {
             return this.scene.camera.viewMatrix;
         }
-        this._rebuildViewMatrices();
+        this.#rebuildViewMatrices();
         return this._viewMatrix;
     }
 
@@ -1648,7 +1652,7 @@ export class SceneModel extends Component {
         if (!this._viewNormalMatrix) {
             return this.scene.camera.viewNormalMatrix;
         }
-        this._rebuildViewMatrices();
+        this.#rebuildViewMatrices();
         return this._viewNormalMatrix;
     }
 
@@ -2205,8 +2209,12 @@ export class SceneModel extends Component {
     }
 
     /**
+     * Creates a quantization range within this SceneModel.
      *
-     * @param cfg
+     * @param {Object} cfg Quantization range properties.
+     * @param {String|Number} cfg.id Mandatory ID for the quantization range.
+     * @param {Number[]} cfg.aabb World-space axis-aligned boundary of the range.
+     * @returns {void}
      */
     createQuantizationRange(cfg) {
         if (cfg.id === undefined || cfg.id === null) {
@@ -2228,7 +2236,7 @@ export class SceneModel extends Component {
         }
     }
 
-    _createDefaultIndices(numIndices) {
+    #createDefaultIndices(numIndices) {
         const indices = [];
         for (let i = 0; i < numIndices; i++) {
             indices.push(i);
@@ -2244,7 +2252,7 @@ export class SceneModel extends Component {
      *
      * @param {Object} cfg Geometry properties.
      * @param {String|Number} cfg.id Mandatory ID for the geometry, to refer to with {@link SceneModel#createMesh}.
-     * @param {String} cfg.primitive The primitive type. Accepted values are 'points', 'lines', 'triangles', 'solid' and 'surface'.
+     * @param {"points"|"lines"|"triangles"|"solid"|"surface"} cfg.primitive The primitive type. Accepted values are 'points', 'lines', 'triangles', 'solid' and 'surface'.
      * @param {Number[]} [cfg.positions] Flat array of uncompressed 3D vertex positions positions. Required for all primitive types. Overridden by ````positionsCompressed````.
      * @param {Number[]} [cfg.positionsCompressed] Flat array of quantized 3D vertex positions. Overrides ````positions````, and must be accompanied by ````positionsDecodeMatrix````.
      * @param {Number[]} [cfg.positionsDecodeMatrix] A 4x4 matrix for decompressing ````positionsCompressed````. Must be accompanied by ````positionsCompressed````.
@@ -2257,6 +2265,7 @@ export class SceneModel extends Component {
      * @param {Number[]} [cfg.uvDecodeMatrix] A 3x3 matrix for decompressing ````uvCompressed````.
      * @param {Number[]} [cfg.indices] Array of primitive connectivity indices. Not required for `points` primitives.
      * @param {Number[]} [cfg.edgeIndices] Array of edge line indices. Used only with 'triangles', 'solid' and 'surface' primitives. Automatically generated internally if not supplied, using the optional ````edgeThreshold```` given to the ````SceneModel```` constructor.
+     * @returns {void}
      */
     createGeometry(cfg) {
         if (cfg.id === undefined || cfg.id === null) {
@@ -2291,7 +2300,7 @@ export class SceneModel extends Component {
             return null;
         }
         if (!cfg.buckets && !cfg.indices && (cfg.primitive === "triangles" || cfg.primitive === "solid" || cfg.primitive === "surface")) {
-            cfg.indices = this._createDefaultIndices((cfg.positions || cfg.positionsCompressed).length / 3);
+            cfg.indices = this.#createDefaultIndices((cfg.positions || cfg.positionsCompressed).length / 3);
         }
         if (!cfg.buckets && !cfg.indices && cfg.primitive !== "points") {
             this.error(`[createGeometry] Param expected: indices (required for '${cfg.primitive}' primitive type)`);
@@ -2383,6 +2392,7 @@ export class SceneModel extends Component {
      * @param {Number} [cfg.wrapR=RepeatWrapping] Wrap parameter for texture coordinate *R*. Supported values are {@link ClampToEdgeWrapping}, {@link MirroredRepeatWrapping} and {@link RepeatWrapping}.
      * @param {Boolean} [cfg.flipY=false] Flips this Texture's source data along its vertical axis when ````true````.
      * @param  {Number} [cfg.encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
+     * @returns {void}
      */
     createTexture(cfg) {
         const textureId = cfg.id;
@@ -2532,12 +2542,12 @@ export class SceneModel extends Component {
      *
      * @param {Object} cfg Texture set properties.
      * @param {String|Number} cfg.id Mandatory ID for the texture set, to refer to with {@link SceneModel#createMesh}.
-     * @param {*} [cfg.colorTextureId] ID of *RGBA* base color texture, with color in *RGB* and alpha in *A*.
-     * @param {*} [cfg.metallicRoughnessTextureId] ID of *RGBA* metal-roughness texture, with the metallic factor in *R*, and roughness factor in *G*.
-     * @param {*} [cfg.normalsTextureId] ID of *RGBA* normal map texture, with normal map vectors in *RGB*.
-     * @param {*} [cfg.emissiveTextureId] ID of *RGBA* emissive map texture, with emissive color in *RGB*.
-     * @param {*} [cfg.occlusionTextureId] ID of *RGBA* occlusion map texture, with occlusion factor in *R*.
-     * @returns {SceneModelTransform} The new texture set.
+     * @param {String|Number} [cfg.colorTextureId] ID of *RGBA* base color texture, with color in *RGB* and alpha in *A*.
+     * @param {String|Number} [cfg.metallicRoughnessTextureId] ID of *RGBA* metal-roughness texture, with the metallic factor in *R*, and roughness factor in *G*.
+     * @param {String|Number} [cfg.normalsTextureId] ID of *RGBA* normal map texture, with normal map vectors in *RGB*.
+     * @param {String|Number} [cfg.emissiveTextureId] ID of *RGBA* emissive map texture, with emissive color in *RGB*.
+     * @param {String|Number} [cfg.occlusionTextureId] ID of *RGBA* occlusion map texture, with occlusion factor in *R*.
+     * @returns {SceneModelTextureSet} The new texture set.
      */
     createTextureSet(cfg) {
         const textureSetId = cfg.id;
@@ -2586,8 +2596,8 @@ export class SceneModel extends Component {
      * * Each {@link SceneModelTransform} can be used by unlimited {@link SceneModelMesh}es
      *
      * @param {Object} cfg Transform creation parameters.
-     * @param {String} cfg.id Mandatory ID for the new transform. Must not clash with any existing components within the {@link Scene}.
-     * @param {String} [cfg.parentTransformId] ID of a parent transform, previously created with {@link SceneModel#createTextureSet}.
+     * @param {String|Number} cfg.id Mandatory ID for the new transform. Must not clash with any existing components within the {@link Scene}.
+     * @param {String|Number} [cfg.parentTransformId] ID of a parent transform, previously created with {@link SceneModel#createTextureSet}.
      * @param {Number[]} [cfg.position=[0,0,0]] Local 3D position of the mesh. Overridden by ````transformId````.
      * @param {Number[]} [cfg.scale=[1,1,1]] Scale of the transform.
      * @param {Number[]} [cfg.rotation=[0,0,0]] Rotation of the transform as Euler angles given in degrees, for each of the X, Y and Z axis.
@@ -2641,7 +2651,7 @@ export class SceneModel extends Component {
      * @param {String|Number} [cfg.textureSetId] ID of a {@link SceneModelTextureSet} previously created with {@link SceneModel#createTextureSet}.
      * @param {String|Number} [cfg.transformId] ID of a {@link SceneModelTransform} to instance, previously created with {@link SceneModel#createTransform}. Overrides all other transform parameters given to this method.
      * @param {String|Number} [cfg.geometryId] ID of a geometry to instance, previously created with {@link SceneModel#createGeometry}. Overrides all other geometry parameters given to this method.
-     * @param {String} cfg.primitive The primitive type. Accepted values are 'points', 'lines', 'triangles', 'solid' and 'surface'.
+     * @param {"points"|"lines"|"triangles"|"solid"|"surface"} cfg.primitive The primitive type. Accepted values are 'points', 'lines', 'triangles', 'solid' and 'surface'.
      * @param {Number[]} [cfg.positions] Flat array of uncompressed 3D vertex positions positions. Required for all primitive types. Overridden by ````positionsCompressed````.
      * @param {Number[]} [cfg.positionsCompressed] Flat array of quantized 3D vertex positions. Overrides ````positions````, and must be accompanied by ````positionsDecodeMatrix````.
      * @param {Number[]} [cfg.positionsDecodeMatrix] A 4x4 matrix for decompressing ````positionsCompressed````. Must be accompanied by ````positionsCompressed````.
@@ -2729,7 +2739,7 @@ export class SceneModel extends Component {
             }
             if (!cfg.buckets && !cfg.indices) {
                 if (isTriangular) {
-                    cfg.indices = this._createDefaultIndices((cfg.positions || cfg.positionsCompressed).length / 3);
+                    cfg.indices = this.#createDefaultIndices((cfg.positions || cfg.positionsCompressed).length / 3);
                 } else if (primitive === "lines") {
                     this.error(`Param expected: indices (required for '${primitive}' primitive type)`);
                     return false;
@@ -2885,13 +2895,13 @@ export class SceneModel extends Component {
             }
         }
 
-        cfg.numPrimitives = this._getNumPrimitives(cfg);
+        cfg.numPrimitives = this.#getNumPrimitives(cfg);
 
         const mesh = new SceneModelMesh(this, cfg.id, cfg.color, cfg.opacity, cfg.transform, cfg.textureSet);
         const pickId = this.scene._renderer.getPickID(mesh);
         mesh.pickId = pickId;
         mesh.origin = math.vec3(cfg.origin);
-        mesh.layer = (cfg.type === DTX) ? this._getDTXLayer(cfg) : this._getVBOLayer(cfg.type === VBO_INSTANCED, cfg);
+        mesh.layer = (cfg.type === DTX) ? this.#getDTXLayer(cfg) : this.#getVBOLayer(cfg.type === VBO_INSTANCED, cfg);
         mesh.aabb = cfg.aabb;
         cfg.pickColor = new Uint8Array([pickId & 0xFF, pickId >> 8 & 0xFF, pickId >> 16 & 0xFF, pickId >> 24 & 0xFF]); // Quantized pick color
         cfg.solid = (cfg.primitive === "solid");
@@ -2904,7 +2914,7 @@ export class SceneModel extends Component {
         return mesh;
     }
 
-    _getNumPrimitives(cfg) {
+    #getNumPrimitives(cfg) {
         let countIndices = 0;
         const primitive = cfg.geometry ? cfg.geometry.primitive : cfg.primitive;
         switch (primitive) {
@@ -2961,7 +2971,7 @@ export class SceneModel extends Component {
         return 0;
     }
 
-    _getDTXLayer(cfg) {
+    #getDTXLayer(cfg) {
         const origin = cfg.origin;
         const primitive = cfg.geometry ? cfg.geometry.primitive : cfg.primitive;
         const layerId = `.${primitive}.${Math.round(origin[0])}.${Math.round(origin[1])}.${Math.round(origin[2])}`;
@@ -2990,12 +3000,12 @@ export class SceneModel extends Component {
         return dtxLayer;
     }
 
-    _getVBOLayer(instancing, cfg) {
+    #getVBOLayer(instancing, cfg) {
         const geometry = instancing && cfg.geometry;
         const primitive = instancing ? geometry.primitive : cfg.primitive;
         const origin = cfg.origin;
         const posDecode = (! instancing) && (cfg.positionsDecodeMatrix || cfg.positionsDecodeBoundary);
-        const positionsDecodeHash = posDecode ? this._createHashStringFromMatrix(posDecode) : "-";
+        const positionsDecodeHash = posDecode ? this.#createHashStringFromMatrix(posDecode) : "-";
         const textureSetId = cfg.textureSetId || "-";
         const geometryId = instancing ? cfg.geometryId : "-";
         const layerId = (instancing ? "instancing" : "batching") + `.${Math.round(origin[0])}.${Math.round(origin[1])}.${Math.round(origin[2])}.${primitive}.${positionsDecodeHash}.${textureSetId}.${geometryId}.${((cfg.normalsCompressed || cfg.normals || [ ]).length > 0) ? "n" : "-"}`;
@@ -3027,7 +3037,7 @@ export class SceneModel extends Component {
         return this._vboLayers[layerId];
     }
 
-    _createHashStringFromMatrix(matrix) {
+    #createHashStringFromMatrix(matrix) {
         const matrixString = matrix.join(";");
         let hash = 0;
         for (let i = 0; i < matrixString.length; i++) {
@@ -3134,7 +3144,7 @@ export class SceneModel extends Component {
         if (this._layersToFinalize.length === 0) {
             return false;
         }
-        this._createDummyEntityForUnusedMeshes();
+        this.#createDummyEntityForUnusedMeshes();
         for (let i = 0, len = this._layersToFinalize.length; i < len; i++) {
             const layer = this._layersToFinalize[i];
             layer.finalize();
@@ -3199,24 +3209,24 @@ export class SceneModel extends Component {
     /** @private */
     rebuildRenderFlags() {
         this.renderFlags.reset();
-        this._updateRenderFlagsVisibleLayers();
+        this.#updateRenderFlagsVisibleLayers();
         if (this.renderFlags.numLayers > 0 && this.renderFlags.numVisibleLayers === 0) {
             this.renderFlags.culled = true;
             return;
         }
-        this._updateRenderFlags();
+        this.#updateRenderFlags();
     }
 
     /**
      * @private
      */
-    _updateRenderFlagsVisibleLayers() {
+    #updateRenderFlagsVisibleLayers() {
         const renderFlags = this.renderFlags;
         renderFlags.numLayers = this.layerList.length;
         renderFlags.numVisibleLayers = 0;
         for (let layerIndex = 0, len = this.layerList.length; layerIndex < len; layerIndex++) {
             const layer = this.layerList[layerIndex];
-            const layerVisible = this._getActiveSectionPlanesForLayer(layer);
+            const layerVisible = this.#getActiveSectionPlanesForLayer(layer);
             if (layerVisible) {
                 renderFlags.visibleLayers[renderFlags.numVisibleLayers++] = layerIndex;
             }
@@ -3224,7 +3234,7 @@ export class SceneModel extends Component {
     }
 
     /** @private */
-    _createDummyEntityForUnusedMeshes() {
+    #createDummyEntityForUnusedMeshes() {
         const unusedMeshIds = Object.keys(this._unusedMeshes);
         if (unusedMeshIds.length > 0) {
             const entityId = `${this.id}-${math.createUUID()}`;
@@ -3238,7 +3248,7 @@ export class SceneModel extends Component {
         this._unusedMeshes = {};
     }
 
-    _getActiveSectionPlanesForLayer(layer) {
+    #getActiveSectionPlanesForLayer(layer) {
         const renderFlags = this.renderFlags;
         const sectionPlanes = this.scene._sectionPlanesState.sectionPlanes;
         const numSectionPlanes = sectionPlanes.length;
@@ -3257,7 +3267,7 @@ export class SceneModel extends Component {
         return true;
     }
 
-    _updateRenderFlags() {
+    #updateRenderFlags() {
         if (this.numVisibleLayerPortions === 0) {
             return;
         }
@@ -3337,7 +3347,7 @@ export class SceneModel extends Component {
     /**
      * @private
      */
-    _withEachVisibleLayer(frameCtx, testNumVisibleLayerPortions, cb) {
+    #withEachVisibleLayer(frameCtx, testNumVisibleLayerPortions, cb) {
         if (testNumVisibleLayerPortions && (this.numVisibleLayerPortions === 0)) {
             return;
         }
@@ -3353,26 +3363,26 @@ export class SceneModel extends Component {
         }
     }
 
-    drawColorOpaque          (frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawColorOpaque          (this.renderFlags, frameCtx)); }
-    drawColorTransparent     (frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawColorTransparent     (this.renderFlags, frameCtx)); }
-    drawDepth                (frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawDepth                (this.renderFlags, frameCtx)); } // Dedicated to SAO because it skips transparent objects
-    drawSilhouetteXRayed     (frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawSilhouetteXRayed     (this.renderFlags, frameCtx)); }
-    drawSilhouetteHighlighted(frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawSilhouetteHighlighted(this.renderFlags, frameCtx)); }
-    drawSilhouetteSelected   (frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawSilhouetteSelected   (this.renderFlags, frameCtx)); }
-    drawEdgesColorOpaque     (frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesColorOpaque     (this.renderFlags, frameCtx)); }
-    drawEdgesColorTransparent(frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesColorTransparent(this.renderFlags, frameCtx)); }
-    drawEdgesXRayed          (frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesXRayed          (this.renderFlags, frameCtx)); }
-    drawEdgesHighlighted     (frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesHighlighted     (this.renderFlags, frameCtx)); }
-    drawEdgesSelected        (frameCtx) { this._withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesSelected        (this.renderFlags, frameCtx)); }
-    drawOcclusion            (frameCtx) { this._withEachVisibleLayer(frameCtx, true,  layer => layer.drawOcclusion            (this.renderFlags, frameCtx)); }
-    drawShadow               (frameCtx) { this._withEachVisibleLayer(frameCtx, true,  layer => layer.drawShadow               (this.renderFlags, frameCtx)); }
-    drawPickMesh             (frameCtx) { this._withEachVisibleLayer(frameCtx, true,  layer => layer.drawPickMesh             (this.renderFlags, frameCtx)); }
-    drawPickDepths           (frameCtx) { this._withEachVisibleLayer(frameCtx, true,  layer => layer.drawPickDepths           (this.renderFlags, frameCtx)); }
-    drawPickNormals          (frameCtx) { this._withEachVisibleLayer(frameCtx, true,  layer => layer.drawPickNormals          (this.renderFlags, frameCtx)); }
-    _drawSnap    (frameCtx, isSnapInit) { this._withEachVisibleLayer(frameCtx, true,  layer => layer.drawSnap                 (this.renderFlags, frameCtx, isSnapInit)); }
+    drawColorOpaque          (frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawColorOpaque          (this.renderFlags, frameCtx)); }
+    drawColorTransparent     (frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawColorTransparent     (this.renderFlags, frameCtx)); }
+    drawDepth                (frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawDepth                (this.renderFlags, frameCtx)); } // Dedicated to SAO because it skips transparent objects
+    drawSilhouetteXRayed     (frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawSilhouetteXRayed     (this.renderFlags, frameCtx)); }
+    drawSilhouetteHighlighted(frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawSilhouetteHighlighted(this.renderFlags, frameCtx)); }
+    drawSilhouetteSelected   (frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawSilhouetteSelected   (this.renderFlags, frameCtx)); }
+    drawEdgesColorOpaque     (frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesColorOpaque     (this.renderFlags, frameCtx)); }
+    drawEdgesColorTransparent(frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesColorTransparent(this.renderFlags, frameCtx)); }
+    drawEdgesXRayed          (frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesXRayed          (this.renderFlags, frameCtx)); }
+    drawEdgesHighlighted     (frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesHighlighted     (this.renderFlags, frameCtx)); }
+    drawEdgesSelected        (frameCtx) { this.#withEachVisibleLayer(frameCtx, false, layer => layer.drawEdgesSelected        (this.renderFlags, frameCtx)); }
+    drawOcclusion            (frameCtx) { this.#withEachVisibleLayer(frameCtx, true,  layer => layer.drawOcclusion            (this.renderFlags, frameCtx)); }
+    drawShadow               (frameCtx) { this.#withEachVisibleLayer(frameCtx, true,  layer => layer.drawShadow               (this.renderFlags, frameCtx)); }
+    drawPickMesh             (frameCtx) { this.#withEachVisibleLayer(frameCtx, true,  layer => layer.drawPickMesh             (this.renderFlags, frameCtx)); }
+    drawPickDepths           (frameCtx) { this.#withEachVisibleLayer(frameCtx, true,  layer => layer.drawPickDepths           (this.renderFlags, frameCtx)); }
+    drawPickNormals          (frameCtx) { this.#withEachVisibleLayer(frameCtx, true,  layer => layer.drawPickNormals          (this.renderFlags, frameCtx)); }
+    #drawSnap    (frameCtx, isSnapInit) { this.#withEachVisibleLayer(frameCtx, true,  layer => layer.drawSnap                 (this.renderFlags, frameCtx, isSnapInit)); }
 
-    drawSnapInit(frameCtx) { this._drawSnap(frameCtx, true ); }
-    drawSnap    (frameCtx) { this._drawSnap(frameCtx, false); }
+    drawSnapInit(frameCtx) { this.#drawSnap(frameCtx, true ); }
+    drawSnap    (frameCtx) { this.#drawSnap(frameCtx, false); }
 
     /**
      * Destroys this SceneModel.

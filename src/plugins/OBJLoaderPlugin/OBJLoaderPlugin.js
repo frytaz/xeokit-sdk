@@ -2,6 +2,7 @@ import {Plugin} from "../../viewer/Plugin.js";
 import {Node} from "../../viewer/scene/nodes/Node.js";
 import {utils} from "../../viewer/scene/utils.js";
 import {OBJSceneGraphLoader} from "./OBJSceneGraphLoader.js";
+/** @import { Viewer } from "../../viewer/Viewer.js" */
 
 /**
  * {@link Viewer} plugin that loads models from [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) files.
@@ -96,9 +97,9 @@ class OBJLoaderPlugin extends Plugin {
      * Loads an OBJ model from a file into this OBJLoader's {@link Viewer}.
      *
      * @param {LoadOBJModel} params Loading parameters.
-     * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
+     * @returns {Node} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
      */
-    load(params = {}) {
+    load(params) {
 
         if (params.id && this.viewer.scene.components[params.id]) {
             this.error("Component with this ID already exists in viewer: " + params.id + " - will autogenerate this ID");

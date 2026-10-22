@@ -24,3 +24,18 @@ export * from "./CityJSONLoaderPlugin/index.js";
 export * from "./DotBIMLoaderPlugin/index.js";
 export * from "./ZonesPlugin/index.js";
 export * from "./lib/ui/index.js";
+
+/**
+ * @typedef {Object} ModelStats
+ * @property {string} sourceFormat
+ * @property {string} schemaVersion
+ * @property {string} title
+ * @property {string} author
+ * @property {string} created
+ * @property {number} numMetaObjects
+ * @property {number} numPropertySets
+ * @property {number} numObjects
+ * @property {number} numGeometries
+ * @property {number} numTriangles
+ * @property {number} numVertices
+ */

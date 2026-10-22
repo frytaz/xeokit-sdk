@@ -108,7 +108,7 @@ const tempVec3 = math.vec3();
  * @typedef {Object} SectionPlanesPluginConfiguration
  * @property {String} [id="SectionPlanes"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
  * @property {String} [overviewCanvasId] ID of a canvas element to display the overview.
- * @property {String} [overviewVisible=true] Initial visibility of the overview canvas.
+ * @property {Boolean} [overviewVisible=true] Initial visibility of the overview canvas.
  */
 class SectionPlanesPlugin extends Plugin {
 
@@ -211,7 +211,7 @@ class SectionPlanesPlugin extends Plugin {
     /**
      * Returns a map of the {@link SectionPlane}s created by this SectionPlanesPlugin.
      *
-     * @returns {{String:SectionPlane}} A map containing the {@link SectionPlane}s, each mapped to its {@link SectionPlane#id}.
+     * @returns {{[key: string]: SectionPlane}} A map containing the {@link SectionPlane}s, each mapped to its {@link SectionPlane#id}.
      */
     get sectionPlanes() {
         return this._sectionPlanes;
@@ -557,11 +557,11 @@ class SectionPlanesPlugin extends Plugin {
         if (this._overview) {
             this._overview.destroy();
         }
-        this._destroyFreeControls();
+        this.#destroyFreeControls();
         super.destroy();
     }
 
-    _destroyFreeControls() {
+    #destroyFreeControls() {
         var control = this._freeControls.pop();
         while (control) {
             control._destroy();

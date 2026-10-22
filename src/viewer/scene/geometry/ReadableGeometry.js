@@ -57,8 +57,8 @@ const tempAABB = math.AABB3();
 /**
  * @typedef {Object} ReadableGeometryConfiguration
  * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @property {Object.<string, Object>} [meta] Optional map of user-defined metadata to attach to this Geometry.
- * @property {String} [primitive="triangles"] The primitive type. Accepted values are 'points', 'lines', 'line-loop', 'line-strip', 'triangles', 'triangle-strip' and 'triangle-fan'.
+ * @property {Object.<string, *>} [meta] Optional map of user-defined metadata to attach to this Geometry.
+ * @property {"points" | "lines" | "line-loop" | "line-strip" | "triangles" | "triangle-strip" | "triangle-fan"} [primitive="triangles"] The primitive type. Accepted values are 'points', 'lines', 'line-loop', 'line-strip', 'triangles', 'triangle-strip' and 'triangle-fan'.
  * @property {Number[]} [positions] Positions array.
  * @property {Number[]} [normals] Vertex normal vectors array.
  * @property {Number[]} [uv] UVs array.
@@ -82,7 +82,7 @@ class ReadableGeometry extends Geometry {
 
     /**
      * @private
-     * @returns {Boolean}
+     * @type {Boolean}
      */
     get isReadableGeometry() {
         return true;
@@ -271,26 +271,26 @@ class ReadableGeometry extends Geometry {
 
     _getEdgeIndices() {
         if (!this._edgeIndicesBuf) {
-            this._buildEdgeIndices();
+            this.#buildEdgeIndices();
         }
         return this._edgeIndicesBuf;
     }
 
     _getPickTrianglePositions() {
         if (!this._pickTrianglePositionsBuf) {
-            this._buildPickTriangleVBOs();
+            this.#buildPickTriangleVBOs();
         }
         return this._pickTrianglePositionsBuf;
     }
 
     _getPickTriangleColors() {
         if (!this._pickTriangleColorsBuf) {
-            this._buildPickTriangleVBOs();
+            this.#buildPickTriangleVBOs();
         }
         return this._pickTriangleColorsBuf;
     }
 
-    _buildEdgeIndices() { // FIXME: Does not adjust indices after other objects are deleted from vertex buffer!!
+    #buildEdgeIndices() { // FIXME: Does not adjust indices after other objects are deleted from vertex buffer!!
         const state = this._state;
         if (!state.positions || !state.indices) {
             return;
@@ -301,7 +301,7 @@ class ReadableGeometry extends Geometry {
         memoryStats.indices += this._edgeIndicesBuf.numItems;
     }
 
-    _buildPickTriangleVBOs() { // Builds positions and indices arrays that allow each triangle to have a unique color
+    #buildPickTriangleVBOs() { // Builds positions and indices arrays that allow each triangle to have a unique color
         const state = this._state;
         if (!state.positions || !state.indices) {
             return;
@@ -316,7 +316,7 @@ class ReadableGeometry extends Geometry {
         memoryStats.colors += this._pickTriangleColorsBuf.numItems;
     }
 
-    _buildPickVertexVBOs() {
+    #buildPickVertexVBOs() {
         // var state = this._state;
         // if (!state.positions || !state.indices) {
         //     return;
@@ -338,7 +338,7 @@ class ReadableGeometry extends Geometry {
 
      @property primitive
      @default "triangles"
-     @type {String}
+     @type {"points" | "lines" | "line-loop" | "line-strip" | "triangles" | "triangle-strip" | "triangle-fan"}
      */
     get primitive() {
         return this._state.primitiveName;

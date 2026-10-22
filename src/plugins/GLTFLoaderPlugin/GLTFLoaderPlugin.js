@@ -231,10 +231,58 @@ import {IFCObjectDefaults} from "../../viewer/metadata/IFCObjectDefaults.js";
  */
 
 /**
+ * A data source through which a {@link GLTFLoaderPlugin} loads metadata, glTF and binary attachments.
+ *
+ * * ````getMetaModel```` - Gets metamodel JSON.
+ * * ````getGLTF```` - Gets glTF JSON.
+ * * ````getArrayBuffer```` - Gets binary glTF file.
+ * * ````cacheBuster```` - Whether cache-busting is enabled.
+ *
+ * @typedef {{
+ *     getMetaModel(metaModelSrc: string | number, ok: Function, error: Function): void;
+ *     getGLTF(glTFSrc: string | number, ok: Function, error: Function): void;
+ *     getArrayBuffer(glTFSrc: string | number, binarySrc: string | number, ok: Function, error: Function): void;
+ *     cacheBuster: boolean;
+ * }} IGLTFDefaultDataSource
+ */
+
+/**
+ * @typedef {Object} LoadGLTFModel
+ * @property {String} [id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
+ * @property {String} [src] Path to a glTF file, as an alternative to the ````gltf```` parameter.
+ * @property {Object} [gltf] glTF JSON, as an alternative to the ````src```` parameter.
+ * @property {String} [metaModelSrc] Path to an optional metadata file, as an alternative to the ````metaModelJSON```` parameter.
+ * @property {Object} [metaModelJSON] JSON model metadata, as an alternative to the ````metaModelSrc```` parameter.
+ * @property {object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
+ * @property {Boolean} [edges=false] Whether or not xeokit renders the model with edges emphasized.
+ * @property {Number[]} [origin=[0,0,0]] The double-precision World-space origin of the model's coordinates.
+ * @property {Number[]} [position=[0,0,0]] The single-precision position, relative to ````origin````.
+ * @property {Number[]} [scale=[1,1,1]] The model's scale.
+ * @property {Number[]} [rotation=[0,0,0]] The model's orientation, as Euler angles given in degrees, for each of the X, Y and Z axis.
+ * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
+ * @property {Boolean} [saoEnabled=true] Indicates if Scalable Ambient Obscurance (SAO) is enabled for the model. SAO is configured by the Scene's {@link SAO} component. Only works when {@link SAO#enabled} is also ````true````
+ * @property {Boolean} [pbrEnabled=true] Indicates if physically-based rendering (PBR) is enabled for the model. Overrides ````colorTextureEnabled````. Only works when {@link Scene#pbrEnabled} is also ````true````.
+ * @property {Boolean} [colorTextureEnabled=true] Indicates if base color texture rendering is enabled for the model. Overridden by ````pbrEnabled````.  Only works when {@link Scene#colorTextureEnabled} is also ````true````.
+ * @property {Boolean} [backfaces=true] When true, always show backfaces, even on objects for which the glTF material is single-sided. When false, only show backfaces on geometries whenever the glTF material is double-sided.
+ * @property {Number} [edgeThreshold=10] When xraying, highlighting, selecting or edging, this is the threshold angle between normals of adjacent triangles, below which their shared wireframe edge is not drawn.
+ * @property {Boolean} [dtxEnabled=true] When ````true```` (default) use data textures (DTX), where appropriate, to
+ * represent the returned model. Set false to always use vertex buffer objects (VBOs). Note that DTX is only applicable
+ * to non-textured triangle meshes, and that VBOs are always used for meshes that have textures, line segments, or point
+ * primitives. Only works while {@link DTX#enabled} is also ````true````.
+ * @property {Boolean} [autoMetaModel] When supplied, creates a default MetaModel with a single MetaObject.
+ * @property {Boolean} [globalizeObjectIds=false] Indicates whether to globalize each {@link Entity#id} and {@link MetaObject#id}, in case you need to prevent ID clashes with other models.
+ * @property {Object} [parseOptions={}] Options to pass to loaders.gl parse method, eg. ````{ gltf: { excludeExtensions: { "KHR_texture_transform": false } } }````.
+ * @property {Boolean} [entityPerMesh=false] Create an entity for each mesh, instead of grouping leaf meshes under their common entity.
+ * @property {{core: {parse: (...args: any[]) => any}, gltf: {GLTFLoader: any, postProcessGLTF: (...args: any[]) => any}}} [loadersGl] Alternative user-provided loaders.gl library.
+ * This feature has been tested with loaders.gl 4.3.4 version.
+ * Because loaders.gl is supplied externally, xeokit cannot guarantee compatibility with all loaders.gl versions.
+ */
+
+/**
  * @typedef {Object} GLTFLoaderPluginConfiguration
  * @property {String} [id="GLTFLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
- * @property {Object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
- * @property {Object} [dataSource] A custom data source through which the GLTFLoaderPlugin can load metadata, glTF and binary attachments. Defaults to an instance of {@link GLTFDefaultDataSource}, which loads over HTTP.
+ * @property {IFCObjectDefaults} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
+ * @property {IGLTFDefaultDataSource} [dataSource] A custom data source through which the GLTFLoaderPlugin can load metadata, glTF and binary attachments. Defaults to an instance of {@link GLTFDefaultDataSource}, which loads over HTTP.
  */
 class GLTFLoaderPlugin extends Plugin {
 
@@ -259,7 +307,7 @@ class GLTFLoaderPlugin extends Plugin {
      *
      * Default value is {@link GLTFDefaultDataSource}, which loads via an XMLHttpRequest.
      *
-     * @type {Object}
+     * @type {IGLTFDefaultDataSource}
      */
     set dataSource(value) {
         this._dataSource = value || new GLTFDefaultDataSource();
@@ -270,7 +318,7 @@ class GLTFLoaderPlugin extends Plugin {
      *
      * Default value is {@link GLTFDefaultDataSource}, which loads via an XMLHttpRequest.
      *
-     * @type {Object}
+     * @type {IGLTFDefaultDataSource}
      */
     get dataSource() {
         return this._dataSource;
@@ -281,7 +329,7 @@ class GLTFLoaderPlugin extends Plugin {
      *
      * Default value is {@link IFCObjectDefaults}.
      *
-     * @type {{String: Object}}
+     * @type {IFCObjectDefaults}
      */
     set objectDefaults(value) {
         this._objectDefaults = value || IFCObjectDefaults;
@@ -292,7 +340,7 @@ class GLTFLoaderPlugin extends Plugin {
      *
      * Default value is {@link IFCObjectDefaults}.
      *
-     * @type {{String: Object}}
+     * @type {IFCObjectDefaults}
      */
     get objectDefaults() {
         return this._objectDefaults;
@@ -301,38 +349,10 @@ class GLTFLoaderPlugin extends Plugin {
     /**
      * Loads a glTF model from a file into this GLTFLoaderPlugin's {@link Viewer}.
      *
-     * @param {Object} params Loading parameters.
-     * @param {String} [params.id] ID to assign to the root {@link Entity#id}, unique among all components in the Viewer's {@link Scene}, generated automatically by default.
-     * @param {String} [params.src] Path to a glTF file, as an alternative to the ````gltf```` parameter.
-     * @param {*} [params.gltf] glTF JSON, as an alternative to the ````src```` parameter.
-     * @param {String} [params.metaModelSrc] Path to an optional metadata file, as an alternative to the ````metaModelJSON```` parameter.
-     * @param {*} [params.metaModelJSON] JSON model metadata, as an alternative to the ````metaModelSrc```` parameter.
-     * @param {{String:Object}} [params.objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
-     * @param {Boolean} [params.edges=false] Whether or not xeokit renders the model with edges emphasized.
-     * @param {Number[]} [params.origin=[0,0,0]] The double-precision World-space origin of the model's coordinates.
-     * @param {Number[]} [params.position=[0,0,0]] The single-precision position, relative to ````origin````.
-     * @param {Number[]} [params.scale=[1,1,1]] The model's scale.
-     * @param {Number[]} [params.rotation=[0,0,0]] The model's orientation, as Euler angles given in degrees, for each of the X, Y and Z axis.
-     * @param {Number[]} [params.matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
-     * @param {Boolean} [params.saoEnabled=true] Indicates if Scalable Ambient Obscurance (SAO) is enabled for the model. SAO is configured by the Scene's {@link SAO} component. Only works when {@link SAO#enabled} is also ````true````
-     * @param {Boolean} [params.pbrEnabled=true] Indicates if physically-based rendering (PBR) is enabled for the model. Overrides ````colorTextureEnabled````. Only works when {@link Scene#pbrEnabled} is also ````true````.
-     * @param {Boolean} [params.colorTextureEnabled=true] Indicates if base color texture rendering is enabled for the model. Overridden by ````pbrEnabled````.  Only works when {@link Scene#colorTextureEnabled} is also ````true````.
-     * @param {Boolean} [params.backfaces=true] When true, always show backfaces, even on objects for which the glTF material is single-sided. When false, only show backfaces on geometries whenever the glTF material is double-sided.
-     * @param {Number} [params.edgeThreshold=10] When xraying, highlighting, selecting or edging, this is the threshold angle between normals of adjacent triangles, below which their shared wireframe edge is not drawn.
-     * @param {Boolean} [params.dtxEnabled=true] When ````true```` (default) use data textures (DTX), where appropriate, to
-     * represent the returned model. Set false to always use vertex buffer objects (VBOs). Note that DTX is only applicable
-     * to non-textured triangle meshes, and that VBOs are always used for meshes that have textures, line segments, or point
-     * primitives. Only works while {@link DTX#enabled} is also ````true````.
-     * @param {Boolean} [params.autoMetaModel] When supplied, creates a default MetaModel with a single MetaObject.
-     * @param {Boolean} [params.globalizeObjectIds=false] Indicates whether to globalize each {@link Entity#id} and {@link MetaObject#id}, in case you need to prevent ID clashes with other models.
-     * @param {*} [params.parseOptions={}] Options to pass to loaders.gl parse method, eg. ````{ gltf: { excludeExtensions: { "KHR_texture_transform": false } } }````.
-     * @param {Boolean} [params.entityPerMesh=false] Create an entity for each mesh, instead of grouping leaf meshes under their common entity.
-     * @param {*} [params.loadersGl={core,gltf}] Alternative user-provided loaders.gl library.
-     * This feature has been tested with loaders.gl 4.3.4 version.
-     * Because loaders.gl is supplied externally, xeokit cannot guarantee compatibility with all loaders.gl versions.
-     * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
+     * @param {LoadGLTFModel} params Loading parameters.
+     * @returns {SceneModel} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}
      */
-    load(params = {}) {
+    load(params) {
         if (params.id && this.viewer.scene.components[params.id]) {
             this.error("Component with this ID already exists in viewer: " + params.id + " - will autogenerate this ID");
             delete params.id;

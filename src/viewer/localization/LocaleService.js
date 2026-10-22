@@ -147,7 +147,7 @@ import {Map} from "./../scene/utils/Map.js";
 
 /**
  * @typedef {Object} LocaleServiceConfiguration
- * @property {JSON} [messages]
+ * @property {*} [messages] The locale translations.
  * @property {String} [locale]
  */
 class LocaleService {
@@ -390,6 +390,23 @@ class LocaleService {
         }
     }
 
+    /**
+     * Subscribes to the "updated" event on this LocaleService, fired with this LocaleService when the
+     * translations are replaced, or with the new locale when the locale changes.
+     *
+     * @overload
+     * @param {"updated"} event The event
+     * @param {(e: LocaleService | string) => void} callback Callback fired on the event
+     * @return {String} Handle to the subscription, which may be used to unsubscribe with {@link #off}.
+     */
+    /**
+     * Subscribes to an event on this LocaleService.
+     *
+     * @overload
+     * @param {String} event The event
+     * @param {Function} callback Callback fired on the event
+     * @return {String} Handle to the subscription, which may be used to unsubscribe with {@link #off}.
+     */
     /**
      * Subscribes to an event on this LocaleService.
      *

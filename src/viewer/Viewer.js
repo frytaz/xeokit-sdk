@@ -6,6 +6,7 @@ import {LocaleService} from "./localization/LocaleService.js";
 import {html2canvas} from '../external.js';
 import {math} from "./scene/math/math.js";
 import {transformToNode} from "../plugins/lib/ui/index.js";
+/** @import { Plugin } from "./Plugin.js" */
 
 /**
  * The 3D Viewer at the heart of the xeokit SDK.
@@ -251,7 +252,9 @@ class Viewer {
     /**
      * Installs a Plugin.
      *
-     * @private
+     * Called by the {@link Plugin} constructor; there is normally no need to call this directly.
+     *
+     * @param {Plugin} plugin The Plugin to install.
      */
     addPlugin(plugin) {
         this._plugins.push(plugin);
@@ -320,7 +323,7 @@ class Viewer {
         }
     }
 
-    _renderSnapshotToCanvas(params) {
+    #renderSnapshotToCanvas(params) {
         const resize = (params.width !== undefined && params.height !== undefined);
         const canvas = this.scene.canvas.canvas;
         const saveWidth  = canvas.clientWidth;
@@ -387,7 +390,7 @@ class Viewer {
     getSnapshot(params = {}) {
         // firing "rendering" is necessary to trigger DTX{Lines,Triangles}Layer::_uploadDeferredFlags
         this.scene.fire("rendering", { }, true);
-        return this._renderSnapshotToCanvas(params).toDataURL();
+        return this.#renderSnapshotToCanvas(params).toDataURL();
     }
 
     /**
@@ -412,9 +415,9 @@ class Viewer {
      * @param {Object} [params] Capture options.
      * @param {Number} [params.width] Desired width of result in pixels - defaults to width of canvas.
      * @param {Number} [params.height] Desired height of result in pixels - defaults to height of canvas.
-     * @param {String} [params.format="jpeg"] Desired format; "jpeg", "png" or "bmp".
+     * @param {"jpeg" | "png" | "bmp"} [params.format="jpeg"] Desired format; "jpeg", "png" or "bmp".
      * @param {Boolean} [params.includeGizmos=false] When true, will include gizmos like {@link SectionPlane} in the snapshot.
-     * @returns {Promise} Promise which returns a string-encoded image data URI.
+     * @returns {Promise<String>} Promise which returns a string-encoded image data URI.
      */
     async getSnapshotWithPlugins(params = {}) {
 
@@ -430,7 +433,7 @@ class Viewer {
         // right amount of pixels, for a sharper image.
 
 
-        const snapshotResult = this._renderSnapshotToCanvas(params);
+        const snapshotResult = this.#renderSnapshotToCanvas(params);
 
         const pluginToCapture = {};
         const pluginContainerElements = [];

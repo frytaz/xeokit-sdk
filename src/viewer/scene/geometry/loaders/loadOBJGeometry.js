@@ -1,5 +1,22 @@
 import {utils} from '../../utils.js';
 import {K3D} from '../../libs/k3d.js';
+/** @import { Scene } from '../../scene/Scene.js' */
+
+/**
+ * @typedef {Object} LoadObjGeometryConfiguration
+ * @property {String} [src] Path to OBJ file.
+ */
+
+/**
+ * @typedef {Object} ObjGeometryData
+ * @property {String} [src] Path to the OBJ file.
+ * @property {String} primitive Primitive type, always "triangles".
+ * @property {Number[]} positions Vertex positions.
+ * @property {Number[]|null} normals Vertex normals, or null when the OBJ has none.
+ * @property {Boolean} autoNormals True when the OBJ has no normals, and they should be generated.
+ * @property {Number[]} uv Vertex UVs.
+ * @property {Int32Array} indices Indices.
+ */
 
 /**
  * @desc Loads {@link Geometry} from OBJ.
@@ -66,9 +83,8 @@ import {K3D} from '../../libs/k3d.js';
  *
  * @function loadOBJGeometry
  * @param {Scene} scene Scene we're loading the geometry for.
- * @param {Object} [cfg] Configs, also added to the result object.
- * @param {String} [cfg.src]  Path to OBJ file.
- * @returns {Object} Configuration to pass into a {@link Geometry} constructor, containing geometry arrays loaded from the OBJ file.
+ * @param {LoadObjGeometryConfiguration} [cfg] Configs, also added to the result object.
+ * @returns {Promise<ObjGeometryData>} Configuration to pass into a {@link Geometry} constructor, containing geometry arrays loaded from the OBJ file.
  */
 function loadOBJGeometry(scene, cfg = {}) {
 

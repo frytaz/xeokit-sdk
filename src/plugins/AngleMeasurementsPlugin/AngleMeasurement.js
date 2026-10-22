@@ -427,8 +427,8 @@ class AngleMeasurement extends Component {
     }
 
     /**
-     * Sets if this DistanceMeasurement appears highlighted.
-     * @param highlighted
+     * Sets if this AngleMeasurement appears highlighted.
+     * @param {Boolean} highlighted
      */
     setHighlighted(highlighted) {
         this._drawables.forEach(d => d.setHighlighted(highlighted));
@@ -448,6 +448,8 @@ class AngleMeasurement extends Component {
      * Gets the function that formats the angle label's text.
      *
      * By default, this function formats the angle with two decimal places.
+     *
+     * @type {(angle: number) => string}
      */
     get labelStringFormat() {
         return this._labelStringFormat;
@@ -455,6 +457,8 @@ class AngleMeasurement extends Component {
 
     /** 
      * Sets the function that formats the angle label's text.
+     *
+     * @type {(angle: number) => string}
      */
     set labelStringFormat(value) {
         this._labelStringFormat = value;

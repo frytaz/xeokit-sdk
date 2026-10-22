@@ -21,7 +21,15 @@ import {math} from "../math/math.js";
  * @property {Number[]} [v0=[0,0,0]] The starting point.
  * @property {Number[]} [v1=[0,0,0]] The middle control point.
  * @property {Number[]} [v2=[0,0,0]] The end point.
- * @property {Number[]} [t=0] Current position on this QuadraticBezierCurve, in range between ````0..1````.
+ * @property {Number} [t=0] Current position on this QuadraticBezierCurve, in range between ````0..1````.
+ */
+
+/**
+ * @typedef {Object} QuadraticBezierCurveJson
+ * @property {Number[]} v0 The starting point.
+ * @property {Number[]} v1 The middle control point.
+ * @property {Number[]} v2 The end point.
+ * @property {Number} t Current position on the QuadraticBezierCurve.
  */
 class QuadraticBezierCurve extends Curve {
 
@@ -153,6 +161,11 @@ class QuadraticBezierCurve extends Curve {
         return vector;
     }
 
+    /**
+     * Gets a JSON representation of this QuadraticBezierCurve.
+     *
+     * @returns {QuadraticBezierCurveJson}
+     */
     getJSON() {
         return {
             v0: this._v0,

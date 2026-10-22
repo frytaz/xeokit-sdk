@@ -6,6 +6,7 @@ import {WebIFCDefaultDataSource} from "./WebIFCDefaultDataSource.js";
 import {IFCObjectDefaults} from "../../viewer/metadata/IFCObjectDefaults.js";
 import {math} from "../../viewer/index.js";
 import {worldToRTCPositions} from "../../viewer/scene/math/rtcCoords.js";
+/** @import { ModelStats } from "../index.js" */
 
 /**
  * {@link Viewer} plugin that uses [web-ifc](https://github.com/tomvandig/web-ifc) to load BIM models directly from IFC files.
@@ -358,12 +359,24 @@ import {worldToRTCPositions} from "../../viewer/scene/math/rtcCoords.js";
  */
 
 /**
+ * A data source through which a {@link WebIFCLoaderPlugin} loads IFC files.
+ *
+ * * ````getIFC```` - Gets the contents of the given IFC file in an arraybuffer.
+ * * ````cacheBuster```` - Whether cache-busting is enabled.
+ *
+ * @typedef {{
+ *     getIFC(src: string | number, ok: (buffer: ArrayBuffer) => void, error: (e: Error) => void): void;
+ *     cacheBuster: boolean;
+ * }} IWebIFCDefaultDataSource
+ */
+
+/**
  * @typedef {Object} WebIFCLoaderPluginConfiguration
  * @property {String} [id="ifcLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
  * @property {Object} WebIFC The web-ifc module, required by WebIFCLoaderPlugin. WebIFCLoaderPlugin uses various IFC type constants defined on this module.
  * @property {Object} IfcAPI A pre-initialized instance of the web-ifc API. WebIFCLoaderPlugin uses this to parse IFC.
  * @property {Object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
- * @property {Object} [dataSource] A custom data source through which the WebIFCLoaderPlugin can load model and metadata files. Defaults to an instance of {@link WebIFCDefaultDataSource}, which loads over HTTP.
+ * @property {IWebIFCDefaultDataSource} [dataSource] A custom data source through which the WebIFCLoaderPlugin can load model and metadata files. Defaults to an instance of {@link WebIFCDefaultDataSource}, which loads over HTTP.
  * @property {String[]} [includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {String[]} [excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {Boolean} [excludeUnclassifiedObjects=false] When loading metadata and this is ````true````, will only load {@link Entity}s that have {@link MetaObject}s (that are not excluded). This is useful when we don't want Entitys in the Scene that are not represented within IFC navigation components, such as {@link TreeViewPlugin}.
@@ -375,7 +388,7 @@ import {worldToRTCPositions} from "../../viewer/scene/math/rtcCoords.js";
  * @property {String} [src] Path to a IFC file, as an alternative to the ````ifc```` parameter.
  * @property {ArrayBuffer} [ifc] The IFC file data, as an alternative to the ````src```` parameter.
  * @property {Boolean} [loadMetadata=true] Whether to load IFC metadata (metaobjects and property sets).
- * @property {Object.<string, Object>} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
+ * @property {IFCObjectDefaults} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
  * @property {String[]} [includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {String[]} [excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {Boolean} [edges=false] Indicates if the model's edges are initially emphasized.
@@ -386,10 +399,10 @@ import {worldToRTCPositions} from "../../viewer/scene/math/rtcCoords.js";
  * @property {Number[]} [matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]] The model's world transform matrix. Overrides the position, scale and rotation parameters. Relative to ````origin````.
  * @property {Boolean} [saoEnabled=true] Indicates if Scalable Ambient Obscurance (SAO) will apply to the model. SAO is configured by the Scene's {@link SAO} component. Only works when {@link SAO#enabled} is also ````true````
  * @property {Boolean} [pbrEnabled=false] Indicates if physically-based rendering (PBR) will apply to the model. Only works when {@link Scene#pbrEnabled} is also ````true````.
- * @property {Number} [backfaces=false] When we set this ````true````, then we force rendering of backfaces for the model. When we leave this ````false````, then we allow the Viewer to decide when to render backfaces. In that case, the Viewer will hide backfaces on watertight meshes, show backfaces on open meshes, and always show backfaces on meshes when we slice them open with {@link SectionPlane}s.
+ * @property {Boolean} [backfaces=false] When we set this ````true````, then we force rendering of backfaces for the model. When we leave this ````false````, then we allow the Viewer to decide when to render backfaces. In that case, the Viewer will hide backfaces on watertight meshes, show backfaces on open meshes, and always show backfaces on meshes when we slice them open with {@link SectionPlane}s.
  * @property {Boolean} [excludeUnclassifiedObjects=false] When loading metadata and this is ````true````, will only load {@link Entity}s that have {@link MetaObject}s (that are not excluded). This is useful when we don't want Entitys in the Scene that are not represented within IFC navigation components, such as {@link TreeViewPlugin}.
  * @property {Boolean} [globalizeObjectIds=false] Indicates whether to globalize each {@link Entity#id} and {@link MetaObject#id}, in case you need to prevent ID clashes with other models. See {@link WebIFCLoaderPlugin#globalizeObjectIds} for more info.
- * @property {Object} [stats] Collects model statistics.
+ * @property {ModelStats} [stats] Collects model statistics.
  * @property {Boolean} [dtxEnabled=true] When ````true```` (default) use data textures (DTX), where appropriate, to
  * represent the returned model. Set false to always use vertex buffer objects (VBOs). Note that DTX is only applicable
  * to non-textured triangle meshes, and that VBOs are always used for meshes that have textures, line segments, or point
@@ -439,7 +452,7 @@ class WebIFCLoaderPlugin extends Plugin {
      *
      * Default value is {@link WebIFCDefaultDataSource}, which loads via HTTP.
      *
-     * @type {Object}
+     * @type {IWebIFCDefaultDataSource}
      */
     get dataSource() {
         return this._dataSource;
@@ -450,7 +463,7 @@ class WebIFCLoaderPlugin extends Plugin {
      *
      * Default value is {@link WebIFCDefaultDataSource}, which loads via HTTP.
      *
-     * @type {Object}
+     * @type {IWebIFCDefaultDataSource}
      */
     set dataSource(value) {
         this._dataSource = value || new WebIFCDefaultDataSource();
@@ -461,7 +474,7 @@ class WebIFCLoaderPlugin extends Plugin {
      *
      * Default value is {@link IFCObjectDefaults}.
      *
-     * @type {{String: Object}}
+     * @type {IFCObjectDefaults}
      */
     get objectDefaults() {
         return this._objectDefaults;
@@ -472,7 +485,7 @@ class WebIFCLoaderPlugin extends Plugin {
      *
      * Default value is {@link IFCObjectDefaults}.
      *
-     * @type {{String: Object}}
+     * @type {IFCObjectDefaults}
      */
     set objectDefaults(value) {
         this._objectDefaults = value || IFCObjectDefaults;
@@ -598,7 +611,7 @@ class WebIFCLoaderPlugin extends Plugin {
      * Loads an ````IFC```` model into this WebIFCLoaderPlugin's {@link Viewer}.
      *
      * @param {LoadWebIFCModel} params Loading parameters.
-     * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}.
+     * @returns {SceneModel} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}.
      */
     load(params = {}) {
 
@@ -650,9 +663,9 @@ class WebIFCLoaderPlugin extends Plugin {
 
         try {
             if (params.src) {
-                this._loadModel(params.src, params, options, sceneModel);
+                this.#loadModel(params.src, params, options, sceneModel);
             } else {
-                this._parseModel(params.ifc, params, options, sceneModel);
+                this.#parseModel(params.ifc, params, options, sceneModel);
             }
         } catch (e) {
             this.error(e);
@@ -662,11 +675,11 @@ class WebIFCLoaderPlugin extends Plugin {
         return sceneModel;
     }
 
-    _loadModel(src, params, options, sceneModel) {
+    #loadModel(src, params, options, sceneModel) {
         const spinner = this.viewer.scene.canvas.spinner;
         spinner.processes++;
         this._dataSource.getIFC(params.src, (arrayBuffer) => {
-                this._parseModel(arrayBuffer, params, options, sceneModel);
+                this.#parseModel(arrayBuffer, params, options, sceneModel);
                 spinner.processes--;
             },
             (errMsg) => {
@@ -676,7 +689,7 @@ class WebIFCLoaderPlugin extends Plugin {
             });
     }
 
-    _parseModel(arrayBuffer, params, options, sceneModel) {
+    #parseModel(arrayBuffer, params, options, sceneModel) {
         if (sceneModel.destroyed) {
             return;
         }
@@ -747,11 +760,11 @@ class WebIFCLoaderPlugin extends Plugin {
                 }
             }
 
-            this._parseMetaObjects(ctx);
-            this._parsePropertySets(ctx);
+            this.#parseMetaObjects(ctx);
+            this.#parsePropertySets(ctx);
         }
 
-        this._parseGeometry(ctx);
+        this.#parseGeometry(ctx);
 
         sceneModel.finalize();
 
@@ -769,14 +782,14 @@ class WebIFCLoaderPlugin extends Plugin {
         });
     }
 
-    _parseMetaObjects(ctx) {
+    #parseMetaObjects(ctx) {
         const lines = this._ifcAPI.GetLineIDsWithType(ctx.modelID, this._webIFC.IFCPROJECT);
         const ifcProjectId = lines.get(0);
         const ifcProject = this._ifcAPI.GetLine(ctx.modelID, ifcProjectId);
-        this._parseSpatialChildren(ctx, ifcProject);
+        this.#parseSpatialChildren(ctx, ifcProject);
     }
 
-    _parseSpatialChildren(ctx, ifcElement, parentMetaObjectId) {
+    #parseSpatialChildren(ctx, ifcElement, parentMetaObjectId) {
         const metaObjectType = this._ifcAPI.GetNameFromTypeCode(ifcElement.type);
         if (ctx.includeTypes && (!ctx.includeTypes[metaObjectType])) {
             return;
@@ -784,13 +797,13 @@ class WebIFCLoaderPlugin extends Plugin {
         if (ctx.excludeTypes && ctx.excludeTypes[metaObjectType]) {
             return;
         }
-        this._createMetaObject(ctx, ifcElement, parentMetaObjectId);
+        this.#createMetaObject(ctx, ifcElement, parentMetaObjectId);
         const metaObjectId = ifcElement.GlobalId.value;
-        this._parseRelatedItemsOfType(ctx, ifcElement.expressID, 'RelatingObject', 'RelatedObjects', this._webIFC.IFCRELAGGREGATES, metaObjectId);
-        this._parseRelatedItemsOfType(ctx, ifcElement.expressID, 'RelatingStructure', 'RelatedElements', this._webIFC.IFCRELCONTAINEDINSPATIALSTRUCTURE, metaObjectId);
+        this.#parseRelatedItemsOfType(ctx, ifcElement.expressID, 'RelatingObject', 'RelatedObjects', this._webIFC.IFCRELAGGREGATES, metaObjectId);
+        this.#parseRelatedItemsOfType(ctx, ifcElement.expressID, 'RelatingStructure', 'RelatedElements', this._webIFC.IFCRELCONTAINEDINSPATIALSTRUCTURE, metaObjectId);
     }
 
-    _createMetaObject(ctx, ifcElement, parentMetaObjectId) {
+    #createMetaObject(ctx, ifcElement, parentMetaObjectId) {
         const id = ifcElement.GlobalId.value;
         const metaObjectType = this._ifcAPI.GetNameFromTypeCode(ifcElement.type);
         const metaObjectName = (ifcElement.Name && ifcElement.Name.value !== "") ? ifcElement.Name.value : metaObjectType;
@@ -805,7 +818,7 @@ class WebIFCLoaderPlugin extends Plugin {
         ctx.stats.numMetaObjects++;
     }
 
-    _parseRelatedItemsOfType(ctx, id, relation, related, type, parentMetaObjectId) {
+    #parseRelatedItemsOfType(ctx, id, relation, related, type, parentMetaObjectId) {
         const lines = this._ifcAPI.GetLineIDsWithType(ctx.modelID, type);
         for (let i = 0; i < lines.size(); i++) {
             const relID = lines.get(i);
@@ -822,18 +835,18 @@ class WebIFCLoaderPlugin extends Plugin {
                 const element = rel[related];
                 if (!Array.isArray(element)) {
                     const ifcElement = this._ifcAPI.GetLine(ctx.modelID, element.value);
-                    this._parseSpatialChildren(ctx, ifcElement, parentMetaObjectId);
+                    this.#parseSpatialChildren(ctx, ifcElement, parentMetaObjectId);
                 } else {
                     element.forEach((element2) => {
                         const ifcElement = this._ifcAPI.GetLine(ctx.modelID, element2.value);
-                        this._parseSpatialChildren(ctx, ifcElement, parentMetaObjectId);
+                        this.#parseSpatialChildren(ctx, ifcElement, parentMetaObjectId);
                     });
                 }
             }
         }
     }
 
-    _parsePropertySets(ctx) {
+    #parsePropertySets(ctx) {
         const lines = this._ifcAPI.GetLineIDsWithType(ctx.modelID, this._webIFC.IFCRELDEFINESBYPROPERTIES);
         for (let i = 0; i < lines.size(); i++) {
             let relID = lines.get(i);
@@ -896,7 +909,7 @@ class WebIFCLoaderPlugin extends Plugin {
         }
     }
 
-    _parseGeometry(ctx) {
+    #parseGeometry(ctx) {
         this._ifcAPI.StreamAllMeshes(ctx.modelID, (flatMesh) => {
             // TODO: Can we do geometry reuse with web-ifc?
             const flatMeshExpressID = flatMesh.expressID;

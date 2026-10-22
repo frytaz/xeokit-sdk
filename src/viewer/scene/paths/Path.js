@@ -20,7 +20,7 @@ class Path extends Curve {
 
     /**
      * @constructor
-     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this Path as well.
+     * @param {Component} owner Owner component. When destroyed, the owner will destroy this Path as well.
      * @param {PathConfiguration} [cfg] Path configuration
      */
     constructor(owner, cfg = {}) {
@@ -50,7 +50,7 @@ class Path extends Curve {
      *
      * Default value is ````[]````.
      *
-     * @param {{Array of Spline, Path, QuadraticBezierCurve or CubicBezierCurve}} value.
+     * @param {Array<Curve|String|Number>} value The {@link Curve}s, or their IDs.
      */
     set curves(value) {
 
@@ -125,7 +125,7 @@ class Path extends Curve {
     /**
      * Gets the {@link Curve}s in this Path.
      *
-     * @returns {{Array of Spline, Path, QuadraticBezierCurve or CubicBezierCurve}} the {@link Curve}s in this path.
+     * @returns {Curve[]} the {@link Curve}s in this path.
      */
     get curves() {
         return this._curves;
@@ -171,7 +171,7 @@ class Path extends Curve {
      * @return {Number} Length of this path.
      */
     get length() {
-        var lens = this._getCurveLengths();
+        var lens = this.#getCurveLengths();
         return lens[lens.length - 1];
     }
 
@@ -183,7 +183,7 @@ class Path extends Curve {
      */
     getPoint(t) {
         var d = t * this.length;
-        var curveLengths = this._getCurveLengths();
+        var curveLengths = this.#getCurveLengths();
         var i = 0, diff, curve;
         while (i < curveLengths.length) {
             if (curveLengths[i] >= d) {
@@ -197,7 +197,7 @@ class Path extends Curve {
         return null;
     }
 
-    _getCurveLengths() {
+    #getCurveLengths() {
         if (!this._dirty) {
             return this._cachedLengths;
         }
@@ -214,7 +214,7 @@ class Path extends Curve {
         return lengths;
     }
 
-    _getJSON() {
+    #getJSON() {
         var curveIds = [];
         for (var i = 0, len = this._curves.length; i < len; i++) {
             curveIds.push(this._curves[i].id);

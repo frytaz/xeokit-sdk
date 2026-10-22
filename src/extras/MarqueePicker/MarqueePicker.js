@@ -1,6 +1,8 @@
 import {Component} from "../../viewer/scene/Component.js";
 import {math} from "../../viewer/scene/math/math.js";
 import {Frustum, frustumIntersectsAABB3, setFrustum} from "../../viewer/scene/math/Frustum.js";
+/** @import { Viewer } from "../../viewer/Viewer.js" */
+/** @import { ObjectsKdTree3 } from "../collision/ObjectsKdTree3.js" */
 
 /**
  * Picks a {@link Viewer}'s {@link Entity}s with a canvas-space 2D marquee box.
@@ -89,13 +91,27 @@ import {Frustum, frustumIntersectsAABB3, setFrustum} from "../../viewer/scene/ma
 export class MarqueePicker extends Component {
 
     /**
+     * Pick mode that picks {@link Entity}s that intersect the marquee box.
+     *
+     * @type {number}
+     */
+    static PICK_MODE_INTERSECTS = 0;
+
+    /**
+     * Pick mode that picks {@link Entity}s that are completely inside the marquee box.
+     *
+     * @type {number}
+     */
+    static PICK_MODE_INSIDE = 1;
+
+    /**
      * Creates a MarqueePicker.
      *
      * @param {Object} cfg Configuration
      * @param {Viewer} cfg.viewer The Viewer to pick Entities from.
      * @param {ObjectsKdTree3} cfg.objectsKdTree3 A k-d tree that indexes the Entities in the Viewer for fast spatial lookup.
      */
-    constructor(cfg = {}) {
+    constructor(cfg) {
 
         if (!cfg.viewer) {
             throw "[MarqueePicker] Missing config: viewer";
@@ -134,34 +150,34 @@ export class MarqueePicker extends Component {
     /**
      * Sets the canvas-space position of the first marquee box corner.
      *
-     * @param corner1
+     * @param {number[]} corner1 Canvas-space corner position.
      */
     setMarqueeCorner1(corner1) {
         this._canvasMarqueeCorner1.set(corner1);
         this._canvasMarqueeCorner2.set(corner1);
-        this._updateMarquee();
+        this.#updateMarquee();
     }
 
     /**
      * Sets the canvas-space position of the second marquee box corner.
      *
-     * @param corner2
+     * @param {number[]} corner2 Canvas-space corner position.
      */
     setMarqueeCorner2(corner2) {
         this._canvasMarqueeCorner2.set(corner2);
-        this._updateMarquee();
+        this.#updateMarquee();
     }
 
     /**
      * Sets both canvas-space corner positions of the marquee box.
      *
-     * @param corner1
-     * @param corner2
+     * @param {number[]} corner1 Canvas-space corner position.
+     * @param {number[]} corner2 Canvas-space corner position.
      */
     setMarquee(corner1, corner2) {
         this._canvasMarqueeCorner1.set(corner1);
         this._canvasMarqueeCorner2.set(corner2);
-        this._updateMarquee();
+        this.#updateMarquee();
     }
 
     /**
@@ -235,8 +251,8 @@ export class MarqueePicker extends Component {
      * @returns {string[]} IDs of the {@link Entity}s that were picked, if any
      */
     pick() {
-        this._updateMarquee();
-        this._buildMarqueeFrustum();
+        this.#updateMarquee();
+        this.#buildMarqueeFrustum();
         const entityIds = [];
         const visitNode = (node, intersects = Frustum.INTERSECT) => {
             if (intersects === Frustum.INTERSECT) {
@@ -282,7 +298,7 @@ export class MarqueePicker extends Component {
         return entityIds;
     }
 
-    _updateMarquee() {
+    #updateMarquee() {
         this._canvasMarquee[0] = Math.min(this._canvasMarqueeCorner1[0], this._canvasMarqueeCorner2[0]);
         this._canvasMarquee[1] = Math.min(this._canvasMarqueeCorner1[1], this._canvasMarqueeCorner2[1]);
         this._canvasMarquee[2] = Math.max(this._canvasMarqueeCorner1[0], this._canvasMarqueeCorner2[0]);
@@ -293,7 +309,7 @@ export class MarqueePicker extends Component {
         this._marqueeElement.style.top = `${this._canvasMarquee[1]}px`;
     }
 
-    _buildMarqueeFrustum() { // https://github.com/xeokit/xeokit-sdk/issues/869#issuecomment-1165375770
+    #buildMarqueeFrustum() { // https://github.com/xeokit/xeokit-sdk/issues/869#issuecomment-1165375770
         const canvas = this.viewer.scene.canvas.canvas;
         const canvasWidth = canvas.clientWidth;
         const canvasHeight = canvas.clientHeight;
@@ -336,17 +352,3 @@ export class MarqueePicker extends Component {
         }
     }
 }
-
-/**
- * Pick mode that picks {@link Entity}s that intersect the marquee box.
- *
- * @type {number}
- */
-MarqueePicker.PICK_MODE_INTERSECTS = 0;
-
-/**
- * Pick mode that picks {@link Entity}s that are completely inside the marquee box.
- *
- * @type {number}
- */
-MarqueePicker.PICK_MODE_INSIDE = 1;

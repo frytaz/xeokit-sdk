@@ -14,7 +14,7 @@ class Curve extends Component {
 
     /**
      * @constructor
-     * @param {Component} [owner] Owner component. When destroyed, the owner will destroy this Curve as well.
+     * @param {Component} owner Owner component. When destroyed, the owner will destroy this Curve as well.
      * @param {CurveConfiguration} [cfg] Configs
      */
     constructor(owner, cfg = {}) {
@@ -66,7 +66,7 @@ class Curve extends Component {
      * @returns {Number} The approximate Curve length.
      */
     get length() {
-        var lengths = this._getLengths();
+        var lengths = this.#getLengths();
         return lengths[lengths.length - 1];
     }
 
@@ -95,6 +95,12 @@ class Curve extends Component {
         return math.normalizeVec3(vec, []);
     }
 
+    /**
+     * Returns a point on this Curve at the given position, where positions are spaced by equal arc length.
+     *
+     * @param {Number} u Position, in range ````[0..1]````.
+     * @returns {Number[]} The point.
+     */
     getPointAt(u) {
         var t = this.getUToTMapping(u);
         return this.getPoint(t);
@@ -104,7 +110,7 @@ class Curve extends Component {
      * Samples points on this Curve, at the given number of equally-spaced divisions.
      *
      * @param {Number} divisions The number of divisions.
-     * @returns {{Array of Array}} Array of sampled 3D points.
+     * @returns {Number[][]} Array of sampled 3D points.
      */
     getPoints(divisions) {
         if (!divisions) {
@@ -117,7 +123,7 @@ class Curve extends Component {
         return pts;
     }
 
-    _getLengths(divisions) {
+    #getLengths(divisions) {
         if (!divisions) {
             divisions = (this.__arcLengthDivisions) ? (this.__arcLengthDivisions) : 200;
         }
@@ -142,15 +148,20 @@ class Curve extends Component {
         return cache; // { sums: cache, sum:sum }, Sum is in the last element.
     }
 
-    _updateArcLengths() {
+    #updateArcLengths() {
         this.needsUpdate = true;
-        this._getLengths();
+        this.#getLengths();
     }
 
-    // Given u ( 0 .. 1 ), get a t to find p. This gives you points which are equi distance
-
+    /**
+     * Given u ( 0 .. 1 ), get a t to find p. This gives you points which are equi distance.
+     *
+     * @param {Number} u Position, in range ````[0..1]````.
+     * @param {Number} [distance] Target arc length, used instead of ````u```` when given.
+     * @returns {Number} The ````t```` value.
+     */
     getUToTMapping(u, distance) {
-        var arcLengths = this._getLengths();
+        var arcLengths = this.#getLengths();
         var i = 0;
         var il = arcLengths.length;
         var t;

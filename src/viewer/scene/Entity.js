@@ -493,8 +493,29 @@ class Entity {
 
     /**
      * Gets the complete geometry of this entity.
+     *
+     * @returns {{indices: Number[], positions: Number[]}}
+     * @abstract
      */
     getGeometryData() {
+    }
+
+    /**
+     * Gets volume of the entity.
+     *
+     * @type {Number}
+     * @abstract
+     */
+    get volume() {
+    }
+
+    /**
+     * Gets surface area of the entity.
+     *
+     * @type {Number}
+     * @abstract
+     */
+    get surfaceArea() {
     }
 
     /**

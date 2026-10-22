@@ -19,6 +19,7 @@ import {ParserV9} from "./parsers/ParserV9.js";
 import {ParserV10} from "./parsers/ParserV10.js";
 import {ParserV11} from "./parsers/ParserV11.js";
 import {ParserV12} from './parsers/ParserV12.js';
+/** @import { TextureTranscoder } from "../../viewer/scene/utils/textureTranscoders/TextureTranscoder.js" */
 
 
 const parsers = {};
@@ -601,14 +602,33 @@ parsers[ParserV12.version] = ParserV12;
  */
 
 /**
+ * Indicates whether to enable geometry reuse; when a function, it is called with a ````{ instanceCount: <number> }```` argument and returns whether to reuse that geometry.
+ * @typedef {boolean | ((geometryConfig: { instanceCount: number }) => boolean)} ReuseGeometries
+ */
+
+/**
+ * A data source through which an {@link XKTLoaderPlugin} loads model and metadata files.
+ *
+ * * ````getMetaModel```` - Gets metamodel JSON.
+ * * ````getXKT```` - Gets the contents of the given ````.xkt```` file in an arraybuffer.
+ * * ````cacheBuster```` - Whether cache-busting is enabled.
+ *
+ * @typedef {{
+ *     getMetaModel(metaModelSrc: string | number, ok: (json: any) => void, error: (e: Error) => void): void;
+ *     getXKT(src: string | number, ok: (buffer: ArrayBuffer) => void, error: (e: Error) => void): void;
+ *     cacheBuster: boolean;
+ * }} IXKTDefaultDataSource
+ */
+
+/**
  * @typedef {Object} XKTLoaderPluginConfiguration
  * @property {String} [id="XKTLoader"] Optional ID for this plugin, so that we can find it within {@link Viewer#plugins}.
- * @property {Object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
- * @property {Object} [dataSource] A custom data source through which the XKTLoaderPlugin can load model and metadata files. Defaults to an instance of {@link XKTDefaultDataSource}, which loads uover HTTP.
+ * @property {IFCObjectDefaults} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object.  Default value is {@link IFCObjectDefaults}.
+ * @property {IXKTDefaultDataSource} [dataSource] A custom data source through which the XKTLoaderPlugin can load model and metadata files. Defaults to an instance of {@link XKTDefaultDataSource}, which loads uover HTTP.
  * @property {String[]} [includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {String[]} [excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {Boolean} [excludeUnclassifiedObjects=false] When loading metadata and this is ````true````, will only load {@link Entity}s that have {@link MetaObject}s (that are not excluded). This is useful when we don't want Entitys in the Scene that are not represented within IFC navigation components, such as {@link TreeViewPlugin}.
- * @property {Boolean|Function} [reuseGeometries=true] Indicates whether to enable geometry reuse (````true```` by default) or whether to internally expand, a function will be called with a `{ instanceCount: <number> }` argument.
+ * @property {ReuseGeometries} [reuseGeometries=true] Indicates whether to enable geometry reuse (````true```` by default) or whether to internally expand, a function will be called with a `{ instanceCount: <number> }` argument.
  * @property {Number} [maxGeometryBatchSize=50000000] Maximum geometry batch size, as number of vertices. This is optionally supplied
  * @property {KTX2TextureTranscoder} [textureTranscoder] Transcoder used internally to transcode KTX2
  */
@@ -620,10 +640,10 @@ parsers[ParserV12.version] = ParserV12;
  * @property {ArrayBuffer} [xkt] The *````.xkt````* file data, as an alternative to the ````src```` parameter.
  * @property {String} [metaModelSrc] Path or URL to an optional metadata file, as an alternative to the ````metaModelData```` parameter.
  * @property {*} [metaModelData] JSON model metadata, as an alternative to the ````metaModelSrc```` parameter.
- * @property {Boolean|Function} [loadIntoMetaScene=true] Whether to load metadata into ````MetaScene````, otherwise expose as ````SceneModel::metadata````. If provided as a function, it will be called with either ````metaModelSrc````'s contents, ````metaModelData```` value, or xkt's embedded metadata, and the function's return value will be used as ````metaModel.loadData````'s input.
+ * @property {boolean | ((metadata: any) => any)} [loadIntoMetaScene=true] Whether to load metadata into ````MetaScene````, otherwise expose as ````SceneModel::metadata````. If provided as a function, it will be called with either ````metaModelSrc````'s contents, ````metaModelData```` value, or xkt's embedded metadata, and the function's return value will be used as ````metaModel.loadData````'s input.
  * @property {String} [manifestSrc] Path or URL to a JSON manifest file that provides paths to ````.xkt```` files to load as parts of the model. Use this option to load models that have been split into
- * @property {Object} [manifest] A JSON manifest object (as an alternative to a path or URL) that provides paths to ````.xkt```` files to load as parts of the model. Use this option to load models that have been split into
- * @property {Object.<string, Object>} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
+ * @property {object} [manifest] A JSON manifest object (as an alternative to a path or URL) that provides paths to ````.xkt```` files to load as parts of the model. Use this option to load models that have been split into
+ * @property {object} [objectDefaults] Map of initial default states for each loaded {@link Entity} that represents an object. Default value is {@link IFCObjectDefaults}.
  * @property {String[]} [includeTypes] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {String[]} [excludeTypes] When loading metadata, never loads objects that have {@link MetaObject}s with {@link MetaObject#type} values in this list.
  * @property {String[]} [includeIds] When loading metadata, only loads objects that have {@link MetaObject}s with {@link MetaObject#id} values in this list.
@@ -636,10 +656,10 @@ parsers[ParserV12.version] = ParserV12;
  * @property {Boolean} [saoEnabled=true] Indicates if Scalable Ambient Obscurance (SAO) is enabled for the model. SAO is configured by the Scene's {@link SAO} component. Only works when {@link SAO#enabled} is also ````true````
  * @property {Boolean} [pbrEnabled=true] Indicates if physically-based rendering (PBR) is enabled for the model. Overrides ````colorTextureEnabled````. Only works when {@link Scene#pbrEnabled} is also ````true````.
  * @property {Boolean} [colorTextureEnabled=true] Indicates if base color texture rendering is enabled for the model. Overridden by ````pbrEnabled````.  Only works when {@link Scene#colorTextureEnabled} is also ````true````.
- * @property {Number} [backfaces=false] When we set this ````true````, then we force rendering of backfaces for the model.
+ * @property {Boolean} [backfaces=false] When we set this ````true````, then we force rendering of backfaces for the model.
  * @property {Boolean} [excludeUnclassifiedObjects=false] When loading metadata and this is ````true````, will only load {@link Entity}s that have {@link MetaObject}s (that are not excluded). This is useful when we don't want Entitys in the Scene that are not represented within IFC navigation components, such as {@link TreeViewPlugin}.
  * @property {Boolean} [globalizeObjectIds=false] Indicates whether to globalize each {@link Entity#id} and {@link MetaObject#id}, in case you need to prevent ID clashes with other models. See {@link XKTLoaderPlugin#globalizeObjectIds} for more info.
- * @property {Boolean|Function} [reuseGeometries=true] Indicates whether to enable geometry reuse (````true```` by default) or whether to expand
+ * @property {ReuseGeometries} [reuseGeometries=true] Indicates whether to enable geometry reuse (````true```` by default) or whether to expand
  * @property {Boolean} [dtxEnabled=true] When ````true```` (default) use data textures (DTX), where appropriate, to
  * @property {Number} [renderOrder=0] Specifies the rendering order for the model. This is used to control the order in which
  */
@@ -697,7 +717,7 @@ class XKTLoaderPlugin extends Plugin {
      *
      * Default value is {@link XKTDefaultDataSource}, which loads via HTTP.
      *
-     * @type {Object}
+     * @type {IXKTDefaultDataSource}
      */
     get dataSource() {
         return this._dataSource;
@@ -708,7 +728,7 @@ class XKTLoaderPlugin extends Plugin {
      *
      * Default value is {@link XKTDefaultDataSource}, which loads via HTTP.
      *
-     * @type {Object}
+     * @type {IXKTDefaultDataSource}
      */
     set dataSource(value) {
         this._dataSource = value || new XKTDefaultDataSource();
@@ -719,7 +739,7 @@ class XKTLoaderPlugin extends Plugin {
      *
      * Default value is {@link IFCObjectDefaults}.
      *
-     * @type {{String: Object}}
+     * @type {IFCObjectDefaults}
      */
     get objectDefaults() {
         return this._objectDefaults;
@@ -730,7 +750,7 @@ class XKTLoaderPlugin extends Plugin {
      *
      * Default value is {@link IFCObjectDefaults}.
      *
-     * @type {{String: Object}}
+     * @type {IFCObjectDefaults}
      */
     set objectDefaults(value) {
         this._objectDefaults = value || IFCObjectDefaults;
@@ -885,7 +905,7 @@ class XKTLoaderPlugin extends Plugin {
      *
      * Default value is ````true````.
      *
-     * @type {Boolean}
+     * @type {ReuseGeometries}
      */
     get reuseGeometries() {
         return this._reuseGeometries;
@@ -904,7 +924,7 @@ class XKTLoaderPlugin extends Plugin {
      *
      * See [#769](https://github.com/xeokit/xeokit-sdk/issues/769) for more info.
      *
-     * @type {Boolean}
+     * @type {ReuseGeometries}
      */
     set reuseGeometries(value) {
         this._reuseGeometries = value;
@@ -920,9 +940,9 @@ class XKTLoaderPlugin extends Plugin {
      * in data pipelines), then that metamodel will be loaded and the metamodel in the XKT 8 file will be ignored.
      *
      * @param {LoadXKTModel} params Loading parameters.
-     * @returns {Entity} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}.
+     * @returns {SceneModel} Entity representing the model, which will have {@link Entity#isModel} set ````true```` and will be registered by {@link Entity#id} in {@link Scene#models}.
      */
-    load(params = {}) {
+    load(params) {
 
         if (params.id && this.viewer.scene.components[params.id]) {
             this.error("Component with this ID already exists in viewer: " + params.id + " - will autogenerate this ID");
@@ -1067,9 +1087,9 @@ class XKTLoaderPlugin extends Plugin {
                         globalizeObjectIds: options.globalizeObjectIds
                     });
                     if (params.src) {
-                        this._loadModel(params.src, options, sceneModel, null, manifestCtx, finish, error);
+                        this.#loadModel(params.src, options, sceneModel, null, manifestCtx, finish, error);
                     } else {
-                        this._parseModel(params.xkt, options, sceneModel, null, manifestCtx);
+                        this.#parseModel(params.xkt, options, sceneModel, null, manifestCtx);
                         finish();
                     }
                 }, (errMsg) => {
@@ -1083,9 +1103,9 @@ class XKTLoaderPlugin extends Plugin {
                     globalizeObjectIds: options.globalizeObjectIds
                 });
                 if (params.src) {
-                    this._loadModel(params.src, options, sceneModel, null, manifestCtx, finish, error);
+                    this.#loadModel(params.src, options, sceneModel, null, manifestCtx, finish, error);
                 } else {
-                    this._parseModel(params.xkt, options, sceneModel, null, manifestCtx);
+                    this.#parseModel(params.xkt, options, sceneModel, null, manifestCtx);
                     finish();
                 }
             }
@@ -1094,9 +1114,9 @@ class XKTLoaderPlugin extends Plugin {
         } else {
 
             if (params.src) {
-                this._loadModel(params.src, options, sceneModel, metaModel, manifestCtx, finish, error);
+                this.#loadModel(params.src, options, sceneModel, metaModel, manifestCtx, finish, error);
             } else if (params.xkt) {
-                this._parseModel(params.xkt, options, sceneModel, metaModel, manifestCtx);
+                this.#parseModel(params.xkt, options, sceneModel, metaModel, manifestCtx);
                 finish();
             } else if (params.manifestSrc || params.manifest) {
                 const baseDir = params.manifestSrc ? getBaseDirectory(params.manifestSrc) : "";
@@ -1130,7 +1150,7 @@ class XKTLoaderPlugin extends Plugin {
                             done();
                         } else {
                             this._dataSource.getXKT(`${baseDir}${xktFiles[i]}`, (arrayBuffer) => {
-                                this._parseModel(arrayBuffer, options, sceneModel, null /* Ignore metamodel in XKT */, manifestCtx);
+                                this.#parseModel(arrayBuffer, options, sceneModel, null /* Ignore metamodel in XKT */, manifestCtx);
                                 sceneModel.preFinalize();
                                 i++;
                                 this.scheduleTask(loadNext, 200);
@@ -1148,7 +1168,7 @@ class XKTLoaderPlugin extends Plugin {
                             done();
                         } else {
                             this._dataSource.getXKT(`${baseDir}${xktFiles[i]}`, (arrayBuffer) => {
-                                this._parseModel(arrayBuffer, options, sceneModel, metaModel, manifestCtx);
+                                this.#parseModel(arrayBuffer, options, sceneModel, metaModel, manifestCtx);
                                 sceneModel.preFinalize();
                                 i++;
                                 this.scheduleTask(loadNext, 200);
@@ -1198,15 +1218,15 @@ class XKTLoaderPlugin extends Plugin {
         return sceneModel;
     }
 
-    _loadModel(src, options, sceneModel, metaModel, manifestCtx, done, error) {
+    #loadModel(src, options, sceneModel, metaModel, manifestCtx, done, error) {
         this._dataSource.getXKT(src, (arrayBuffer) => {
-            this._parseModel(arrayBuffer, options, sceneModel, metaModel, manifestCtx);
+            this.#parseModel(arrayBuffer, options, sceneModel, metaModel, manifestCtx);
             sceneModel.preFinalize();
             done();
         }, error);
     }
 
-    async _parseModel(arrayBuffer, options, sceneModel, metaModel, manifestCtx) {
+    async #parseModel(arrayBuffer, options, sceneModel, metaModel, manifestCtx) {
         if (sceneModel.destroyed) {
             return;
         }

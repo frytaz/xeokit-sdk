@@ -1,3 +1,5 @@
+/** @import { StoreyViewsPlugin } from "./StoreyViewsPlugin.js" */
+
 /**
  * @desc Information about an ````IfcBuildingStorey````.
  *

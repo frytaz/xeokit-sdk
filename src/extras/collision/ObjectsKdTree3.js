@@ -3,6 +3,8 @@ import {math} from "../../viewer/scene/math/math.js";
 const MAX_KD_TREE_DEPTH = 15; // Increase if greater precision needed
 const kdTreeDimLength = new Float32Array(3);
 
+/** @import { Viewer } from "../../viewer/Viewer.js" */
+
 /**
  * Automatically indexes a {@link Viewer}'s {@link Entity}s in a 3D k-d tree
  * to support fast collision detection with 3D World-space axis-aligned boundaries (AABBs) and frustums.
@@ -34,6 +36,10 @@ export class ObjectsKdTree3 {
             throw "Parameter expected: cfg.viewer";
         }
 
+        /**
+         * The Viewer that provides the {@link Entity}s in this ObjectsKdTree3.
+         * @type {Viewer}
+         */
         this.viewer = cfg.viewer;
 
         this._maxTreeDepth = cfg.maxTreeDepth || MAX_KD_TREE_DEPTH;
@@ -54,15 +60,17 @@ export class ObjectsKdTree3 {
      *
      * Each time this accessor is accessed, it will lazy-rebuild the ObjectsKdTree3
      * if {@link Entity}s have been created or removed in the {@link Viewer} since the last time it was accessed.
+     *
+     * @returns {*}
      */
     get root() {
         if (this._needsRebuild) {
-            this._rebuild();
+            this.#rebuild();
         }
         return this._root;
     }
 
-    _rebuild() {
+    #rebuild() {
         const viewer = this.viewer;
         const scene = viewer.scene;
         const depth = 0;
@@ -71,12 +79,12 @@ export class ObjectsKdTree3 {
         };
         for (let objectId in scene.objects) {
             const entity = scene.objects[objectId];
-            this._insertEntity(this._root, entity, depth + 1);
+            this.#insertEntity(this._root, entity, depth + 1);
         }
         this._needsRebuild = false;
     }
 
-    _insertEntity(node, entity, depth) {
+    #insertEntity(node, entity, depth) {
 
         const entityAABB = entity.aabb;
 
@@ -87,13 +95,13 @@ export class ObjectsKdTree3 {
         }
         if (node.left) {
             if (math.containsAABB3(node.left.aabb, entityAABB)) {
-                this._insertEntity(node.left, entity, depth + 1);
+                this.#insertEntity(node.left, entity, depth + 1);
                 return;
             }
         }
         if (node.right) {
             if (math.containsAABB3(node.right.aabb, entityAABB)) {
-                this._insertEntity(node.right, entity, depth + 1);
+                this.#insertEntity(node.right, entity, depth + 1);
                 return;
             }
         }
@@ -115,7 +123,7 @@ export class ObjectsKdTree3 {
                 aabb: aabbLeft
             };
             if (math.containsAABB3(aabbLeft, entityAABB)) {
-                this._insertEntity(node.left, entity, depth + 1);
+                this.#insertEntity(node.left, entity, depth + 1);
                 return;
             }
         }
@@ -126,7 +134,7 @@ export class ObjectsKdTree3 {
                 aabb: aabbRight
             };
             if (math.containsAABB3(aabbRight, entityAABB)) {
-                this._insertEntity(node.right, entity, depth + 1);
+                this.#insertEntity(node.right, entity, depth + 1);
                 return;
             }
         }

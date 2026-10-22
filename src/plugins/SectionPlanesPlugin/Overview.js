@@ -2,6 +2,7 @@ import {math} from "../../viewer/scene/math/math.js";
 import {Scene} from "../../viewer/scene/scene/Scene.js";
 import {DirLight} from "./../../viewer/scene/lights/DirLight.js";
 import {Plane} from "./Plane.js";
+/** @import { SectionPlanesPlugin } from "./SectionPlanesPlugin.js" */
 
 /**
  * @desc An interactive 3D overview for navigating the {@link SectionPlane}s created by its {@link SectionPlanesPlugin}.

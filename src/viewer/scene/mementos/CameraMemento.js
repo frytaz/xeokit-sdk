@@ -137,7 +137,7 @@ class CameraMemento {
      * Restores a {@link Scene}'s {@link Camera} to the state previously captured with {@link CameraMemento#saveCamera}.
      *
      * @param {Scene} scene The scene.
-     * @param {Function} [done] When this callback is given, will fly the {@link Camera} to the saved state then fire the callback. Otherwise will just jump the Camera to the saved state.
+     * @param {() => void} [done] When this callback is given, will fly the {@link Camera} to the saved state then fire the callback. Otherwise will just jump the Camera to the saved state.
      */
     restoreCamera(scene, done) {
 

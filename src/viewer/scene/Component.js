@@ -442,12 +442,12 @@ class Component {
      * @param {String} message The message to log
      */
     log(message) {
-        message = "[LOG]" + this._message(message);
+        message = "[LOG]" + this.#message(message);
         window.console.log(message);
         this.scene.fire("log", message);
     }
 
-    _message(message) {
+    #message(message) {
         return " [" + this.type + " " + utils.inQuotes(this.id) + "]: " + message;
     }
 
@@ -461,7 +461,7 @@ class Component {
      * @param {String} message The message to log
      */
     warn(message) {
-        message = "[WARN]" + this._message(message);
+        message = "[WARN]" + this.#message(message);
         window.console.warn(message);
         this.scene.fire("warn", message);
     }
@@ -476,7 +476,7 @@ class Component {
      * @param {String} message The message to log
      */
     error(message) {
-        message = "[ERROR]" + this._message(message);
+        message = "[ERROR]" + this.#message(message);
         window.console.error(message);
         this.scene.fire("error", message);
     }
@@ -504,7 +504,7 @@ class Component {
      * @param {Boolean} [params.recompiles=true] When true, fires "dirty" events on this component
      * @private
      */
-    _attach(params) {
+    #attach(params) {
 
         const name = params.name;
 
@@ -655,7 +655,7 @@ class Component {
                 component.once("destroyed",
                     function () {
                         attachment.params.component = null;
-                        this._attach(attachment.params);
+                        this.#attach(attachment.params);
                     },
                     this));
 
@@ -816,7 +816,7 @@ class Component {
 
     /**
      * Schedule a task to perform on the next browser interval
-     * @param task
+     * @param {Function} task
      */
     scheduleTask(task) {
         core.scheduleTask(task, null);

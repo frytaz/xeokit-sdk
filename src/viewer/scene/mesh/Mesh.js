@@ -216,7 +216,7 @@ const renderersCache = { };
  * @property {Boolean} [background=false] Indicates if the Mesh should act as background, e.g., it can be used for a skybox.
  * @property {Number[]} [colorize=[1.0,1.0,1.0]] Mesh's initial RGB colorize color, multiplies by the rendered fragment colors.
  * @property {Number} [opacity=1.0] Mesh's initial opacity factor, multiplies by the rendered fragment alpha.
- * @property {String} [billboard="none"] Mesh's billboarding behaviour. Options are "none" for no billboarding, "spherical" to always directly face {@link Camera.eye}, rotating both vertically and horizontally, or "cylindrical" to face the {@link Camera#eye} while rotating only about its vertically axis (use that mode for things like trees on a landscape).
+ * @property {"none" | "spherical" | "cylindrical"} [billboard="none"] Mesh's billboarding behaviour. Options are "none" for no billboarding, "spherical" to always directly face {@link Camera.eye}, rotating both vertically and horizontally, or "cylindrical" to face the {@link Camera#eye} while rotating only about its vertically axis (use that mode for things like trees on a landscape).
  * @property {Geometry} [geometry] {@link Geometry} to define the shape of this Mesh. Inherits {@link Scene#geometry} by default.
  * @property {Material} [material] {@link Material} to define the normal rendered appearance for this Mesh. Inherits {@link Scene#material} by default.
  * @property {EmphasisMaterial} [xrayMaterial] {@link EmphasisMaterial} to define the xrayed appearance for this Mesh. Inherits {@link Scene#xrayMaterial} by default.
@@ -266,7 +266,7 @@ export class Mesh extends Component {
             edges: false,
             stationary: !!cfg.stationary,
             background: !!cfg.background,
-            billboard: this._checkBillboard(cfg.billboard),
+            billboard: this.#checkBillboard(cfg.billboard),
             layer: null,
             colorize: null,
             pickID: this.scene._renderer.getPickID(this),
@@ -687,7 +687,7 @@ export class Mesh extends Component {
      */
     get worldNormalMatrix() {
         if (this._worldNormalMatrixDirty) {
-            this._buildWorldNormalMatrix();
+            this.#buildWorldNormalMatrix();
         }
         return this._worldNormalMatrix;
     }
@@ -1394,7 +1394,7 @@ export class Mesh extends Component {
         return this._edgeMaterial;
     }
 
-    _checkBillboard(value) {
+    #checkBillboard(value) {
         value = value || "none";
         if (value !== "spherical" && value !== "cylindrical" && value !== "none") {
             this.error("Unsupported value for 'billboard': " + value + " - accepted values are " +
@@ -1478,7 +1478,7 @@ export class Mesh extends Component {
         this._worldMatrixDirty = false;
     }
 
-    _buildWorldNormalMatrix() {
+    #buildWorldNormalMatrix() {
         if (this._worldMatrixDirty) {
             this._buildWorldMatrix();
         }
@@ -1538,6 +1538,7 @@ export class Mesh extends Component {
      *
      * @param {Number[]} axis Local axis about which to rotate.
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Mesh} this
      */
     rotate(axis, angle) {
         angleAxis[0] = axis[0];
@@ -1558,6 +1559,7 @@ export class Mesh extends Component {
      *
      * @param {Number[]} axis Local axis about which to rotate.
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Mesh} this
      */
     rotateOnWorldAxis(axis, angle) {
         angleAxis[0] = axis[0];
@@ -1574,6 +1576,7 @@ export class Mesh extends Component {
      * Rotates the Mesh about the local X-axis by the given increment.
      *
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Mesh} this
      */
     rotateX(angle) {
         return this.rotate(xAxis, angle);
@@ -1583,6 +1586,7 @@ export class Mesh extends Component {
      * Rotates the Mesh about the local Y-axis by the given increment.
      *
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Mesh} this
      */
     rotateY(angle) {
         return this.rotate(yAxis, angle);
@@ -1592,6 +1596,7 @@ export class Mesh extends Component {
      * Rotates the Mesh about the local Z-axis by the given increment.
      *
      * @param {Number} angle Angle increment in degrees.
+     * @returns {Mesh} this
      */
     rotateZ(angle) {
         return this.rotate(zAxis, angle);
@@ -1602,6 +1607,7 @@ export class Mesh extends Component {
      *
      * @param {Number[]} axis Normalized local space 3D vector along which to translate.
      * @param {Number} distance Distance to translate along  the vector.
+     * @returns {Mesh} this
      */
     translate(axis, distance) {
         math.vec3ApplyQuaternion(this.quaternion, axis, veca);
@@ -1621,6 +1627,7 @@ export class Mesh extends Component {
      * Translates the Mesh along the local X-axis by the given increment.
      *
      * @param {Number} distance Distance to translate along  the X-axis.
+     * @returns {Mesh} this
      */
     translateX(distance) {
         return this.translate(xAxis, distance);
@@ -1630,6 +1637,7 @@ export class Mesh extends Component {
      * Translates the Mesh along the local Y-axis by the given increment.
      *
      * @param {Number} distance Distance to translate along  the Y-axis.
+     * @returns {Mesh} this
      */
     translateY(distance) {
         return this.translate(yAxis, distance);
@@ -1639,6 +1647,7 @@ export class Mesh extends Component {
      * Translates the Mesh along the local Z-axis by the given increment.
      *
      * @param {Number} distance Distance to translate along  the Z-axis.
+     * @returns {Mesh} this
      */
     translateZ(distance) {
         return this.translate(zAxis, distance);
@@ -1665,20 +1674,20 @@ export class Mesh extends Component {
     /** @private */
     rebuildRenderFlags() {
         this.renderFlags.reset();
-        if (!this._getActiveSectionPlanes()) {
+        if (!this.#getActiveSectionPlanes()) {
             this.renderFlags.culled = true;
             return;
         }
         this.renderFlags.numLayers = 1;
         this.renderFlags.numVisibleLayers = 1;
         this.renderFlags.visibleLayers[0] = 0;
-        this._updateRenderFlags();
+        this.#updateRenderFlags();
     }
 
     /**
      * @private
      */
-    _updateRenderFlags() {
+    #updateRenderFlags() {
 
         const renderFlags = this.renderFlags;
         const state = this._state;
@@ -1750,7 +1759,7 @@ export class Mesh extends Component {
         }
     }
 
-    _getActiveSectionPlanes() {
+    #getActiveSectionPlanes() {
 
         if (this._state.clippable) {
 

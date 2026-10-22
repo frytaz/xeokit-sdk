@@ -1,3 +1,4 @@
+/** @import { SceneModelTexture } from './SceneModelTexture.js' */
 /**
  * A texture set within a {@link SceneModel}.
  *
@@ -17,41 +18,44 @@ export class SceneModelTextureSet {
          * Unique ID of this SceneModelTextureSet.
          *
          * The SceneModelTextureSet is registered against this ID in {@link SceneModel#textureSets}.
+         *
+         * @type {String|Number}
          */
         this.id = cfg.id;
 
         /**
          * The color texture.
-         * @type {SceneModelTexture|*}
+         * @type {SceneModelTexture|null}
          */
         this.colorTexture = cfg.colorTexture;
 
         /**
          * The alpha cutoff [float]
+         * @type {Number}
          */
         this.alphaCutoff = cfg.alphaCutoff;
 
         /**
          * The metallic-roughness texture.
-         * @type {SceneModelTexture|*}
+         * @type {SceneModelTexture|null}
          */
         this.metallicRoughnessTexture = cfg.metallicRoughnessTexture;
 
         /**
          * The normal map texture.
-         * @type {SceneModelTexture|*}
+         * @type {SceneModelTexture|null}
          */
         this.normalsTexture = cfg.normalsTexture;
 
         /**
          * The emissive color texture.
-         * @type {SceneModelTexture|*}
+         * @type {SceneModelTexture|null}
          */
         this.emissiveTexture = cfg.emissiveTexture;
 
         /**
          * The ambient occlusion texture.
-         * @type {SceneModelTexture|*}
+         * @type {SceneModelTexture|null}
          */
         this.occlusionTexture = cfg.occlusionTexture;
     }

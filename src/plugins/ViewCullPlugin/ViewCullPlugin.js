@@ -81,12 +81,12 @@ class ViewCullPlugin extends Plugin {
         this._onModelLoaded = viewer.scene.on("modelLoaded", (modelId) => {
             const model = this.viewer.scene.models[modelId];
             if (model) {
-                this._addModel(model);
+                this.#addModel(model);
             }
         });
 
         this._onSceneTick = viewer.scene.on("tick", () => {
-            this._doCull();
+            this.#doCull();
         });
     }
 
@@ -108,18 +108,18 @@ class ViewCullPlugin extends Plugin {
         return this._enabled;
     }
 
-    _addModel(model) {
+    #addModel(model) {
         const modelInfo = {
             model: model,
             onDestroyed: model.on("destroyed", () => {
-                this._removeModel(model);
+                this.#removeModel(model);
             })
         };
         this._modelInfos[model.id] = modelInfo;
         this._kdTreeDirty = true;
     }
 
-    _removeModel(model) {
+    #removeModel(model) {
         const modelInfo = this._modelInfos[model.id];
         if (modelInfo) {
             modelInfo.model.off(modelInfo.onDestroyed);
@@ -128,13 +128,13 @@ class ViewCullPlugin extends Plugin {
         }
     }
 
-    _doCull() {
+    #doCull() {
         const cullDirty = (this._frustumDirty || this._kdTreeDirty);
         if (this._frustumDirty) {
-            this._buildFrustum();
+            this.#buildFrustum();
         }
         if (this._kdTreeDirty) {
-            this._buildKDTree();
+            this.#buildKDTree();
         }
         if (cullDirty) {
             const kdNode = this._kdRoot;
@@ -142,18 +142,18 @@ class ViewCullPlugin extends Plugin {
                 for (let objectIdx = 0, len = this._objectCullStates.numObjects; objectIdx < len; objectIdx++) {
                     this._objectCullStates.setObjectViewCulled(objectIdx, false);
                 }
-                this._visitKDNode(kdNode);
+                this.#visitKDNode(kdNode);
             }
         }
     }
 
-    _buildFrustum() {
+    #buildFrustum() {
         const camera = this.viewer.scene.camera;
         setFrustum(this._frustum, camera.viewMatrix, camera.projMatrix);
         this._frustumDirty = false;
     }
 
-    _buildKDTree() {
+    #buildKDTree() {
         const viewer = this.viewer;
         const scene = viewer.scene;
         const depth = 0;
@@ -167,12 +167,12 @@ class ViewCullPlugin extends Plugin {
         };
         for (let objectIdx = 0, len = this._objectCullStates.numObjects; objectIdx < len; objectIdx++) {
             const entity = this._objectCullStates.objects[objectIdx];
-            this._insertEntityIntoKDTree(this._kdRoot, entity, objectIdx, depth + 1);
+            this.#insertEntityIntoKDTree(this._kdRoot, entity, objectIdx, depth + 1);
         }
         this._kdTreeDirty = false;
     }
 
-    _insertEntityIntoKDTree(kdNode, entity, objectIdx, depth) {
+    #insertEntityIntoKDTree(kdNode, entity, objectIdx, depth) {
 
         const entityAABB = entity.aabb;
 
@@ -185,14 +185,14 @@ class ViewCullPlugin extends Plugin {
 
         if (kdNode.left) {
             if (math.containsAABB3(kdNode.left.aabb, entityAABB)) {
-                this._insertEntityIntoKDTree(kdNode.left, entity, objectIdx, depth + 1);
+                this.#insertEntityIntoKDTree(kdNode.left, entity, objectIdx, depth + 1);
                 return;
             }
         }
 
         if (kdNode.right) {
             if (math.containsAABB3(kdNode.right.aabb, entityAABB)) {
-                this._insertEntityIntoKDTree(kdNode.right, entity, objectIdx, depth + 1);
+                this.#insertEntityIntoKDTree(kdNode.right, entity, objectIdx, depth + 1);
                 return;
             }
         }
@@ -221,7 +221,7 @@ class ViewCullPlugin extends Plugin {
                 intersection: Frustum.INTERSECT
             };
             if (math.containsAABB3(aabbLeft, entityAABB)) {
-                this._insertEntityIntoKDTree(kdNode.left, entity, objectIdx, depth + 1);
+                this.#insertEntityIntoKDTree(kdNode.left, entity, objectIdx, depth + 1);
                 return;
             }
         }
@@ -234,7 +234,7 @@ class ViewCullPlugin extends Plugin {
                 intersection: Frustum.INTERSECT
             };
             if (math.containsAABB3(aabbRight, entityAABB)) {
-                this._insertEntityIntoKDTree(kdNode.right, entity, objectIdx, depth + 1);
+                this.#insertEntityIntoKDTree(kdNode.right, entity, objectIdx, depth + 1);
                 return;
             }
         }
@@ -245,7 +245,7 @@ class ViewCullPlugin extends Plugin {
         math.expandAABB3(kdNode.aabb, entityAABB);
     }
 
-    _visitKDNode(kdNode, intersects = Frustum.INTERSECT) {
+    #visitKDNode(kdNode, intersects = Frustum.INTERSECT) {
         if (intersects !== Frustum.INTERSECT && kdNode.intersects === intersects) {
             return;
         }
@@ -262,10 +262,10 @@ class ViewCullPlugin extends Plugin {
             }
         }
         if (kdNode.left) {
-            this._visitKDNode(kdNode.left, intersects);
+            this.#visitKDNode(kdNode.left, intersects);
         }
         if (kdNode.right) {
-            this._visitKDNode(kdNode.right, intersects);
+            this.#visitKDNode(kdNode.right, intersects);
         }
     }
 
@@ -280,7 +280,7 @@ class ViewCullPlugin extends Plugin {
      */
     destroy() {
         super.destroy();
-        this._clear();
+        this.#clear();
         const scene = this.viewer.scene;
         const camera = scene.camera;
         scene.off(this._onModelLoaded);
@@ -289,7 +289,7 @@ class ViewCullPlugin extends Plugin {
         camera.off(this._onProjMatrix);
     }
 
-    _clear() {
+    #clear() {
         for (let modelId in this._modelInfos) {
             const modelInfo = this._modelInfos[modelId];
             modelInfo.model.off(modelInfo.onDestroyed);

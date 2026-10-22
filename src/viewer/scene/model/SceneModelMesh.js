@@ -1,5 +1,9 @@
 import {math} from "../math/math.js";
 import {meshSurfaceArea, meshVolume} from "../math/index.js";
+/** @import { SceneModel } from './SceneModel.js' */
+/** @import { SceneModelEntity } from './SceneModelEntity.js' */
+/** @import { SceneModelTransform } from './SceneModelTransform.js' */
+/** @import { SceneModelTextureSet } from './SceneModelTextureSet.js' */
 
 const tempOBB3 = math.OBB3();
 const tempOBB3b = math.OBB3();
@@ -48,7 +52,7 @@ export class SceneModelMesh {
          * * These are created with {@link SceneModel#createTransform}
          * * Each of these is also registered in {@link SceneModel#transforms}.
          *
-         * @type {SceneModelTransform}
+         * @type {SceneModelTransform|null}
          */
         this.transform = transform;
 
@@ -59,7 +63,7 @@ export class SceneModelMesh {
          * * These are created with {@link SceneModel#createTextureSet}
          * * Each of these is also registered in {@link SceneModel#textureSets}.
          *
-         * @type {SceneModelTextureSet}
+         * @type {SceneModelTextureSet|null}
          */
         this.textureSet = textureSet;
 
@@ -70,6 +74,8 @@ export class SceneModelMesh {
          * Unique ID of this SceneModelMesh.
          *
          * The SceneModelMesh is registered against this ID in {@link SceneModel#meshes}.
+         *
+         * @type {String|Number}
          */
         this.id = id;
 
@@ -163,7 +169,7 @@ export class SceneModelMesh {
         this.layer.setVisible(this.portionId, entityFlags, this._transparent);
     }
 
-    _setColor(color) {
+    #setColor(color) {
         this._color[0] = color[0];
         this._color[1] = color[1];
         this._color[2] = color[2];
@@ -313,6 +319,11 @@ export class SceneModelMesh {
         }
     }
 
+    /**
+     * Returns true if this SceneModelMesh has a "solid" primitive type.
+     *
+     * @returns {Boolean}
+     */
     isSolid() {
         return this.layer.solid;
     }

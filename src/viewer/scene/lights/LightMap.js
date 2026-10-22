@@ -50,7 +50,7 @@ import {Component} from '../Component.js';
  * @typedef {Object} LightMapConfiguration
  * @property {String} [id] Optional ID for this LightMap, unique among all components in the parent scene, generated automatically when omitted.
  * @property {Object.<string, *>} [meta] Optional map of user-defined metadata to attach to this LightMap.
- * @property {String[]} [src=null] Paths to six image files to load into this LightMap.
+ * @property {String[]} src Paths to six image files to load into this LightMap.
  * @property {Boolean} [flipY=false] Flips this LightMap's source data along its vertical axis when true.
  * @property {Number} [encoding=LinearEncoding] Encoding format. Supported values are {@link LinearEncoding} and {@link sRGBEncoding}.
  */

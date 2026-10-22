@@ -79,7 +79,7 @@ import {math} from '../math/math.js';
  * @property {Number} [lineWidth=1] Scalar that controls the width of {@link Geometry} lines.
  * @property {Number} [pointSize=1] Scalar that controls the size of points for {@link Geometry} with {@link Geometry#primitive} set to "points".
  * @property {Boolean} [backfaces=false] Whether to render {@link Geometry} backfaces.
- * @property {Boolean} [frontface="ccw"] The winding order for {@link Geometry} front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
+ * @property {"cw" | "ccw"} [frontface="ccw"] The winding order for {@link Geometry} front faces - "cw" for clockwise, or "ccw" for counter-clockwise.
  */
 class LambertMaterial extends Material {
 
@@ -345,7 +345,7 @@ class LambertMaterial extends Material {
      *
      * Default value is ````"ccw"````.
      *
-     * @type {String}
+     * @type {"cw" | "ccw"}
      */
     set frontface(value) {
         value = value !== "cw";
@@ -361,7 +361,7 @@ class LambertMaterial extends Material {
      *
      * Default value is ````"ccw"````.
      *
-     * @type {String}
+     * @type {"cw" | "ccw"}
      */
     get frontface() {
         return this._state.frontface ? "ccw" : "cw";

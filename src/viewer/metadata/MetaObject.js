@@ -1,3 +1,6 @@
+/** @import { MetaModel } from "./MetaModel.js" */
+/** @import { PropertySet } from "./PropertySet.js" */
+
 /**
  * @desc Metadata corresponding to an {@link Entity} that represents an object.
  *
@@ -105,6 +108,16 @@ class MetaObject {
              */
             this.external = params.external;
         }
+
+        /**
+         * The child MetaObjects of this MetaObject, if any.
+         *
+         * Undefined until the owning {@link MetaModel} has been finalized, or when this MetaObject has no children.
+         *
+         * @property children
+         * @type {MetaObject[]}
+         */
+        this.children; // Declaration only; assigned by MetaModel#finalize
     }
 
     /**
@@ -150,7 +163,7 @@ class MetaObject {
     /**
      * Iterates over the {@link MetaObject}s within the subtree.
      *
-     * @param {Function} callback Callback fired at each {@link MetaObject}.
+     * @param {function(MetaObject): void} callback Callback fired at each {@link MetaObject}.
      */
     withMetaObjectsInSubtree(callback) {
 

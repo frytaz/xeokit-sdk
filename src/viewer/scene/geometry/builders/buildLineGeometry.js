@@ -1,6 +1,16 @@
 import {utils} from '../../utils.js';
 
 /**
+ * @typedef {Object} buildLineGeometryConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number[]} [startPoint]  3D start point (x0, y0, z0).
+ * @property {Number[]} [endPoint]  3D end point (x1, y1, z1).
+ * @property {Number[]} [pattern] Lengths of segments that describe a pattern.
+ * @property {Boolean} [extendToEnd] If true: it will try to make sure the line doesn't end up with a gap, as it will
+ * extend the last segment.
+ */
+
+/**
  * @desc Creates a 3D line {@link Geometry}.
  *
  * ## Usage
@@ -181,13 +191,7 @@ import {utils} from '../../utils.js';
  * ````
  *
  * @function buildLineGeometry
- * @param {Object} [cfg] Configs
- * @param {String} [cfg.id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
- * @param {Number[]} [cfg.startPoint]  3D start point (x0, y0, z0).
- * @param {Number[]} [cfg.endPoint]  3D end point (x1, y1, z1).
- * @param {Number[]} [cfg.pattern] Lengths of segments that describe a pattern.
- * @param {Bool} [cfg.extendToEnd] If true: it will try to make sure the line doesn't end up with a gap, as it will
- * extend the last segment.
+ * @param {buildLineGeometryConfiguration} [cfg] Configs
  * @returns {Object} Configuration for a {@link Geometry} subtype.
  */
 function buildLineGeometry(cfg = {}) {

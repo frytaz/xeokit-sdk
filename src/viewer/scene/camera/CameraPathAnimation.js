@@ -1,6 +1,13 @@
 import {Component} from "../Component.js"
 import {CameraFlightAnimation} from "./CameraFlightAnimation.js"
+/** @import { CameraPath } from './CameraPath.js' */
 
+/**
+ * @typedef {Object} CameraPathAnimationConfiguration
+ * @property {String} [id] Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
+ * @property {Number} [playingRate=1.0] The amount of progress per second.
+ * @property {CameraPath} [cameraPath] A {@link CameraPath} that defines the path of a {@link Camera}.
+ */
 
 /**
  * @desc Animates the {@link Scene}'s's {@link Camera} along a {@link CameraPath}.
@@ -76,6 +83,11 @@ import {CameraFlightAnimation} from "./CameraFlightAnimation.js"
  */
 class CameraPathAnimation extends Component {
 
+    static STOPPED = 0;
+    static SCRUBBING = 1;
+    static PLAYING = 2;
+    static PLAYING_TO = 3;
+
     /**
      * Returns "CameraPathAnimation".
      *
@@ -89,9 +101,7 @@ class CameraPathAnimation extends Component {
     /**
      * @constructor
      * @param {Component} [owner]  Owner component. When destroyed, the owner will destroy this CameraPathAnimation as well.
-     * @param {Object} [cfg] Configuration
-     * @param {String} [cfg.id]  Optional ID, unique among all components in the parent {@link Scene}, generated automatically when omitted.
-     * @param {CameraPath} [cfg.eyeCurve] A {@link CameraPath} that defines the path of a {@link Camera}.
+     * @param {CameraPathAnimationConfiguration} [cfg] Configuration
      */
     constructor(owner, cfg = {}) {
 
@@ -108,10 +118,10 @@ class CameraPathAnimation extends Component {
 
         this.cameraPath = cfg.cameraPath;
 
-        this._tick = this.scene.on("tick", this._updateT, this);
+        this._tick = this.scene.on("tick", this.#updateT, this);
     }
 
-    _updateT() {
+    #updateT() {
         const cameraPath = this._cameraPath;
         if (!cameraPath) {
             return;
@@ -190,7 +200,7 @@ class CameraPathAnimation extends Component {
     /**
      * Gets the rate at which the CameraPathAnimation animates the {@link Camera} along the {@link CameraPath}.
      *
-     * @returns {*|number} The current playing rate.
+     * @returns {Number} The current playing rate.
      */
     get rate() {
         return this._playingRate;
@@ -246,7 +256,7 @@ class CameraPathAnimation extends Component {
      * Flies the {@link Camera} directly to the given frame on the CameraPathAnimation's {@link CameraPath}.
      *
      * @param {Number} frameIdx Index of the frame to play to.
-     * @param {Function} [ok] Callback to fire when playing is complete.
+     * @param {() => void} [ok] Callback to fire when playing is complete.
      */
     flyToFrame(frameIdx, ok) {
         const cameraPath = this._cameraPath;
@@ -317,10 +327,5 @@ class CameraPathAnimation extends Component {
         this.scene.off(this._tick);
     }
 }
-
-CameraPathAnimation.STOPPED = 0;
-CameraPathAnimation.SCRUBBING = 1;
-CameraPathAnimation.PLAYING = 2;
-CameraPathAnimation.PLAYING_TO = 3;
 
 export {CameraPathAnimation}
