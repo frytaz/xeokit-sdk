@@ -126,12 +126,12 @@ class Texture extends Component {
             matrix: math.identityMat4(),
             hasMatrix: (cfg.translate && (cfg.translate[0] !== 0 || cfg.translate[1] !== 0)) || (!!cfg.rotate) || (cfg.scale && (cfg.scale[0] !== 0 || cfg.scale[1] !== 0)),
             maxAnisotropy: cfg.maxAnisotropy,
-            minFilter: this._checkMinFilter(cfg.minFilter),
-            magFilter: this._checkMagFilter(cfg.magFilter),
-            wrapS: this._checkWrapS(cfg.wrapS),
-            wrapT: this._checkWrapT(cfg.wrapT),
-            flipY: this._checkFlipY(cfg.flipY),
-            encoding: this._checkEncoding(cfg.encoding)
+            minFilter: this.#checkMinFilter(cfg.minFilter),
+            magFilter: this.#checkMagFilter(cfg.magFilter),
+            wrapS: this.#checkWrapS(cfg.wrapS),
+            wrapT: this.#checkWrapT(cfg.wrapT),
+            flipY: this.#checkFlipY(cfg.flipY),
+            encoding: this.#checkEncoding(cfg.encoding)
         });
 
         // Data source
@@ -164,7 +164,7 @@ class Texture extends Component {
         stats.memory.textures++;
     }
 
-    _checkMinFilter(value) {
+    #checkMinFilter(value) {
         value = value || LinearMipMapLinearFilter;
         if (value !== LinearFilter &&
             value !== LinearMipMapNearestFilter &&
@@ -178,7 +178,7 @@ class Texture extends Component {
         return value;
     }
 
-    _checkMagFilter(value) {
+    #checkMagFilter(value) {
         value = value || LinearFilter;
         if (value !== LinearFilter && value !== NearestFilter) {
             this.error("Unsupported value for 'magFilter' - supported values are LinearFilter and NearestFilter. Defaulting to LinearFilter.");
@@ -187,7 +187,7 @@ class Texture extends Component {
         return value;
     }
 
-    _checkWrapS(value) {
+    #checkWrapS(value) {
         value = value || RepeatWrapping;
         if (value !== ClampToEdgeWrapping && value !== MirroredRepeatWrapping && value !== RepeatWrapping) {
             this.error("Unsupported value for 'wrapS' - supported values are ClampToEdgeWrapping, MirroredRepeatWrapping and RepeatWrapping. Defaulting to RepeatWrapping.");
@@ -196,7 +196,7 @@ class Texture extends Component {
         return value;
     }
 
-    _checkWrapT(value) {
+    #checkWrapT(value) {
         value = value || RepeatWrapping;
         if (value !== ClampToEdgeWrapping && value !== MirroredRepeatWrapping && value !== RepeatWrapping) {
             this.error("Unsupported value for 'wrapT' - supported values are ClampToEdgeWrapping, MirroredRepeatWrapping and RepeatWrapping. Defaulting to RepeatWrapping.");
@@ -205,11 +205,11 @@ class Texture extends Component {
         return value;
     }
 
-    _checkFlipY(value) {
+    #checkFlipY(value) {
         return !!value;
     }
 
-    _checkEncoding(value) {
+    #checkEncoding(value) {
         value = value || LinearEncoding;
         if (value !== LinearEncoding && value !== sRGBEncoding) {
             this.error("Unsupported value for 'encoding' - supported values are LinearEncoding and sRGBEncoding. Defaulting to LinearEncoding.");
@@ -479,7 +479,7 @@ class Texture extends Component {
     /**
      * Gets if this Texture's source data is flipped along its vertical axis.
      *
-     * @type {Number}
+     * @type {Boolean}
      */
     get flipY() {
         return this._state.flipY;
